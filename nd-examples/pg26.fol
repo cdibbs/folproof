@@ -1,0 +1,10 @@
+1  p -> q	: premise
+2  p or ~p	: LEM
+3 | ~p		: assumption
+4 | ~p or q	: vi1 3
+  ---
+5 |  p		: assumption
+6 |  q		: ->e 1,5
+7 | ~p or q	: vi2 6
+  ---
+8  ~p or q	: ve 2,3-4,5-7

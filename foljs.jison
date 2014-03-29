@@ -1,46 +1,38 @@
-%lex
-id		[a-zA-Z_'"0-9]+
-
-%%
-\n		return 'EOL';
-\s+		/* ignore whitespace */
-"and"		return 'AND';
-"or"		return 'OR';
-"implies"|"->"	return 'IMPLIES';
-"iff"|"<->"	return 'IFF';
-"not"|"~"|"!"	return 'NOT';
-"union"		return 'UNION';
-"intersection"	return 'INTERSECTION';
-"every"		return 'EVERY';
-"exists"	return 'EXISTS';
-"in"		return 'IN';
-"empty"		return 'EMPTYSET';
-"forAll"	return 'FORALL';
-"("		return 'LPAREN';
-")"		return 'RPAREN';
-{id}		return 'ID';
-","		return 'COMMA';
-<<EOF>>		return 'EOF';		
-
-/lex
+/* FOL.js grammar by Chris Dibbern */
+%options flex
+%ebnf
 
 %%
 
 proof
-	: clause_list EOF
-	{ $$ = $1; console.log("%j", $$); }
+	: clause_list EOL? ENDOFFILE
+	{ $$ = $clause_list; console.log("%j", $$); }
 	;
 
 clause_list
-	: e_iff EOL clause_list
-	{ $$ = $3; $$.unshift($1); }
-	| e_iff
-	{ $$ = [$1]; }
+	: box
+	{ $$ = [$box]; }
+	| clause_list EOL box
+	{ $$ = $clause_list; $$.unshift($box); }
 	;
 
-e_forall
-	: FORALL var e_forall
-	{ $$ = ['forall', $var, $e_forall]; }
+box
+	: BOX clause_list EOL DEBOX
+	{ $$ = ['box', $clause_list]; }
+	| sentence JUSTIFICATION?
+	{ $$ = ['rule', $sentence, $2]; }
+	;
+
+sentence
+	: e_quant
+	| e_iff
+	;
+
+e_quant
+	: FORALL ID sentence
+	{ $$ = ['forall', $var, $sentence]; }
+	| EXISTS ID sentence
+	{ $$ = ['exists', $var, $sentence]; }
 	;
 
 e_iff
@@ -72,21 +64,28 @@ e_or
 	;
 
 e_not
-	: NOT id
-	{ $$ = ['not', $id]; }
-	| id
-	{ $$ = $1; }
+	: NOT atom
+	{ $$ = ['not', $atom]; }
+	| atom
+	{ $$ = $atom; }
 	;
 
-id_list
-	: id
-	{ $$ = [$id]; }
-	| id COMMA id_list
-	{ $$ = $id_list; $$.unshift($id); }
+atom
+	: term
+	{ $$ = $term; }
+	| LPAREN sentence RPAREN
+	{ $$ = $sentence; }
 	;
 
-id
-	: ID LPAREN id_list RPAREN
+term_list
+	: term
+	{ $$ = [$term]; }
+	| term COMMA term_list
+	{ $$ = $id_list; $$.unshift($term); }
+	;
+
+term
+	: ID LPAREN term_list RPAREN
 	{ $$ = ['id', $ID, $id_list]; }
 	| ID LPAREN RPAREN
 	{ $$ = ['id', $ID, []]; }

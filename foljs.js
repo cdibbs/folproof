@@ -74,54 +74,66 @@
 var foljs = (function(){
 var parser = {trace: function trace() { },
 yy: {},
-symbols_: {"error":2,"proof":3,"clause_list":4,"EOF":5,"e_iff":6,"EOL":7,"e_imp":8,"IFF":9,"e_and":10,"IMPLIES":11,"e_or":12,"AND":13,"e_not":14,"OR":15,"NOT":16,"id":17,"id_list":18,"COMMA":19,"ID":20,"LPAREN":21,"RPAREN":22,"$accept":0,"$end":1},
-terminals_: {2:"error",5:"EOF",7:"EOL",9:"IFF",11:"IMPLIES",13:"AND",15:"OR",16:"NOT",19:"COMMA",20:"ID",21:"LPAREN",22:"RPAREN"},
-productions_: [0,[3,2],[4,3],[4,1],[6,3],[6,1],[8,3],[8,1],[10,3],[10,1],[12,3],[12,1],[14,2],[14,1],[18,1],[18,3],[17,4],[17,3],[17,1]],
+symbols_: {"error":2,"proof":3,"clause_list":4,"proof_option0":5,"ENDOFFILE":6,"box":7,"EOL":8,"BOX":9,"DEBOX":10,"sentence":11,"box_option0":12,"e_quant":13,"e_iff":14,"FORALL":15,"ID":16,"EXISTS":17,"e_imp":18,"IFF":19,"e_and":20,"IMPLIES":21,"e_or":22,"AND":23,"e_not":24,"OR":25,"NOT":26,"atom":27,"term":28,"LPAREN":29,"RPAREN":30,"term_list":31,"COMMA":32,"JUSTIFICATION":33,"$accept":0,"$end":1},
+terminals_: {2:"error",6:"ENDOFFILE",8:"EOL",9:"BOX",10:"DEBOX",15:"FORALL",16:"ID",17:"EXISTS",19:"IFF",21:"IMPLIES",23:"AND",25:"OR",26:"NOT",29:"LPAREN",30:"RPAREN",32:"COMMA",33:"JUSTIFICATION"},
+productions_: [0,[3,3],[4,1],[4,3],[7,4],[7,2],[11,1],[11,1],[13,3],[13,3],[14,3],[14,1],[18,3],[18,1],[20,3],[20,1],[22,3],[22,1],[24,2],[24,1],[27,1],[27,3],[31,1],[31,3],[28,4],[28,3],[28,1],[5,0],[5,1],[12,0],[12,1]],
 performAction: function anonymous(yytext, yyleng, yylineno, yy, yystate /* action[1] */, $$ /* vstack */, _$ /* lstack */) {
 /* this == yyval */
 
 var $0 = $$.length - 1;
 switch (yystate) {
-case 1: this.$ = $$[$0-1]; console.log("%j", this.$); 
+case 1: this.$ = $$[$0-2]; console.log("%j", this.$); 
 break;
-case 2: this.$ = $$[$0]; this.$.unshift($$[$0-2]); 
+case 2: this.$ = [$$[$0]]; 
 break;
-case 3: this.$ = [$$[$0]]; 
+case 3: this.$ = $$[$0-2]; this.$.unshift($$[$0]); 
 break;
-case 4: this.$ = ['iff', $$[$0-2], $$[$0]]; 
+case 4: this.$ = ['box', $$[$0-2]]; 
 break;
-case 5: this.$ = $$[$0]; 
+case 5: this.$ = ['rule', $$[$0-1], $$[$0]]; 
 break;
-case 6: this.$ = ['->', $$[$0-2], $$[$0]]; 
+case 8: this.$ = ['forall', $var, $$[$0]]; 
 break;
-case 7: this.$ = $$[$0]; 
+case 9: this.$ = ['exists', $var, $$[$0]]; 
 break;
-case 8: this.$ = ['and', $$[$0-2], $$[$0]]; 
-break;
-case 9: this.$ = $$[$0]; 
-break;
-case 10: this.$ = ['or', $$[$0-2], $$[$0]]; 
+case 10: this.$ = ['iff', $$[$0-2], $$[$0]]; 
 break;
 case 11: this.$ = $$[$0]; 
 break;
-case 12: this.$ = ['not', $$[$0]]; 
+case 12: this.$ = ['->', $$[$0-2], $$[$0]]; 
 break;
 case 13: this.$ = $$[$0]; 
 break;
-case 14: this.$ = [$$[$0]]; 
+case 14: this.$ = ['and', $$[$0-2], $$[$0]]; 
 break;
-case 15: this.$ = $$[$0]; this.$.unshift($$[$0-2]); 
+case 15: this.$ = $$[$0]; 
 break;
-case 16: this.$ = ['id', $$[$0-3], $$[$0-1]]; 
+case 16: this.$ = ['or', $$[$0-2], $$[$0]]; 
 break;
-case 17: this.$ = ['id', $$[$0-2], []]; 
+case 17: this.$ = $$[$0]; 
 break;
-case 18: this.$ = ['id', $$[$0]]; 
+case 18: this.$ = ['not', $$[$0]]; 
+break;
+case 19: this.$ = $$[$0]; 
+break;
+case 20: this.$ = $$[$0]; 
+break;
+case 21: this.$ = $$[$0-1]; 
+break;
+case 22: this.$ = [$$[$0]]; 
+break;
+case 23: this.$ = $id_list; this.$.unshift($$[$0-2]); 
+break;
+case 24: this.$ = ['id', $$[$0-3], $id_list]; 
+break;
+case 25: this.$ = ['id', $$[$0-2], []]; 
+break;
+case 26: this.$ = ['id', $$[$0]]; 
 break;
 }
 },
-table: [{3:1,4:2,6:3,8:4,10:5,12:6,14:7,16:[1,8],17:9,20:[1,10]},{1:[3]},{5:[1,11]},{5:[2,3],7:[1,12]},{5:[2,5],7:[2,5],9:[1,13]},{5:[2,7],7:[2,7],9:[2,7],11:[1,14]},{5:[2,9],7:[2,9],9:[2,9],11:[2,9],13:[1,15]},{5:[2,11],7:[2,11],9:[2,11],11:[2,11],13:[2,11],15:[1,16]},{17:17,20:[1,10]},{5:[2,13],7:[2,13],9:[2,13],11:[2,13],13:[2,13],15:[2,13]},{5:[2,18],7:[2,18],9:[2,18],11:[2,18],13:[2,18],15:[2,18],19:[2,18],21:[1,18],22:[2,18]},{1:[2,1]},{4:19,6:3,8:4,10:5,12:6,14:7,16:[1,8],17:9,20:[1,10]},{6:20,8:4,10:5,12:6,14:7,16:[1,8],17:9,20:[1,10]},{8:21,10:5,12:6,14:7,16:[1,8],17:9,20:[1,10]},{10:22,12:6,14:7,16:[1,8],17:9,20:[1,10]},{12:23,14:7,16:[1,8],17:9,20:[1,10]},{5:[2,12],7:[2,12],9:[2,12],11:[2,12],13:[2,12],15:[2,12]},{17:26,18:24,20:[1,10],22:[1,25]},{5:[2,2]},{5:[2,4],7:[2,4]},{5:[2,6],7:[2,6],9:[2,6]},{5:[2,8],7:[2,8],9:[2,8],11:[2,8]},{5:[2,10],7:[2,10],9:[2,10],11:[2,10],13:[2,10]},{22:[1,27]},{5:[2,17],7:[2,17],9:[2,17],11:[2,17],13:[2,17],15:[2,17],19:[2,17],22:[2,17]},{19:[1,28],22:[2,14]},{5:[2,16],7:[2,16],9:[2,16],11:[2,16],13:[2,16],15:[2,16],19:[2,16],22:[2,16]},{17:26,18:29,20:[1,10]},{22:[2,15]}],
-defaultActions: {11:[2,1],19:[2,2],29:[2,15]},
+table: [{3:1,4:2,7:3,9:[1,4],11:5,13:6,14:7,15:[1,8],16:[1,18],17:[1,9],18:10,20:11,22:12,24:13,26:[1,14],27:15,28:16,29:[1,17]},{1:[3]},{5:19,6:[2,27],8:[1,20]},{6:[2,2],8:[2,2]},{4:21,7:3,9:[1,4],11:5,13:6,14:7,15:[1,8],16:[1,18],17:[1,9],18:10,20:11,22:12,24:13,26:[1,14],27:15,28:16,29:[1,17]},{6:[2,29],8:[2,29],12:22,33:[1,23]},{6:[2,6],8:[2,6],30:[2,6],33:[2,6]},{6:[2,7],8:[2,7],30:[2,7],33:[2,7]},{16:[1,24]},{16:[1,25]},{6:[2,11],8:[2,11],19:[1,26],30:[2,11],33:[2,11]},{6:[2,13],8:[2,13],19:[2,13],21:[1,27],30:[2,13],33:[2,13]},{6:[2,15],8:[2,15],19:[2,15],21:[2,15],23:[1,28],30:[2,15],33:[2,15]},{6:[2,17],8:[2,17],19:[2,17],21:[2,17],23:[2,17],25:[1,29],30:[2,17],33:[2,17]},{16:[1,18],27:30,28:16,29:[1,17]},{6:[2,19],8:[2,19],19:[2,19],21:[2,19],23:[2,19],25:[2,19],30:[2,19],33:[2,19]},{6:[2,20],8:[2,20],19:[2,20],21:[2,20],23:[2,20],25:[2,20],30:[2,20],33:[2,20]},{11:31,13:6,14:7,15:[1,8],16:[1,18],17:[1,9],18:10,20:11,22:12,24:13,26:[1,14],27:15,28:16,29:[1,17]},{6:[2,26],8:[2,26],19:[2,26],21:[2,26],23:[2,26],25:[2,26],29:[1,32],30:[2,26],32:[2,26],33:[2,26]},{6:[1,33]},{6:[2,28],7:34,9:[1,4],11:5,13:6,14:7,15:[1,8],16:[1,18],17:[1,9],18:10,20:11,22:12,24:13,26:[1,14],27:15,28:16,29:[1,17]},{8:[1,35]},{6:[2,5],8:[2,5]},{6:[2,30],8:[2,30]},{11:36,13:6,14:7,15:[1,8],16:[1,18],17:[1,9],18:10,20:11,22:12,24:13,26:[1,14],27:15,28:16,29:[1,17]},{11:37,13:6,14:7,15:[1,8],16:[1,18],17:[1,9],18:10,20:11,22:12,24:13,26:[1,14],27:15,28:16,29:[1,17]},{14:38,16:[1,18],18:10,20:11,22:12,24:13,26:[1,14],27:15,28:16,29:[1,17]},{16:[1,18],18:39,20:11,22:12,24:13,26:[1,14],27:15,28:16,29:[1,17]},{16:[1,18],20:40,22:12,24:13,26:[1,14],27:15,28:16,29:[1,17]},{16:[1,18],22:41,24:13,26:[1,14],27:15,28:16,29:[1,17]},{6:[2,18],8:[2,18],19:[2,18],21:[2,18],23:[2,18],25:[2,18],30:[2,18],33:[2,18]},{30:[1,42]},{16:[1,18],28:45,30:[1,44],31:43},{1:[2,1]},{6:[2,3],8:[2,3]},{7:34,9:[1,4],10:[1,46],11:5,13:6,14:7,15:[1,8],16:[1,18],17:[1,9],18:10,20:11,22:12,24:13,26:[1,14],27:15,28:16,29:[1,17]},{6:[2,8],8:[2,8],30:[2,8],33:[2,8]},{6:[2,9],8:[2,9],30:[2,9],33:[2,9]},{6:[2,10],8:[2,10],30:[2,10],33:[2,10]},{6:[2,12],8:[2,12],19:[2,12],30:[2,12],33:[2,12]},{6:[2,14],8:[2,14],19:[2,14],21:[2,14],30:[2,14],33:[2,14]},{6:[2,16],8:[2,16],19:[2,16],21:[2,16],23:[2,16],30:[2,16],33:[2,16]},{6:[2,21],8:[2,21],19:[2,21],21:[2,21],23:[2,21],25:[2,21],30:[2,21],33:[2,21]},{30:[1,47]},{6:[2,25],8:[2,25],19:[2,25],21:[2,25],23:[2,25],25:[2,25],30:[2,25],32:[2,25],33:[2,25]},{30:[2,22],32:[1,48]},{6:[2,4],8:[2,4]},{6:[2,24],8:[2,24],19:[2,24],21:[2,24],23:[2,24],25:[2,24],30:[2,24],32:[2,24],33:[2,24]},{16:[1,18],28:45,31:49},{30:[2,23]}],
+defaultActions: {33:[2,1],49:[2,23]},
 parseError: function parseError(str, hash) {
     if (hash.recoverable) {
         this.trace(str);
@@ -130,7 +142,7 @@ parseError: function parseError(str, hash) {
     }
 },
 parse: function parse(input) {
-    var self = this, stack = [0], tstack = [], vstack = [null], lstack = [], table = this.table, yytext = '', yylineno = 0, yyleng = 0, recovering = 0, TERROR = 2, EOF = 1;
+    var self = this, stack = [0], vstack = [null], lstack = [], tstack = [], table = this.table, yytext = '', yylineno = 0, yyleng = 0, recovering = 0, TERROR = 2, EOF = 1;
     var args = lstack.slice.call(arguments, 1);
     this.lexer.setInput(input);
     this.lexer.yy = this.yy;
@@ -591,49 +603,100 @@ performAction: function anonymous(yy,yy_,$avoiding_name_collisions,YY_START) {
 
 var YYSTATE=YY_START;
 switch($avoiding_name_collisions) {
-case 0:return 7;
+case 0:return 8;
 break;
-case 1:/* ignore whitespace */
+case 1:return 23;
 break;
-case 2:return 13;
+case 2:return 25;
 break;
-case 3:return 15;
+case 3:return 21;
 break;
-case 4:return 11;
+case 4:return 19;
 break;
-case 5:return 9;
+case 5:return 26;
 break;
-case 6:return 16;
+case 6:return 'UNION';
 break;
-case 7:return 'UNION';
+case 7:return 'INTERSECTION';
 break;
-case 8:return 'INTERSECTION';
+case 8:return 'EVERY';
 break;
-case 9:return 'EVERY';
+case 9:/* ignore line numbers, for now */
 break;
-case 10:return 'EXISTS';
+case 10:return 17;
 break;
 case 11:return 'IN';
 break;
 case 12:return 'EMPTYSET';
 break;
-case 13:return 'FORALL';
+case 13:return 15;
 break;
-case 14:return 21;
+case 14:return 29;
 break;
-case 15:return 22;
+case 15:return 30;
 break;
-case 16:return 20;
+case 16:return 16;
 break;
-case 17:return 19;
+case 17:return 32;
 break;
-case 18:return 5;		
+case 18: yy_.yytext = yy_.yytext.substr(yy_.yytext.substr(1).search(/\S/)+1); return 33; 
+break;
+case 19:
+				/* Similar to the idea of semantic whitespace, we keep track of virtual
+				 * BOX/DEBOX characters based on a stack of | occurrences
+				 */
+				    var indentation = yy_.yytext.length - yy_.yytext.search(/\s/) - 1;
+				    if (indentation > this._iemitstack[0]) {
+					this._iemitstack.unshift(indentation);
+					this._log(this.topState(), "BOX", this.stateStackSize());
+					this.myBegin(this.topState(), 'deepening, due to indent'); // deepen our current state
+					return 9;
+				    }
+
+				    var tokens = [];
+
+				    while (indentation < this._iemitstack[0]) {
+					this.myPopState();
+					this._log(this.topState(), "DEBOX", this.stateStackSize());
+					tokens.push("DEBOX");
+					this._iemitstack.shift();
+				    }
+				    if (tokens.length) return tokens;
+
+				
+break;
+case 20:
+				// remaining DEBOXes implied by EOF
+				var tokens = [];
+
+				while (this._iemitstack[0]) {
+					tokens.unshift("DEBOX");
+					this._iemitstack.shift();
+				}
+				tokens.unshift("ENDOFFILE");
+				if (tokens.length) return tokens;
+				
+break;
+case 21: this._log("DEBOX"); this._iemitstack.shift(); return 10; 
+break;
+case 22:return 'EOF';		
+break;
+case 23:/* ignore whitespace */
 break;
 }
 },
-rules: [/^(?:\n\b)/,/^(?:\s+)/,/^(?:and\b)/,/^(?:or\b)/,/^(?:implies|->)/,/^(?:iff|<->)/,/^(?:not|~|!)/,/^(?:union\b)/,/^(?:intersection\b)/,/^(?:every\b)/,/^(?:exists\b)/,/^(?:in\b)/,/^(?:empty\b)/,/^(?:forAll\b)/,/^(?:\()/,/^(?:\))/,/^(?:([a-zA-Z_'"0-9]+))/,/^(?:,)/,/^(?:$)/],
-conditions: {"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18],"inclusive":true}}
+rules: [/^(?:\n)/,/^(?:and\b)/,/^(?:or\b)/,/^(?:implies|->|=>)/,/^(?:iff|<->|=>)/,/^(?:not|~|!)/,/^(?:union\b)/,/^(?:intersection\b)/,/^(?:every\b)/,/^(?:\d+)/,/^(?:exists\b)/,/^(?:in\b)/,/^(?:empty\b)/,/^(?:forAll\b)/,/^(?:\()/,/^(?:\))/,/^(?:([a-zA-Z_'"0-9]+))/,/^(?:,)/,/^(?::.*)/,/^(?:\|+)/,/^(?:\s*$)/,/^(?:-+)/,/^(?:$)/,/^(?:\s+)/],
+conditions: {"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],"inclusive":true}}
 };
+jisonLexerFn = lexer.setInput;
+lexer.setInput = function(input) {
+        var debug = false;
+        this._iemitstack = [0];
+        this._log = function() { if (debug) console.log.apply(this, arguments); };
+        this.myBegin = function(state, why) { this._log("Begin " + state + " because " + why); this.begin(state); };
+        this.myPopState = function() { this._log("Popping " + this.popState() + " to " + this.topState()); };
+        return jisonLexerFn.call(this, input);
+};;
 return lexer;
 })();
 parser.lexer = lexer;
