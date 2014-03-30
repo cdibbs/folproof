@@ -1,0 +1,9 @@
+1   p and q implies r		: premise
+2 | p				: assumption
+3 ||q				: assumption
+4 ||p and q			: and i 2,3
+5 ||r				: ->e 1,4
+   ---
+6 | q implies r			: ->i 3-5
+  ---
+7   p implies (q implies r)	: ->i 2-6

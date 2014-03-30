@@ -11,21 +11,34 @@ spc				[\t \u00a0\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u2
 "union"				return 'UNION';
 "intersection"			return 'INTERSECTION';
 "every"				return 'EVERY';
+"with"				return 'WITH';
+"of"				return "OF";
 \d+				/* ignore line numbers, for now */
-"exists"			return 'EXISTS';
+"E."				return 'EXISTS';
 "in"				return 'IN';
 "empty"				return 'EMPTYSET';
-"forAll"			return 'FORALL';
+"A."				return 'FORALL';
 "("				return 'LPAREN';
 ")"				return 'RPAREN';
 {id}				return 'ID';
 ","				return 'COMMA';
 ":".*				%{ yytext = yytext.substr(yytext.substr(1).search(/\S/)+1); return 'JUSTIFICATION'; %}
+"|"*"-"+			%{ /* manually close an assumption box */
+				this._log("MANUAL DEBOX");
+				var expectedNewIndent = this._iemitstack.length - 1;
+				var actualNewIndent = (yytext.match(/\|/g)||[]).length;
+				if (actualNewIndent > 0 && expectedNewIndent != actualNewIndent) {
+					this._log("Indentation " + actualNewIndent + ", expected: " + expectedNewIndent);
+					throw new Error("End assumption indentation mismatch");
+				}
+				this._iemitstack.shift();
+				return 'DEBOX';
+				%}
 "|"+				%{
 				/* Similar to the idea of semantic whitespace, we keep track of virtual
 				 * BOX/DEBOX characters based on a stack of | occurrences
 				 */
-				    var indentation = yytext.length - yytext.search(/\s/) - 1;
+				    var indentation = yytext.length;
 				    if (indentation > this._iemitstack[0]) {
 					this._iemitstack.unshift(indentation);
 					this._log(this.topState(), "BOX", this.stateStackSize());
@@ -44,7 +57,7 @@ spc				[\t \u00a0\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u2
 				    if (tokens.length) return tokens;
 
 				%}
-\s*<<EOF>>			%{
+<<EOF>>				%{
 				// remaining DEBOXes implied by EOF
 				var tokens = [];
 
@@ -55,9 +68,7 @@ spc				[\t \u00a0\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u2
 				tokens.unshift("ENDOFFILE");
 				if (tokens.length) return tokens;
 				%}
-"-"+				%{ this._log("DEBOX"); this._iemitstack.shift(); return 'DEBOX'; %} /* manually close an assumption box */
-<<EOF>>				return 'EOF';		
-\s+				/* ignore whitespace */
+{spc}+				/* ignore whitespace */
 
 %%
 jisonLexerFn = lexer.setInput;

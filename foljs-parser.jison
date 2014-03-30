@@ -17,10 +17,17 @@ clause_list
 	;
 
 box
-	: BOX clause_list EOL DEBOX
-	{ $$ = ['box', $clause_list]; }
+	: BOX with JUSTIFICATION? EOL clause_list EOL DEBOX
+	{ $$ = ['folbox', $clause_list, $with, @$]; }
+	| BOX clause_list EOL DEBOX
+	{ $$ = ['box', $clause_list, @$]; }
 	| sentence JUSTIFICATION?
-	{ $$ = ['rule', $sentence, $2]; }
+	{ $$ = ['rule', $sentence, $2, @$]; }
+	;
+
+with
+	: WITH ID OF ID
+	{ $$ = ['with', $2, $4]; }
 	;
 
 sentence
@@ -30,9 +37,9 @@ sentence
 
 e_quant
 	: FORALL ID sentence
-	{ $$ = ['forall', $var, $sentence]; }
+	{ $$ = ['forall', $ID, $sentence]; }
 	| EXISTS ID sentence
-	{ $$ = ['exists', $var, $sentence]; }
+	{ $$ = ['exists', $ID, $sentence]; }
 	;
 
 e_iff
@@ -81,12 +88,12 @@ term_list
 	: term
 	{ $$ = [$term]; }
 	| term COMMA term_list
-	{ $$ = $id_list; $$.unshift($term); }
+	{ $$ = $term_list; $$.unshift($term); }
 	;
 
 term
 	: ID LPAREN term_list RPAREN
-	{ $$ = ['id', $ID, $id_list]; }
+	{ $$ = ['id', $ID, $term_list]; }
 	| ID LPAREN RPAREN
 	{ $$ = ['id', $ID, []]; }
 	| ID
