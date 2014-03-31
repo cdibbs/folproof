@@ -6,7 +6,7 @@
 
 proof
 	: clause_list EOL? ENDOFFILE
-	{ $$ = $clause_list; console.log("%j", $$); }
+	{ $$ = $clause_list; return $$; }
 	;
 
 clause_list
@@ -81,7 +81,7 @@ atom
 	: term
 	{ $$ = $term; }
 	| LPAREN sentence RPAREN
-	{ $$ = $sentence; }
+	{ $$ = ['paren', $sentence]; }
 	;
 
 term_list

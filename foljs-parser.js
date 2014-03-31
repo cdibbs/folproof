@@ -82,7 +82,7 @@ performAction: function anonymous(yytext, yyleng, yylineno, yy, yystate /* actio
 
 var $0 = $$.length - 1;
 switch (yystate) {
-case 1: this.$ = $$[$0-2]; console.log("%j", this.$); 
+case 1: this.$ = $$[$0-2]; return this.$; 
 break;
 case 2: this.$ = [$$[$0]]; 
 break;
