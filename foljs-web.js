@@ -9,7 +9,6 @@ var foljsWeb = (function() {
 
 	function renderRules(dom, ast, line) {
 		for (var i=0; i<ast.length; i++) {
-			console.log(ast[i]);
 			if (ast[i][0] === 'rule') {
 				line = renderRule(dom, ast[i], line);
 			} else if (ast[i][0] === 'box') {
@@ -25,34 +24,58 @@ var foljsWeb = (function() {
 		var nest = $("<div class='rule'></div>");
 		nest.append("<span class='lineno'>" + line + "</span>");
 		nest.append(renderClause(ast));
+		nest.append(renderJustification(ast));
 		dom.append(nest);
 		return line + 1;
 	}
 
 	function renderClause(ast) {
-		var nest, s, l, r;
-		switch(ast[0]) {
-			case "forall":
-				s = renderClause(ast[2]);
-				nest = $("&forall;" + ast[1] + " (" + s + ")");
-				return nest;
-			case "exists":
-				s = renderClause(ast[2]);
-				nest = $("&exist;" + ast[1] + " (" + s + ")");
-				return nest;
-			case "iff":
-				l = renderClause(ast[1]);
-				r = renderClause(ast[2]);
-				nest = l.append("&iff;").append(r);
-				return nest;
-			case "->":
-			case "and":
-			case "or":
-			case "not":
-			case "paren":
-			case "id":
-				return renderTerm();
+		var c, l, r, op;
+		if (!ast || !ast[1]) return "";
+
+		switch(ast[1][0]) {
+			case "forall": op = "&forall;"; break;
+			case "exists": op = "&exist;";
 		}
+		if (op) {
+			t = renderTerm(ast[1][1]);
+			c = renderClause(ast[1][2]);
+			t.prepend(op);
+			t.append("(", c, ")");
+			return t;
+		}
+		switch(ast[1][0]) {
+			case "iff": op = "&harr;"; break;
+			case "->": op = "&rarr;"; break;
+			case "and": op = "&and;"; break;
+			case "or": op = "&or;"; break;
+			case "not": op = "&not;";
+		}
+		if (op) {
+			l = renderClause(ast[1][1]);
+			r = renderClause(ast[1][2]);
+			l.append(op).append(r);
+			return l;
+		}
+		if (ast[1][0] === "paren") {
+			c = renderClause(ast[1]);
+			c.prepend("(").append(")");
+			return c;
+		}
+
+		return renderTerm(ast[1]);
+	}
+
+	function renderTerm(ast) {
+		return $("<span>" + ast + "</span>");
+	}
+	
+	function renderJustification(ast) {
+		var nest = $("<div class='justification'></div>");
+		nest.append(ast[2][0]);
+		if (ast[2][1])
+			nest.append(" ", ast[2][1].join(", "));
+		return nest;
 	}
 
 	function renderSimpleBox(dom, ast, line) {

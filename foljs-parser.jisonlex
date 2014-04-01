@@ -1,5 +1,7 @@
 id				[a-zA-Z_'"0-9]+
 spc				[\t \u00a0\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u3000]
+numrange			[0-9]+(\-[0-9]+)?
+justify				":".*
 
 %%
 \n				return 'EOL';
@@ -13,7 +15,24 @@ spc				[\t \u00a0\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u2
 "every"				return 'EVERY';
 "with"				return 'WITH';
 "of"				return "OF";
-\d+				/* ignore line numbers, for now */
+\d+				/* ignore digits, for now */
+{justify}			%{
+				// Syntax: "[...] : rule name [NumOrRange[, NumOrRange]*]
+				
+				// strip the leading colon and spaces
+				yytext = yytext.substr(yytext.substr(1).search(/\S/));
+				
+				// find the beginning of the first line number
+				yytext = yytext.trim();
+				var pos = yytext.search(/\s+\d+/);
+				var lineranges = null, name = yytext;
+				if (pos) {
+					name = yytext.substr(0, pos);
+					lineranges = yytext.substr(pos+1).split(/\s*,\s*/);
+				}
+				yytext = [name, lineranges];
+				return 'JUSTIFICATION';
+				%};
 "E."				return 'EXISTS';
 "in"				return 'IN';
 "empty"				return 'EMPTYSET';
@@ -22,7 +41,6 @@ spc				[\t \u00a0\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u2
 ")"				return 'RPAREN';
 {id}				return 'ID';
 ","				return 'COMMA';
-":".*				%{ yytext = yytext.substr(yytext.substr(1).search(/\S/)+1); return 'JUSTIFICATION'; %}
 "|"*"-"+			%{ /* manually close an assumption box */
 				this._log("MANUAL DEBOX");
 				var expectedNewIndent = this._iemitstack.length - 1;

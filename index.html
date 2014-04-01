@@ -12,7 +12,7 @@ $(document).ready(function() {
 		var proof = $(this).val();
 		var ast = foljsParser.parse(proof);
 		var html = foljsWeb.render(ast);
-		$("#render-panel").append(html);
+		$("#render-panel").empty().append(html);
 	});
 	$("#proof-input").keyup(); // force invocation on load
 });
@@ -21,6 +21,9 @@ $(document).ready(function() {
 #proof-input { height: 30em; width: 100%; font-family: monospace;}
 #render-panel { height: 23em; }
 #result-box { height: 5em; }
+.justification { width: 50%; float: right; }
+.FOL-box { border: 1px solid black; border-radius: 3px; padding: 2px;}
+.lineno { width: 3em; }
 </style>
 </head>
 <body>
@@ -28,14 +31,15 @@ $(document).ready(function() {
 		<div class='row'>
 			<div class='col-md-12'>
 				<h1>FOL.js "in your cup" Proof Checker</h1>
-				<p>
-					Enter your proof in the input box, below. As you type, the formatted proof will appear on the right, along with a
-					validation status, beneath that.
-				</p>
 				<div class='bs-callout bs-callout-info'>
-					<h4>Note:</h4>
+					<h4>Instructions:</h4>
 					<p>
-						Please be sure you have a modern browser, and that Javascript is enabled.</strong>
+						Enter your proof in the input box, below. As you type, the formatted proof
+						will appear on the right, along with a validation status, beneath that.
+					</p>
+					<p>
+						<strong>Note:</strong> Please be sure you have a modern browser, and that
+						Javascript is enabled.
 					</p>
 				</div>
 			</div>

@@ -13,15 +13,15 @@ clause_list
 	: box
 	{ $$ = [$box]; }
 	| clause_list EOL box
-	{ $$ = $clause_list; $$.unshift($box); }
+	{ $$ = $clause_list; $$.push($box); }
 	;
 
 box
-	: BOX with JUSTIFICATION? EOL clause_list EOL DEBOX
+	: BOX with EOL clause_list EOL DEBOX
 	{ $$ = ['folbox', $clause_list, $with, @$]; }
 	| BOX clause_list EOL DEBOX
 	{ $$ = ['box', $clause_list, @$]; }
-	| sentence JUSTIFICATION?
+	| sentence JUSTIFICATION
 	{ $$ = ['rule', $sentence, $2, @$]; }
 	;
 
