@@ -63,11 +63,40 @@ var foljsWeb = (function() {
 			return c;
 		}
 
-		return renderTerm(ast[1]);
+		return renderTerm(ast);
 	}
 
 	function renderTerm(ast) {
-		return $("<span>" + ast + "</span>");
+		if (ast instanceof Array) {
+			if (ast.length === 2) {
+				return $("<span>" + ast[1] + "</span>");
+			} else if (ast.length === 3) {
+				var term = $("<span class='term parameterized'></span>");
+				term.append(ast[1], "(");
+				for (var i=0; i<ast[2].length; i++) {
+					term.append(renderTerm(ast[2][i]));
+					if (i < ast[2].length-1) term.append(", ");
+				}
+				term.append(")");
+				return term;
+			}
+		} else {
+			return renderSimpleTerm(ast);
+		}
+	}
+
+	function renderSimpleTerm(t) {
+		var symbols = "alpha beta gamma delta epsilon zeta eta theta iota kappa lambda mu nu xi omicron pi rho sigma tau upsilon phi chi psi omega".split(" ");
+		var parts = t.match(/(.*?)(\d+)?$/);
+		var sym = parts[1];
+		if ($.inArray(t.toLowerCase(), symbols) !== -1) {
+			sym = "&" + parts[1] + ";";
+		}
+		if (parts[2]) {
+			return $("<span class='special-symbol'>" + sym + "<sub>" + parts[2] + "</sub></span>");
+		} else {
+			return $("<span class='symbol'>" + sym + "</span>");
+		}
 	}
 	
 	function renderJustification(ast) {
