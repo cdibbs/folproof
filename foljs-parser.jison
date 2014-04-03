@@ -21,8 +21,8 @@ box
 	{ $$ = ['folbox', $clause_list, $with, @$]; }
 	| BOX clause_list EOL DEBOX
 	{ $$ = ['box', $clause_list, @$]; }
-	| sentence JUSTIFICATION
-	{ $$ = ['rule', $sentence, $2, @$]; }
+	| sentence JUSTIFICATION?
+	{ $$ = ['rule', $sentence, $2 ? $2 : ["premise", null], @$]; }
 	;
 
 with

@@ -9,6 +9,7 @@ var foljsWeb = (function() {
 
 	function renderRules(dom, ast, line) {
 		for (var i=0; i<ast.length; i++) {
+			console.log(ast[i]);
 			if (ast[i][0] === 'rule') {
 				line = renderRule(dom, ast[i], line);
 			} else if (ast[i][0] === 'box') {
@@ -23,49 +24,52 @@ var foljsWeb = (function() {
 	function renderRule(dom, ast, line) {
 		var nest = $("<div class='rule'></div>");
 		nest.append("<span class='lineno'>" + line + "</span>");
-		nest.append(renderClause(ast));
-		nest.append(renderJustification(ast));
+		nest.append(renderClause(ast[1]));
+		nest.append(renderJustification(ast[2]));
 		dom.append(nest);
 		return line + 1;
 	}
 
 	function renderClause(ast) {
 		var c, l, r, op;
-		if (!ast || !ast[1]) return "";
 
-		switch(ast[1][0]) {
+		switch(ast[0]) {
 			case "forall": op = "&forall;"; break;
 			case "exists": op = "&exist;";
 		}
 		if (op) {
-			t = renderTerm(ast[1][1]);
-			c = renderClause(ast[1][2]);
+			t = renderTerm(ast[1]);
+			c = renderClause(ast[2]);
 			t.prepend(op);
 			t.append("(", c, ")");
 			return t;
 		}
-		switch(ast[1][0]) {
+		switch(ast[0]) {
 			case "iff": op = "&harr;"; break;
 			case "->": op = "&rarr;"; break;
 			case "and": op = "&and;"; break;
 			case "or": op = "&or;"; break;
-			case "not": op = "&not;";
+			case "=": op = "=";
 		}
 		if (op) {
-			console.log(ast[1][1]);
-			l = renderClause(ast[1][1]);
-			r = renderClause(ast[1][2]);
+			console.log(ast[1], ast[2]);
+			l = renderClause(ast[1]);
+			r = renderClause(ast[2]);
 			l.append(op).append(r);
 			return l;
 		}
-		if (ast[1][0] === "paren") {
+		if (ast[0] === "paren") {
 			c = renderClause(ast[1]);
 			c.prepend("(").append(")");
 			return c;
 		} else if (ast[0] === "id") {
 			return renderTerm(ast);
+		} else if (ast[0] === "not") {
+			l = renderClause(ast[1]);
+			l.prepend("&not;");
+			return l;
 		}
-		return renderTerm(ast[1]);
+		return renderTerm(ast);
 	}
 
 	function renderTerm(ast) {
@@ -89,12 +93,17 @@ var foljsWeb = (function() {
 
 	function renderSimpleTerm(t) {
 		var symbols = "alpha beta gamma delta epsilon zeta eta theta iota kappa lambda mu nu xi omicron pi rho sigma tau upsilon phi chi psi omega".split(" ");
+		var others = {
+			"_|_" : "&perp;", "contradiction" : "&perp;"
+		};
 		var parts = t.match(/(.*?)(\d+)?$/);
 		var sym = parts[1];
 		// &Omega; and &omega; are different. &OmEGa; does not exist, hence the quirkiness
 		// to allow users to distinguish between lower and uppercase greek letters.
 		if ($.inArray(sym[0].toLowerCase() + sym.substr(1), symbols) !== -1) {
 			sym = "&" + sym + ";";
+		} else if (others[sym]) {
+			sym = others[sym];
 		}
 		if (parts[2]) {
 			return $("<span class='special-symbol'>" + sym + "<sub>" + parts[2] + "</sub></span>");
@@ -105,9 +114,9 @@ var foljsWeb = (function() {
 	
 	function renderJustification(ast) {
 		var nest = $("<div class='justification'></div>");
-		nest.append(ast[2][0]);
-		if (ast[2][1])
-			nest.append(" ", ast[2][1].join(", "));
+		nest.append(ast[0]);
+		if (ast[1])
+			nest.append(" ", ast[1].join(", "));
 		return nest;
 	}
 
