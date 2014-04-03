@@ -52,6 +52,7 @@ var foljsWeb = (function() {
 			case "not": op = "&not;";
 		}
 		if (op) {
+			console.log(ast[1][1]);
 			l = renderClause(ast[1][1]);
 			r = renderClause(ast[1][2]);
 			l.append(op).append(r);
@@ -61,20 +62,21 @@ var foljsWeb = (function() {
 			c = renderClause(ast[1]);
 			c.prepend("(").append(")");
 			return c;
+		} else if (ast[0] === "id") {
+			return renderTerm(ast);
 		}
-
-		return renderTerm(ast);
+		return renderTerm(ast[1]);
 	}
 
 	function renderTerm(ast) {
 		if (ast instanceof Array) {
 			if (ast.length === 2) {
-				return $("<span>" + ast[1] + "</span>");
-			} else if (ast.length === 3) {
+				return $("<span></span>").append(renderSimpleTerm(ast[1]));
+			} else if (ast.length >= 3) {
 				var term = $("<span class='term parameterized'></span>");
-				term.append(ast[1], "(");
+				term.append(renderSimpleTerm(ast[1]), "(");
 				for (var i=0; i<ast[2].length; i++) {
-					term.append(renderTerm(ast[2][i]));
+					term.append(renderSimpleTerm(ast[2][i][1]));
 					if (i < ast[2].length-1) term.append(", ");
 				}
 				term.append(")");
@@ -89,8 +91,10 @@ var foljsWeb = (function() {
 		var symbols = "alpha beta gamma delta epsilon zeta eta theta iota kappa lambda mu nu xi omicron pi rho sigma tau upsilon phi chi psi omega".split(" ");
 		var parts = t.match(/(.*?)(\d+)?$/);
 		var sym = parts[1];
-		if ($.inArray(t.toLowerCase(), symbols) !== -1) {
-			sym = "&" + parts[1] + ";";
+		// &Omega; and &omega; are different. &OmEGa; does not exist, hence the quirkiness
+		// to allow users to distinguish between lower and uppercase greek letters.
+		if ($.inArray(sym[0].toLowerCase() + sym.substr(1), symbols) !== -1) {
+			sym = "&" + sym + ";";
 		}
 		if (parts[2]) {
 			return $("<span class='special-symbol'>" + sym + "<sub>" + parts[2] + "</sub></span>");
@@ -116,6 +120,8 @@ var foljsWeb = (function() {
 
 	function renderFOLBox(dom, ast, line) {
 		var nest = $("<div class='FOL-box'></div>");
+		console.log(ast);
+		nest.append(renderSimpleTerm(ast[2][1]));
 		var line = renderRules(nest, ast[1], line);
 		dom.append(nest);
 		return line;
