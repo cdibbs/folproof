@@ -12,12 +12,13 @@ justify				":".*
 "not"|"~"|"!"			return 'NOT';
 "union"				return 'UNION';
 "intersection"			return 'INTERSECTION';
+"="				return 'EQUALS';
 "every"				return 'EVERY';
 "with"				return 'WITH';
 "of"				return "OF";
 \d+				/* ignore digits, for now */
 {justify}			%{
-				// Syntax: "[...] : rule name [NumOrRange[, NumOrRange]*]
+				// Syntax: "[...] : ruleName [[elim/intro] [NumOrRange[, NumOrRange]*]]
 				
 				// strip the leading colon and spaces
 				yytext = yytext.substr(yytext.substr(1).search(/\S/));
@@ -26,11 +27,21 @@ justify				":".*
 				yytext = yytext.trim();
 				var pos = yytext.search(/\s+\d+/);
 				var lineranges = null, name = yytext;
-				if (pos) {
+				if (pos != -1) {
 					name = yytext.substr(0, pos);
 					lineranges = yytext.substr(pos+1).split(/\s*,\s*/);
 				}
-				yytext = [name, lineranges];
+				var parts = name.split(' ');
+				var rtype = null, side = null;
+				if (parts[0]) {
+					name = parts[0];
+					rtype = parts[1];
+					if (rtype && (parts = rtype.match(/([a-zA-Z]+)(\d+)/))) {
+						rtype = parts[1];
+						side = parts[2];
+					}
+				}
+				yytext = [name, rtype, side, lineranges];
 				return 'JUSTIFICATION';
 				%};
 "E."				return 'EXISTS';

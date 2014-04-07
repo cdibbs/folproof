@@ -114,9 +114,10 @@ var foljsWeb = (function() {
 	
 	function renderJustification(ast) {
 		var nest = $("<div class='justification'></div>");
-		nest.append(ast[0]);
-		if (ast[1])
-			nest.append(" ", ast[1].join(", "));
+		nest.append(ast[0], " ", ast[1]);
+		if (ast[2]) nest.append(ast[2]);
+		if (ast[3])
+			nest.append(" ", ast[3].join(", "));
 		return nest;
 	}
 

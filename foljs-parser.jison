@@ -85,11 +85,16 @@ atom
 	;
 
 term_list
-	: term
-	{ $$ = [$term]; }
-	| term COMMA term_list
-	{ $$ = $term_list; $$.unshift($term); }
+	: infix_term
+	{ $$ = [$infix_term]; }
+	| infix_term COMMA term_list
+	{ $$ = $term_list; $$.unshift($infix_term); }
 	;
+
+infix_term
+	: term EQUALS term
+	{ $$ = ['id', '=', [$term, $term]]; }
+	| term;
 
 term
 	: ID LPAREN term_list RPAREN
