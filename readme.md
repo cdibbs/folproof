@@ -6,7 +6,7 @@
 
 # Running
 Please see the included index.html. Right now, there is no command line interface for verifying proofs.
-You can take it for a test drive at [cdibbs.github.io/folproof](cdibbs.github.io/folproof).
+You can take it for a test drive at [//cdibbs.github.io/folproof](//cdibbs.github.io/folproof).
 
 # Architecture Overview
 * foljs-parser.js - DO NOT EDIT - built from foljs-parser.jison and foljs-parser.jisonlex
