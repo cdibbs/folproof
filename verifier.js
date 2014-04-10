@@ -281,6 +281,9 @@ var foljsVerifier = (function() {
 				if (part != null)
 					return "Equality-Intro: Step part (e.g., the 2 in 'and e2') not applicable, in this context.";
 
+				if (steps != null)
+					return "Equality-Intro: Steps reference not applicable.";
+
 				var s = proof.steps[step].getSentence();
 				if (s[0] !== '=')
 					return "Equality-Intro: Current step is not an equality." + proof.steps[step].getSentence();
@@ -291,14 +294,86 @@ var foljsVerifier = (function() {
 				return "Equality-Intro: Left and right sides do not match.";
 			},
 			"elimination" : function(proof, step, part, steps) {
-				return false;
+				debug("=e", step, part, steps);
+				if (part != null)
+					return "Equality-Elim: Step part (e.g., the 2 in 'and e2') not applicable, in this context.";
+
+				if (steps.length != 2)
+					return "Equality-Elim: Must reference two, prior proof steps.";
+
+				var substSteps = [parseInt(steps[0]) - 1, parseInt(steps[1]) - 1];
+				if (substSteps[0] >= step || substSteps[1] >=  step)
+					return "Equality-Elim: Both referenced steps must occur before current step.";
+				
+				var equalityExpr = proof.steps[substSteps[0]].getSentence();
+				var elimExpr = proof.steps[substSteps[1]].getSentence();
+				var proposedResult = proof.steps[step].getSentence();
+				if (equalityExpr[0] !== '=')
+					return "Equality-Elim: First referenced step is not an equality.";
+									
+				var elimExprT = elimTransform(elimExpr, equalityExpr[1], equalityExpr[2]);
+				if (elimExprT === false || !semanticEq(elimExprT, proposedResult))
+					return "Equality-Elim: Does not result in current step.";
+
+				return true;
 			}
 		},
 	};
+
+	function elimTransform(startExpr, origSubExpr, newSubExpr) {
+		debug("elimTransform", startExpr, origSubExpr, newSubExpr);
+		var binOps = ["->", "and", "or", "<->", "="];
+		var unOps = ["not"];
+
+		// remove parens, which are basically stylistic no-ops
+		while (startExpr[0] === 'paren') startExpr = startExpr[1];
+
+		// Are we the thing to replace? Then return the new thing.
+		if (semanticEq(startExpr, origSubExpr)) return newSubExpr;
+
+		// if the rec call to elimT returns anything but false, return our part
+		// of the AST rebuilt using what was returned.
+		if (arrayContains(binOps, startExpr[0])) {
+			var leftSide = elimTransform(startExpr[1], origSubExpr, newSubExpr);
+			if (leftSide !== false) return [startExpr[0], leftSide, startExpr[2]];
+
+			var rightSide = elimTransform(startExpr[2], origSubExpr, newSubExpr);
+			if (rightSide !== false) return [startExpr[0], startExpr[1], rightSide];
+
+			return false;
+		} else if (arrayContains(unOps, startExpr[0])) {
+			var inner = elimTransform(startExpr[1]);
+			if (inner !== false) return [startExpr[0], inner];
+			
+			return false;
+		} else if (startExpr[0] === 'id') {
+			if (startExpr.length === 2) // then this is a base case ['id', $ID]
+				return false;
+			if (startExpr.length === 3) {
+				var newTerms = [], found = false;
+				for (var i=0; i<startExpr[2].length; i++) {
+					var inner = elimTransform(startExpr[2][i], origSubExpr, newSubExpr);
+					if (inner !== false) {
+						newTerms.push(inner);
+						found = true;
+					} else {
+						newTerms.push(startExpr[2][i]);
+					}
+				}
+				if (found) return [startExpr[0], startExpr[1], newTerms];
+			}
+			return false;
+		}	
+	}
+
 	function semanticEq(a, b) {
 		debug("semanticEq", a, b);
-		var binOps = ["->", "and", "or", "<->"];
+		var binOps = ["->", "and", "or", "<->", "="];
 		var unOps = ["not"];
+		// remove parens, which are basically stylistic no-ops
+		while (a[0] === 'paren') a = a[1];
+		while (b[0] === 'paren') b = b[1];
+
 		if (arrayContains(binOps, a[0]) && a[0] === b[0]) {
 			if (semanticEq(a[1], b[1]) && semanticEq(a[2], b[2])) {
 				debug("sEq path 1");

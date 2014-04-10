@@ -8,5 +8,8 @@ b -> c
 c : PBC 3-6
 
 a = c
+(a and b) = (d and c)
 a = a : = i
-c = a : = e 1,2
+(a and b) = (a and b) : = i
+c = a : = e 1,3
+(d and c) = (a and b) : = e 2, 4
