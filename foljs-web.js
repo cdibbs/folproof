@@ -1,3 +1,4 @@
+// Used for rendering fol.js proofs to HTML. Requires JQuery.
 var foljsWeb = (function() {
 	var obj = {};
 	// Top-level AST will be an array of rules and boxes. Render them to HTML. :-)
@@ -55,7 +56,7 @@ var foljsWeb = (function() {
 			console.log(ast[1], ast[2]);
 			l = renderClause(ast[1]);
 			r = renderClause(ast[2]);
-			l.append(op).append(r);
+			l.append(" ", op, " ").append(r);
 			return l;
 		}
 		if (ast[0] === "paren") {
@@ -72,18 +73,23 @@ var foljsWeb = (function() {
 		return renderTerm(ast);
 	}
 
+	var infixTerms = ['='];
 	function renderTerm(ast) {
 		if (ast instanceof Array) {
 			if (ast.length === 2) {
 				return $("<span></span>").append(renderSimpleTerm(ast[1]));
 			} else if (ast.length >= 3) {
 				var term = $("<span class='term parameterized'></span>");
-				term.append(renderSimpleTerm(ast[1]), "(");
-				for (var i=0; i<ast[2].length; i++) {
-					term.append(renderSimpleTerm(ast[2][i][1]));
-					if (i < ast[2].length-1) term.append(", ");
+				if ($.inArray(ast[1], infixTerms) == -1) {
+					term.append(renderSimpleTerm(ast[1]), "(");
+					for (var i=0; i<ast[2].length; i++) {
+						term.append(renderSimpleTerm(ast[2][i][1]));
+						if (i < ast[2].length-1) term.append(", ");
+					}
+					term.append(")");
+				} else { // infix
+					term.append(ast[2][0][1]," ", ast[1], " ", ast[2][1][1]);
 				}
-				term.append(")");
 				return term;
 			}
 		} else {

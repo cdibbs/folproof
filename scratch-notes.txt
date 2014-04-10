@@ -1,0 +1,12 @@
+a and b
+b -> c
+| ~c : assumption
+| b : and e2 1
+| c : -> e 2,4
+| _|_ : not e 3,5
+---
+c : PBC 3-6
+
+a = c
+a = a : = i
+c = a : = e 1,2

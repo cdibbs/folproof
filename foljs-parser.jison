@@ -64,8 +64,15 @@ e_and
 	;
 
 e_or
-	: e_not OR e_or
-	{ $$ = ['or', $e_not, $e_or]; }
+	: e_eq OR e_or
+	{ $$ = ['or', $e_eq, $e_or]; }
+	| e_eq
+	{ $$ = $1; }
+	;
+
+e_eq
+	: e_not EQUALS e_eq
+	{ $$ = ['=', $e_not, $e_eq]; }
 	| e_not
 	{ $$ = $1; }
 	;
@@ -85,16 +92,17 @@ atom
 	;
 
 term_list
-	: infix_term
-	{ $$ = [$infix_term]; }
-	| infix_term COMMA term_list
-	{ $$ = $term_list; $$.unshift($infix_term); }
+	: term
+	{ $$ = [$term]; }
+	| term COMMA term_list
+	{ $$ = $term_list; $$.unshift($term); }
 	;
 
 infix_term
 	: term EQUALS term
 	{ $$ = ['id', '=', [$term, $term]]; }
-	| term;
+	| term
+	{ $$ = $term; };
 
 term
 	: ID LPAREN term_list RPAREN

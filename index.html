@@ -11,6 +11,7 @@
 $(document).ready(function() {
 	$("#proof-input").keyup(function(v) {
 		var proof = $(this).val();
+		try {
 			var ast = foljsParser.parse(proof);
 			var result = foljsVerifier.verifyFromAST(ast);
 			console.log(result);
@@ -20,7 +21,9 @@ $(document).ready(function() {
 			} else {
 				$("#result-box").css({ background: "", 'border-left' : "", color : "" });
 			}
-			console.log(err);	
+		} catch (err) {
+			throw err;
+		}
 		var html = foljsWeb.render(ast);
 		$("#render-panel").empty().append(html);
 	});
@@ -61,17 +64,11 @@ $(document).ready(function() {
 						<strong>Note:</strong> Please be sure you have a modern browser, and that
 						Javascript is enabled.
 					</p>
-				</div>
-			</div>
-		</div>
-		<div class='row'>
-			<div class='col-md-12'>
-				<div class='bs-callout bs-callout-info'>
-				<strong>Examples:<strong>
-				<button class='examples' value='0'>HW3 Problem 5</button>
-				<button class='examples' value='1'>HW3 Problem 4</button>
-				<button class='examples' value='2'>HW3 Problem 7</button>
-				<button class='examples' value='3'>Page 115</button>
+					<strong>Examples:<strong>
+					<button class='examples' value='0'>HW3 Problem 5</button>
+					<button class='examples' value='1'>HW3 Problem 4</button>
+					<button class='examples' value='2'>HW3 Problem 7</button>
+					<button class='examples' value='3'>Page 115</button>
 				</div>
 			</div>
 		</div>
