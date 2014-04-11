@@ -25,7 +25,7 @@ $(document).ready(function() {
 		} catch (err) {
 			$("#result").text(err);
 			$("#result-box").css({ background: "", 'border-left' : "", color : "" });
-			throw err;
+			//throw err;
 		}
 		var html = foljsWeb.render(ast);
 		$("#render-panel").empty().append(html);
