@@ -33,9 +33,10 @@ $(document).ready(function() {
 	$("#proof-input").keyup(); // force invocation on load
 	$("button.examples").click(function() {
 		var i = $(this).val();
-		$("#proof-input")
-			.text($("#example" + i).text().substr(1))
-			.keyup();
+		console.log("example " + i);
+		var proof = $("#proof-input");
+		proof.text($("#example" + i).text().substr(1))
+		proof.keyup();
 	});
 });
 </script>
