@@ -9,8 +9,8 @@ Please see the included index.html. Right now, there is no command line interfac
 You can take it for a test drive at [//cdibbs.github.io/folproof](//cdibbs.github.io/folproof).
 
 # Architecture Overview
-* foljs-parser.js - DO NOT EDIT - built from foljs-parser.jison and foljs-parser.jisonlex
-* foljs-web.js - renders proof ASTs to HTML. **NOTE:** requires JQuery
+* foljs-parser.js - built automatically from foljs-parser.jison and foljs-parser.jisonlex
+* foljs-web.js - renders proof ASTs to HTML. Requires JQuery
 * verifier.js - verifies proofs from ASTs
 * index.html - provides a test interface
 
