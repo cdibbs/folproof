@@ -35,7 +35,7 @@ $(document).ready(function() {
 		var i = $(this).val();
 		console.log("example " + i);
 		var proof = $("#proof-input");
-		proof.text($("#example" + i).text().substr(1))
+		proof.val($("#example" + i).text().substr(1))
 		proof.keyup();
 	});
 });
