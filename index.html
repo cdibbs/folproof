@@ -25,7 +25,7 @@ $(document).ready(function() {
 		} catch (err) {
 			$("#result").text(err);
 			$("#result-box").css({ background: "", 'border-left' : "", color : "" });
-			throw err;
+			//throw err;
 		}
 		var html = foljsWeb.render(ast);
 		$("#render-panel").empty().append(html);
@@ -33,9 +33,10 @@ $(document).ready(function() {
 	$("#proof-input").keyup(); // force invocation on load
 	$("button.examples").click(function() {
 		var i = $(this).val();
-		$("#proof-input")
-			.text($("#example" + i).text().substr(1))
-			.keyup();
+		console.log("example " + i);
+		var proof = $("#proof-input");
+		proof.val($("#example" + i).text().substr(1))
+		proof.keyup();
 	});
 });
 </script>
@@ -137,7 +138,7 @@ $(document).ready(function() {
 P(a)
 | with x0 of x
 || a = x0 : assumption
-|| P(x0)
+|| P(x0) : = e 2,1
  -
 | a = x0 -> P(x0) : -> i 2-3
 -
