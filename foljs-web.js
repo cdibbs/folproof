@@ -1,5 +1,6 @@
 // Used for rendering fol.js proofs to HTML. Requires JQuery.
 var foljsWeb = (function() {
+	var debugMode = false;
 	var obj = {};
 	// Top-level AST will be an array of rules and boxes. Render them to HTML. :-)
 	obj.render = function(ast) {
@@ -10,7 +11,7 @@ var foljsWeb = (function() {
 
 	function renderRules(dom, ast, line) {
 		for (var i=0; i<ast.length; i++) {
-			console.log(ast[i]);
+			debug(ast[i]);
 			if (ast[i][0] === 'rule') {
 				line = renderRule(dom, ast[i], line);
 			} else if (ast[i][0] === 'box') {
@@ -53,7 +54,7 @@ var foljsWeb = (function() {
 			case "=": op = "=";
 		}
 		if (op) {
-			console.log(ast[1], ast[2]);
+			debug(ast[1], ast[2]);
 			l = renderClause(ast[1]);
 			r = renderClause(ast[2]);
 			l.append(" ", op, " ").append(r);
@@ -136,11 +137,16 @@ var foljsWeb = (function() {
 
 	function renderFOLBox(dom, ast, line) {
 		var nest = $("<div class='FOL-box'></div>");
-		console.log(ast);
+		debug(ast);
 		nest.append(renderSimpleTerm(ast[2][1]));
 		var line = renderRules(nest, ast[1], line);
 		dom.append(nest);
 		return line;
 	}
 	return obj;
+
+	function debug() {
+		if (debugMode)
+			console.log.apply(console, Array.prototype.slice.call(arguments, 0));
+	}
 })();

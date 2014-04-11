@@ -4,7 +4,7 @@ numrange			[0-9]+(\-[0-9]+)?
 justify				":".*
 
 %%
-\n				return 'EOL';
+"#".*[\n\r]+			/* comments are ignored */
 "and"				return 'AND';
 "or"				return 'OR';
 "implies"|"->"|"=>"		return 'IMPLIES';
@@ -97,6 +97,8 @@ justify				":".*
 				tokens.unshift("ENDOFFILE");
 				if (tokens.length) return tokens;
 				%}
+[\n\r]+{spc}*/![^\n\r]		/* eat blank lines */
+\n				return 'EOL';
 {spc}+				/* ignore whitespace */
 
 %%

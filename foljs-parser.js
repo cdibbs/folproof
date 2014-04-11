@@ -615,7 +615,7 @@ performAction: function anonymous(yy,yy_,$avoiding_name_collisions,YY_START) {
 
 var YYSTATE=YY_START;
 switch($avoiding_name_collisions) {
-case 0:return 8;
+case 0:/* comments are ignored */
 break;
 case 1:return 26;
 break;
@@ -733,12 +733,16 @@ case 24:
 				if (tokens.length) return tokens;
 				
 break;
-case 25:/* ignore whitespace */
+case 25:/* eat blank lines */
+break;
+case 26:return 8;
+break;
+case 27:/* ignore whitespace */
 break;
 }
 },
-rules: [/^(?:\n)/,/^(?:and\b)/,/^(?:or\b)/,/^(?:implies|->|=>)/,/^(?:iff|<->|=>)/,/^(?:not|~|!)/,/^(?:union\b)/,/^(?:intersection\b)/,/^(?:=)/,/^(?:every\b)/,/^(?:with\b)/,/^(?:of\b)/,/^(?:\d+)/,/^(?:(:.*))/,/^(?:E\.)/,/^(?:in\b)/,/^(?:empty\b)/,/^(?:A\.)/,/^(?:\()/,/^(?:\))/,/^(?:([a-zA-Z_][a-zA-Z_'"0-9\|]*))/,/^(?:,)/,/^(?:\|*-+)/,/^(?:\|+)/,/^(?:$)/,/^(?:([\t \u00a0\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u3000])+)/],
-conditions: {"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25],"inclusive":true}}
+rules: [/^(?:#.*[\n\r]+)/,/^(?:and\b)/,/^(?:or\b)/,/^(?:implies|->|=>)/,/^(?:iff|<->|=>)/,/^(?:not|~|!)/,/^(?:union\b)/,/^(?:intersection\b)/,/^(?:=)/,/^(?:every\b)/,/^(?:with\b)/,/^(?:of\b)/,/^(?:\d+)/,/^(?:(:.*))/,/^(?:E\.)/,/^(?:in\b)/,/^(?:empty\b)/,/^(?:A\.)/,/^(?:\()/,/^(?:\))/,/^(?:([a-zA-Z_][a-zA-Z_'"0-9\|]*))/,/^(?:,)/,/^(?:\|*-+)/,/^(?:\|+)/,/^(?:$)/,/^(?:[\n\r]+([\t \u00a0\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u3000])*(?![^\n\r]))/,/^(?:\n)/,/^(?:([\t \u00a0\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u3000])+)/],
+conditions: {"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27],"inclusive":true}}
 };
 jisonLexerFn = lexer.setInput;
 lexer.setInput = function(input) {

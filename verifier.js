@@ -1,5 +1,5 @@
 var foljsVerifier = (function() {
-	var debugMode = true;
+	var debugMode = false;
 	var obj = {};
 	obj.verifyFromAST = function(ast) {
 		var proof = preprocess(ast);
@@ -21,10 +21,13 @@ var foljsVerifier = (function() {
 	var validateRule = function validateRule(result, proof, step) {
 		var rule = proof.steps[step];
 		var why = rule.getJustification();
+		var newv = null;
+		if (why[0].split('.').length == 2)
+			newv = why[0].split('.')[1];
 		var validator = lookupValidator(why);
 		if (typeof validator === 'function') {
 			var part = why[2], lines = why[3];
-			var isValid = validator(proof, step, part, lines);
+			var isValid = validator(proof, step, part, lines, newv);
 			if (isValid === true) {
 				result.valid = true;
 			} else {
@@ -45,6 +48,9 @@ var foljsVerifier = (function() {
 
 	function lookupValidator(why) {
 		var name = why[0].toLowerCase();
+		var newv = null;
+		if (name.split('.').length == 2)
+			name = name.split('.')[0] + ".";
 		var rule = rules[name];
 		if (typeof rule === 'function') { // probably assumption or premise
 			return rule;
@@ -126,27 +132,31 @@ var foljsVerifier = (function() {
 		},
 		"->" : {
 			"introduction" : function(proof, step, part, steps) {	
-				console.debug(steps);
-				var truthStep = parseInt(steps[1]) - 1, impliesStep = parseInt(steps[0]) - 1;
-				if (truthStep >= step || impliesStep >= step)
-					return "Referenced proof steps must precede current step.";
+				debug("-> i", step, part, steps);
+				
+				if (steps == null || steps.length != 1 || steps[0].split("-").length != 2)
+					return "Implies-Intro: Requires proof step range.";
 
-				var truth = proof.steps[truthStep].getSentence();
-				var implies = proof.steps[impliesStep].getSentence();
-				console.debug(implies, truth);
+				var range = steps[0].split("-");
+				range = [parseInt(range[0]) - 1, parseInt(range[1]) - 1];
+				if (range[0] >= step || range[1] >= step || range[1] < range[0])
+					return "Implies-Intro: Referenced step range, x-y, must precede current step, and x < y.";
+
+				var truth = proof.steps[range[0]].getSentence();
+				var result = proof.steps[range[1]].getSentence();
+				var implies = proof.steps[step].getSentence();
 				if (implies[0] != '->')
-					return "Line " + steps[0] + " is not an implication";
-				var truthSemEq = semanticEq(implies[1], truth);
-				var resultSemEq = semanticEq(implies[2], proof.steps[step].getSentence());
-				if (truthSemEq) {
-					if (resultSemEq) {
-						return true;
-					} else {
-						return "The left side does not imply this result.";
-					}
-				}
+					return "Implies-Intro: Current step is not an implication";
 
-				return "The implication's left side does not match the referenced step.";
+				var truthSemEq = semanticEq(implies[1], truth);
+				if (! truthSemEq)
+					return "Implies-Intro: The left side does not match the assumption.";
+
+				var resultSemEq = semanticEq(implies[2], result);
+				if (! resultSemEq)
+					return "Implies-Intro: The result does not match the right side.";
+
+				return true;
 			},
 			"elimination" : function(proof, step, part, steps) {
 				debug("-> e", step, part, steps);
@@ -159,9 +169,8 @@ var foljsVerifier = (function() {
 
 				var truth = proof.steps[truthStep].getSentence();
 				var implies = proof.steps[impliesStep].getSentence();
-				console.debug(implies, truth);
 				if (implies[0] != '->')
-					return "Line " + steps[0] + " is not an implication";
+					return "Implies-Elim: Step " + steps[0] + " is not an implication";
 				var truthSemEq = semanticEq(implies[1], truth);
 				var resultSemEq = semanticEq(implies[2], proof.steps[step].getSentence());
 				if (truthSemEq) {
@@ -341,8 +350,8 @@ var foljsVerifier = (function() {
 				return "Not-Elim: Subexpression in not-expr does not match other expr.";
 			}
 		},
-		"a.x" : {
-			"introduction" : function(proof, step, part, steps) {
+		"a." : {
+			"introduction" : function(proof, step, part, steps, newv) {
 				debug("all-x-i", step, part, steps);
 				if (part != null)
 					return "All-x-Intro: Step part (e.g., the 2 in 'and e2') not applicable, in this context.";
@@ -353,7 +362,7 @@ var foljsVerifier = (function() {
 				var stepRange = steps[0].split("-");
 				stepRange = [parseInt(stepRange[0]) - 1, parseInt(stepRange[1]) - 1];
 				if (stepRange[0] >= step || stepRange[1] >= step || stepRange[0] > stepRange[1])
-					return "All-x-Intro: Referenced proof step range, x-y, must precede current step, and x < y.";
+					return "All-x-Intro: Requires range x-y, such that x, y precede current step, and x <= y.";
 			
 				var currStep = proof.steps[step];
 				var currExpr = currStep.getSentence();
@@ -368,7 +377,7 @@ var foljsVerifier = (function() {
 				
 				// check if any substitutions from our scope match refExpr
 				var scopeVars = scope[scope.length-1];
-				var endExprSub = substitute(endExpr, scopeVars[0], scopeVars[1]);
+				var endExprSub = substitute(endExpr, scopeVars[0], newv);
 				if (semanticEq(endExprSub, currExpr[2]))
 					return true;
 				return "All-x-Intro: Last step in range doesn't match current step after " + scopeVars[0] + "/" + scopeVars[1] + ".";
@@ -406,8 +415,8 @@ var foljsVerifier = (function() {
 				return "All-x-Elim: Referenced step did not match current step under: " + checked.join(", ") + ".";
 			}
 		},
-		"e.x" : {
-			"introduction" : function(proof, step, part, steps) {
+		"e." : {
+			"introduction" : function(proof, step, part, steps, newv) {
 				debug("exists-x-i", step, part, steps);
 				if (part != null)
 					return "Exists-x-Intro: Step part (e.g., the 2 in 'and e2') not applicable, in this context.";

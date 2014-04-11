@@ -18,10 +18,13 @@ $(document).ready(function() {
 			$("#result").text(result.message);
 			if (!result.valid) {
 				$("#result").append("<p>Step: " + result.errorStep + ", Src Line: " + result.errorSrcLoc.first_line + "</p>");
-			} else {
 				$("#result-box").css({ background: "", 'border-left' : "", color : "" });
+			} else {
+				$("#result-box").css({ background: "#ccffcc", 'border-left' : "3px solid green", color : "" });
 			}
 		} catch (err) {
+			$("#result").text(err);
+			$("#result-box").css({ background: "", 'border-left' : "", color : "" });
 			throw err;
 		}
 		var html = foljsWeb.render(ast);
@@ -30,7 +33,6 @@ $(document).ready(function() {
 	$("#proof-input").keyup(); // force invocation on load
 	$("button.examples").click(function() {
 		var i = $(this).val();
-		console.log(i);
 		$("#proof-input")
 			.text($("#example" + i).text().substr(1))
 			.keyup();
@@ -103,6 +105,7 @@ $(document).ready(function() {
 			</div>
 		</div>
 </div>
+<!-- these are hidden by CSS style rules... -->
 <div id='examples'>
 <div id='example0'>
 1 A.x(P(x) -> ~Q(x))	: premise
@@ -118,6 +121,27 @@ $(document).ready(function() {
 9 | contradiction	: E.x elim 2,3-8
   ---
 10 ~(E.x(P(x) and Q(x)))	: not introduction 2-9
+</div>
+<div id='example1'>
+# Extraneous step #s in the src are ignored. Be careful.
+
+1 A.x(P(x,z))
+ | with y0 of x
+2 | P(y0,z) : A.x e 1
+  ---
+3 A.y(P(y,z)) : A.y i 2-2
+</div>
+<div id='example2'>
+# Sloppy syntax is fine :-)
+
+P(a)
+| with x0 of x
+|| a = x0 : assumption
+|| P(x0)
+ -
+| a = x0 -> P(x0) : -> i 2-3
+-
+A.x(a=x->P(x)) : A.x i 2-4
 </div>
 <div id='example3'>
 1  A.x(Q(x) -&gt; R(x))		: premise
