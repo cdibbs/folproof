@@ -692,3 +692,7 @@ var foljsVerifier = (function() {
 	}
 	return obj;
 })();
+
+if (typeof require !== 'undefined' && typeof exports !== 'undefined') {
+	exports.foljsVerifier = foljsVerifier;
+}

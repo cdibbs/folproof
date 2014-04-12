@@ -1,0 +1,36 @@
+{
+  "bugs": {
+	"url": "http://github.com/cdibbs/folproof"  
+  },
+  "name": "folproof",
+  "version": "0.1.0",
+  "description": "The FOL proof verifier",
+  "main": "/",
+  "bin" : "/cli.js",
+  "dependencies" : {
+
+  },
+  "devDependencies": {
+	  "jison": "0.4.x",
+	  "nomnom": "1.5.2",
+	  "test" : "0.6.0",
+	  "path" : "0.4.9",
+	  "vows" : "latest",
+	  "browserify" : "latest",
+	  "underscore" : "latest",
+	  "q" : "latest",
+	  "fabric" : "latest"
+  },
+  "scripts" : {
+    "test" : "echo Not implemented, yet, sorry."
+  },
+  "repository": "",
+  "keywords": [
+    "Node.js",
+    "Eclipse",
+    "Nodeclipse"
+  ],
+  "author": "",
+  "license": "MIT",
+  "readmeFilename": "readme.md"
+}
