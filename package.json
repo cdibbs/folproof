@@ -5,21 +5,14 @@
   "name": "folproof",
   "version": "0.1.0",
   "description": "The FOL proof verifier",
-  "main": "/",
-  "bin" : "/cli.js",
+  "main": "./",
+  "bin" : "./cli.js",
   "dependencies" : {
-
+	"nomnom": "1.5.2",
+	"path" : "0.4.9"
   },
   "devDependencies": {
-	  "jison": "0.4.x",
-	  "nomnom": "1.5.2",
-	  "test" : "0.6.0",
-	  "path" : "0.4.9",
-	  "vows" : "latest",
-	  "browserify" : "latest",
-	  "underscore" : "latest",
-	  "q" : "latest",
-	  "fabric" : "latest"
+	  "jison": "0.4.x"
   },
   "scripts" : {
     "test" : "echo Not implemented, yet, sorry."
