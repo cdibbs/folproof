@@ -16,6 +16,7 @@ If you'd like to run FOLProof in a shell, then proceed, here:
 
 ## Running
 There are currently two ways to run FOLProof:
+
 1. From the shell
  * After installation, just type `folproof [your proof].fol`.
 2. From the web
