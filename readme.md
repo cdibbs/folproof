@@ -9,6 +9,7 @@ TL;DR? Take it for a test drive: [//cdibbs.github.io/folproof](//cdibbs.github.i
 
 ## Installing (Optional)
 If you'd like to run FOLProof in a shell, then proceed, here:
+
 1. Install the build dependencies (node, npm, etc).
 2. Within the folproof root directory, run `sudo npm -g install`.
  * This should install shell dependencies, like nomnom and path.
