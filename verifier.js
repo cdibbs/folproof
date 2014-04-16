@@ -6,11 +6,11 @@ var foljsVerifier = (function() {
 		return obj.verify(proof);
 	};
 
-	// proof = { 1 : Rule(), 2 : Rule() ... };
+	// proof = { 1 : Statement(), 2 : Statement() ... };
 	obj.verify = function(proof) {
 		var result = { message : "Proof is valid.", valid : true };
 		for (var i=0; i<proof.steps.length; i++) {
-			validateRule(result, proof, i);
+			validateStatement(result, proof, i);
 			if (! result.valid) {
 				break;
 			}
@@ -18,9 +18,9 @@ var foljsVerifier = (function() {
 		return result;
 	};
 
-	var validateRule = function validateRule(result, proof, step) {
-		var rule = proof.steps[step];
-		var why = rule.getJustification();
+	var validateStatement = function validateStatement(result, proof, step) {
+		var stmt = proof.steps[step];
+		var why = stmt.getJustification();
 		var newv = null;
 		if (why[0].split('.').length == 2)
 			newv = why[0].split('.')[1];
@@ -34,36 +34,43 @@ var foljsVerifier = (function() {
 				result.valid = false;
 				result.message = isValid;
 				result.errorStep = step + 1;
-				result.errorSrcLoc = rule.getMeta();
+				result.errorSrcLoc = stmt.getMeta();
 			}
 			return;
 		} else if (typeof validator === "string") {
 			result.valid = false;
 			result.message = validator;
 			result.errorStep = step + 1;
-			result.errorSrcLoc = rule.getMeta();
+			result.errorSrcLoc = stmt.getMeta();
 		}
 		result.valid = false;
 	};
 
 	function lookupValidator(why) {
 		var name = why[0].toLowerCase();
-		var newv = null;
 		if (name.split('.').length == 2)
 			name = name.split('.')[0] + ".";
 		var rule = rules[name];
-		if (typeof rule === 'function') { // probably assumption or premise
-			return rule;
-		} else if (why[1] && typeof rule === 'object') {
-			var keys = Object.keys(rule);
+		if (rule.getType() === "simple" || rule.getType() === "derived") {
+			var fn = rule.getSimpleVerifier();
+			if (!fn) throw new Error("Not implemented for " + name);
+			return fn.exec;
+		}
+
+		if (why[1]) {
 			var elimOrIntro = why[1].toLowerCase();
-			for (var i=0; i<keys.length; i++) {
-				if (keys[i].indexOf(elimOrIntro) === 0) {
-					return rule[keys[i]];
-				}
+			if ("introduction".indexOf(elimOrIntro) === 0) {
+				var fn = rule.getIntroVerifier();
+				if (!fn) throw new Error("Not implemented for " + name);
+				return fn.exec;
+			} else if ("elimination".indexOf(elimOrIntro) === 0) {
+				var fn = rule.getElimVerifier();
+				if (!fn) throw new Error("Not implemented for " + name);
+				return fn.exec;
 			}
 			return "Cannot determine elim/intro rule type from " + elimOrIntro;
 		}
+		
 		return "Unrecognized rule: " + why[0] + " " + (why[1] ? why[1] : "")  + (why[2] ? why[2] : "") + " " + (why[3] ? why[3] : "");
 	}
 
@@ -76,7 +83,7 @@ var foljsVerifier = (function() {
 	function preprocessBox(proof, ast, step, scope) {
 		for(var i=0; i<ast.length; i++) {
 			if (ast[i][0] === 'rule') {
-				proof.steps[step] = new Rule(ast[i][1], ast[i][2], scope, ast[i][3]);
+				proof.steps[step] = new Statement(ast[i][1], ast[i][2], scope, ast[i][3]);
 				step = step + 1;
 			} else if (ast[i][0] === 'folbox') {
 				var newScope = scope.slice(0)
@@ -89,7 +96,7 @@ var foljsVerifier = (function() {
 		return step;
 	}
 
-	var Rule = function(sentenceAST, justificationAST, scope, loc) {
+	var Statement = function(sentenceAST, justificationAST, scope, loc) {
 		this.getSentence = function getSentence() {
 			return sentenceAST;
 		};
@@ -102,90 +109,175 @@ var foljsVerifier = (function() {
 		this.getMeta = function() { return loc; }
 	};
 
-	var rules = {
-		"premise" : function(proof, step) { return true; },
-		"assumption" : function(proof, step) { return true; },
-		"pbc" : function(proof, step, part, steps) {
-			debug("PBC", step, part, steps);
-			var stepRange = steps ? steps[0].split("-") : null;
-			if (steps.length != 1 || stepRange.length != 2)
-				return "PBC: Unrecognized step reference format. Should be, e.g., 2-7.";
+	var Rule = function(options) {
+		// { name : name,
+		//   type : ["simple", "derived", "normal"], 
+		//   verifier : new Verifier(parseFormat, function(proof, step) {}),
+		//   introduction : new Verifier(parseFormat, function(proof, step, part, steps, subst) {}),
+		//   elimination : new Verifier(parseFormat, function(proof, step, part, steps, subst) {})
+		// }
+		this.getName = function getName() { return options.name; };
+		this.getType = function getType() { return options.type; };
+		this.getSimpleVerifier = function getSimpleVerifier() { return options.verifier || null; };
+		this.getIntroVerifier = function getIntroVerifier() { return options.introduction || null; };
+		this.getElimVerifier = function getElimVerifier() { return options.elimination || null; };
+	};
 
-			stepRange = [parseInt(stepRange[0]) - 1, parseInt(stepRange[1]) - 1];
-			if (stepRange[0] >= step || stepRange[1] >= step || stepRange[0] > stepRange[1])
-				return "PBC: Referenced proof step range, x-y, must precede current step, and x < y.";
+	var Verifier = function(format, fn) {
+		// format = { hasPart : (true/false), stepRefs : ("num" | "range")*, subst : (true/false) };
+		var self = this;
 
-			var assumptionExpr = proof.steps[stepRange[0]].getSentence();
-			var contraExpr = proof.steps[stepRange[1]].getSentence();
-			if (! isContradiction(contraExpr)) {
-				return "PBC: Final step in range must be a contradiction.";
+		this.exec = function(proof, step, part, steps, subst) {
+			debug(step, part, steps, subst);
+			var checked = self.checkParams(step, part, steps, subst);
+			if (typeof checked === "string") return checked;
+			return fn(proof, step, checked[0], checked[1], checked[2]);
+		};
+
+		this.checkParams = function checkParams(curStep, part, steps, subst) {
+			if (format === null) {
+				if (part != null) 
+					return "Step part (e.g., 2 in 'and e2') not applicable, in this context.";
+				if (steps != null)
+					return "Step references not applicable.";
+				if (subst != null)
+					return "Substitutions not applicable.";
+				return [];
 			}
 
-			if (assumptionExpr[0] !== 'not')
-				return "PBC: Assumption is not a negation. Might you be thinking of not-introduction?";
-			
-			var semEq = semanticEq(assumptionExpr[1], proof.steps[step].getSentence());
-			if (semEq)
-				return true;
-
-			return "PBC: Negation of assumption doesn't match current step.";
-		},
-		"->" : {
-			"introduction" : function(proof, step, part, steps) {	
-				debug("-> i", step, part, steps);
-				
-				if (steps == null || steps.length != 1 || steps[0].split("-").length != 2)
-					return "Implies-Intro: Requires proof step range.";
-
-				var range = steps[0].split("-");
-				range = [parseInt(range[0]) - 1, parseInt(range[1]) - 1];
-				if (range[0] >= step || range[1] >= step || range[1] < range[0])
-					return "Implies-Intro: Referenced step range, x-y, must precede current step, and x < y.";
-
-				var truth = proof.steps[range[0]].getSentence();
-				var result = proof.steps[range[1]].getSentence();
-				var implies = proof.steps[step].getSentence();
-				if (implies[0] != '->')
-					return "Implies-Intro: Current step is not an implication";
-
-				var truthSemEq = semanticEq(implies[1], truth);
-				if (! truthSemEq)
-					return "Implies-Intro: The left side does not match the assumption.";
-
-				var resultSemEq = semanticEq(implies[2], result);
-				if (! resultSemEq)
-					return "Implies-Intro: The result does not match the right side.";
-
-				return true;
-			},
-			"elimination" : function(proof, step, part, steps) {
-				debug("-> e", step, part, steps);
+			var partNum = parseInt(part), refNums = [], subst = [], w = null;
+			if (format.hasPart)
+				if (!(partNum == 1 || partNum == 2))
+					return "Part number must be 1 or 2";
+			else
 				if (part != null)
-					return "Implies-Elim: Step part (e.g., 2 in 'and e2') not applicable, in this context.";
-
-				var truthStep = parseInt(steps[1]) - 1, impliesStep = parseInt(steps[0]) - 1;
-				if (truthStep >= step || impliesStep >= step)
-					return "Implies-Elim: Referenced proof steps must precede current step.";
-
-				var truth = proof.steps[truthStep].getSentence();
-				var implies = proof.steps[impliesStep].getSentence();
-				if (implies[0] != '->')
-					return "Implies-Elim: Step " + steps[0] + " is not an implication";
-				var truthSemEq = semanticEq(implies[1], truth);
-				var resultSemEq = semanticEq(implies[2], proof.steps[step].getSentence());
-				if (truthSemEq) {
-					if (resultSemEq) {
-						return true;
+					return "Step part (e.g., 2 in 'and e2') not applicable, in this context.";
+			
+			if (format.stepRefs) {
+				if (steps.length != format.stepRefs) {
+					var f = format.stepRefs.map(function(e) { return e == "num" ? "n" : "n-m" });
+					return "Step reference mismatch; required format: " + f.join(" ") + ".";
+				}
+				for (var i=0; i<steps.length; i++) {
+					if (format.stepRefs[i] == "num") {
+						var n = parseInt(steps[i]);
+						if (!(n > 0 && n < curStep))
+							return "Step reference #" + (i + 1) + " must be 1 <= step < current.";
+						refNums.push(n);
 					} else {
-						return "Implies-Elim: The left side does not imply this result.";
+						var ab = steps[i].split("-");
+							if (ab.length != 2)
+							return "Step reference # " + (i + 1) + " must be range, a-b, with a <= b.";
+						
+						ab = [parseInt(ab[0]), parseInt(ab[1])];
+						if (ab[0] > ab[1])
+							return "Step reference # " + (i + 1) + " must be range, a-b, with a <= b.";
+						refNums.push(ab);
 					}
 				}
-				
-				return "Implies-Elim: The implication's left side does not match the referenced step.";
 			}
-		},
-		"and" : {
-			"introduction" : function(proof, step, part, steps) {
+
+			if (steps != null)
+				return "Step references not applicable, here.";
+			
+			if (format.subst) {
+				if (subst == null)
+					return "Substitution specification required: id/id.";
+				w = subst.match("([A-Za-z_][A-Za-z_0-9]*)/([A-Za-z_][A-Za-z_0-9]*)");
+				if (w.length != 3)
+					return "Substitution format must match: id1/id2.";
+			}
+
+			return [partNum, refNums, w];
+		};
+	};
+
+	var rules = {
+		"premise" : new Rule({
+				name : "Premise",
+				type : "simple",
+				verifier : new Verifier(null, function(proof, step) { return true; })
+			}),
+		"assumption" : new Rule({
+				name : "Assumption",
+				type : "simple",
+				verifier : new Verifier(null, function(proof, step) { return true; })
+			}),
+		"pbc" : new Rule({
+			name : "PBC",
+			type : "derived",
+			verifier : new Verifier(
+				{ hasPart : false, stepRefs : ["range"], subst : false },
+				function(proof, step, part, steps) {
+		
+					var assumptionExpr = proof.steps[stepRange[0]].getSentence();
+					var contraExpr = proof.steps[stepRange[1]].getSentence();
+					if (! isContradiction(contraExpr)) {
+						return "PBC: Final step in range must be a contradiction.";
+					}
+		
+					if (assumptionExpr[0] !== 'not')
+						return "PBC: Assumption is not a negation. Might you be thinking of not-introduction?";
+			
+					var semEq = semanticEq(assumptionExpr[1], proof.steps[step].getSentence());
+					if (semEq)
+						return true;
+
+					return "PBC: Negation of assumption doesn't match current step.";
+				})
+			}),
+		"->" : new Rule({
+				name : "Implication",
+				type : "normal",
+				introduction : new Verifier(
+					{ hasPart : false, stepRefs : ["range"], subst : false },
+					function(proof, step, part, steps) {	
+					var truth = proof.steps[steps[0][0]].getSentence();
+					var result = proof.steps[steps[0][1]].getSentence();
+					var implies = proof.steps[step].getSentence();
+					if (implies[0] != '->')
+						return "Implies-Intro: Current step is not an implication";
+
+					var truthSemEq = semanticEq(implies[1], truth);
+					if (! truthSemEq)
+						return "Implies-Intro: The left side does not match the assumption.";
+
+					var resultSemEq = semanticEq(implies[2], result);
+					if (! resultSemEq)
+						return "Implies-Intro: The result does not match the right side.";
+	
+					return true;
+					}
+				),
+				elimination : new Verifier(
+					{ hasPart : false, stepRefs : ["num", "num"], subst : false },
+					function(proof, step, part, steps) {
+					var truthStep = steps[1], impliesStep = steps[0];
+					if (truthStep >= step || impliesStep >= step)
+						return "Implies-Elim: Referenced proof steps must precede current step.";
+
+					var truth = proof.steps[truthStep].getSentence();
+					var implies = proof.steps[impliesStep].getSentence();
+					if (implies[0] != '->')
+						return "Implies-Elim: Step " + steps[0] + " is not an implication";
+					var truthSemEq = semanticEq(implies[1], truth);
+					var resultSemEq = semanticEq(implies[2], proof.steps[step].getSentence());
+					if (truthSemEq) {
+						if (resultSemEq) {
+							return true;
+						} else {
+							return "Implies-Elim: The left side does not imply this result.";
+						}
+					}
+				
+					return "Implies-Elim: The implication's left side does not match the referenced step.";
+					}
+				)
+			}),		
+		"and" : new Rule({
+			name : "And",
+			type : "normal",
+			introduction : function(proof, step, part, steps) {
 				debug("and-i", step, part, steps);
 				if (part != null)
 					return "And-Intro: Step part (e.g., the 2 in 'and e2') not applicable, in this context.";
@@ -211,7 +303,7 @@ var foljsVerifier = (function() {
 				
 				return "And-Intro: Left side doesn't match referenced step.";
 			},
-			"elimination" : function(proof, step, part, steps) {
+			elimination : function(proof, step, part, steps) {
 				debug("and-e", step, part, steps);
 				if (part != 1 && part != 2)
 					return "And-Elim: Must reference a side, like ': and e1 [lineNum]'";
@@ -230,9 +322,11 @@ var foljsVerifier = (function() {
 
 				return "And-Elim: In referenced line, side " + part + " does not match current step.";
 			}
-		},
-		"or" : {
-			"introduction" : function(proof, step, part, steps) {
+		}),
+		"or" : new Rule({
+			name : "Or",
+			type : "normal",
+			introduction : function(proof, step, part, steps) {
 				debug("or-i", step, part, steps);
 				if (part != 1 && part != 2)
 					return "Or-Intro: Must reference step side 1 or 2 (e.g., the 2 in 'or i2 n').";
@@ -253,7 +347,7 @@ var foljsVerifier = (function() {
 
 				return "Or-Intro: Side " + part + " doesn't match referenced step.";
 			},
-			"elimination" : function(proof, step, part, steps) {
+			elimination : function(proof, step, part, steps) {
 				debug("or-e", step, part, steps);
 				if (part != null)
 					return "Or-Elim: Step part (e.g., 2 in 'and e2') not applicable, in this context.";
@@ -292,9 +386,11 @@ var foljsVerifier = (function() {
 
 				return true;
 			}
-		},
-		"not" : {
-			"introduction" : function(proof, step, part, steps) {
+		}),
+		"not" : new Rule({
+			name : "Not",
+			type : "normal",
+			introduction : function(proof, step, part, steps) {
 				debug("not-i", step, part, steps);
 				var stepRange = steps ? steps[0].split("-") : null;
 				if (steps.length != 1 || stepRange.length != 2)
@@ -320,7 +416,7 @@ var foljsVerifier = (function() {
 					return "Not-Intro: Negation of assumption doesn't match current step.";
 				}
 			},
-			"elimination" : function(proof, step, part, steps) {
+			elimination : function(proof, step, part, steps) {
 				debug("not-e", step, part, steps);
 				if (part != null)
 					return "Not-Elim: Step part (e.g., 2 in 'and e2') not applicable, in this context.";
@@ -349,9 +445,11 @@ var foljsVerifier = (function() {
 				
 				return "Not-Elim: Subexpression in not-expr does not match other expr.";
 			}
-		},
-		"a." : {
-			"introduction" : function(proof, step, part, steps, newv) {
+		}),
+		"a." : new Rule({
+			name : "ForAll",
+			type : "normal",
+			introduction : function(proof, step, part, steps, newv) {
 				debug("all-x-i", step, part, steps);
 				if (part != null)
 					return "All-x-Intro: Step part (e.g., the 2 in 'and e2') not applicable, in this context.";
@@ -382,7 +480,7 @@ var foljsVerifier = (function() {
 					return true;
 				return "All-x-Intro: Last step in range doesn't match current step after " + scopeVars[0] + "/" + scopeVars[1] + ".";
 			},
-			"elimination" : function(proof, step, part, steps) {
+			elimination : function(proof, step, part, steps) {
 				debug("all-x-e", step, part, steps);
 				if (part != null)
 					return "All-x-Elim: Step part (e.g., the 2 in 'and e2') not applicable, in this context.";
@@ -414,9 +512,11 @@ var foljsVerifier = (function() {
 
 				return "All-x-Elim: Referenced step did not match current step under: " + checked.join(", ") + ".";
 			}
-		},
-		"e." : {
-			"introduction" : function(proof, step, part, steps, newv) {
+		}),
+		"e." : new Rule({
+			name : "Exists",
+			type : "normal",
+			introduction : function(proof, step, part, steps, newv) {
 				debug("exists-x-i", step, part, steps);
 				if (part != null)
 					return "Exists-x-Intro: Step part (e.g., the 2 in 'and e2') not applicable, in this context.";
@@ -448,7 +548,7 @@ var foljsVerifier = (function() {
 
 				return "Exists-x-Elim: Referenced step did not match current step under: " + checked.join(", ") + ".";
 			},
-			"elimination" : function(proof, step, part, steps) {
+			elimination : function(proof, step, part, steps) {
 				debug("exists-x-e", step, part, steps);
 				if (part != null)
 					return "Exists-x-Elim: Step part (e.g., the 2 in 'and e2') not applicable, in this context.";
@@ -487,9 +587,11 @@ var foljsVerifier = (function() {
 				}
 				return "Exists-x-Elim: assumption beginning step doesn't match ref step for " + scopeVars[0] + ".";
 			}
-		},	
-		"=" : {
-			"introduction" : function(proof, step, part, steps) {
+		}),	
+		"=" : new Rule({
+			name : "Equality",
+			type : "normal",
+			introduction : function(proof, step, part, steps) {
 				debug("=i", step, part, steps);
 				if (part != null)
 					return "Equality-Intro: Step part (e.g., the 2 in 'and e2') not applicable, in this context.";
@@ -506,7 +608,7 @@ var foljsVerifier = (function() {
 				
 				return "Equality-Intro: Left and right sides do not match.";
 			},
-			"elimination" : function(proof, step, part, steps) {
+			elimination : function(proof, step, part, steps) {
 				debug("=e", step, part, steps);
 				if (part != null)
 					return "Equality-Elim: Step part (e.g., the 2 in 'and e2') not applicable, in this context.";
@@ -530,7 +632,7 @@ var foljsVerifier = (function() {
 
 				return true;
 			}
-		},
+		}),
 	};
 
 	function substitute(startExpr, a, b, bound) {
