@@ -12,7 +12,8 @@
 	"path" : "0.4.9"
   },
   "devDependencies": {
-	  "jison": "0.4.x"
+	"jison": "0.4.x",
+        "nodeunit" : "latest"
   },
   "scripts" : {
     "test" : "echo Not implemented, yet, sorry."

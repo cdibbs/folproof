@@ -1,10 +1,11 @@
 // Used for rendering fol.js proofs to HTML. Requires JQuery.
-var foljsWeb = (function() {
+var folproofWeb = (function() {
 	var debugMode = false;
 	var obj = {};
 	// Top-level AST will be an array of rules and boxes. Render them to HTML. :-)
 	obj.render = function(ast) {
 		var dom = $("<div></div>");
+		if (!ast) return dom;
 		renderRules(dom, ast, 1);
 		return dom;
 	}

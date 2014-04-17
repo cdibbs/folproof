@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-var parser	= require('./foljs-parser.js').parser;
+var parser	= require('./folproof-parser.js').parser;
 var verifier = require('./verifier.js').foljsVerifier;
 var fs = require('fs');
 var path = require('path');

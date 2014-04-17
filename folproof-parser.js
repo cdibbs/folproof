@@ -71,7 +71,7 @@
     recoverable: (boolean: TRUE when the parser has a error recovery rule available for this particular error)
   }
 */
-var foljsParser = (function(){
+var folproofParser = (function(){
 var parser = {trace: function trace() { },
 yy: {},
 symbols_: {"error":2,"proof":3,"clause_list":4,"proof_option0":5,"ENDOFFILE":6,"box":7,"EOL":8,"BOX":9,"with":10,"DEBOX":11,"sentence":12,"box_option0":13,"WITH":14,"ID":15,"OF":16,"e_quant":17,"e_iff":18,"FORALL":19,"EXISTS":20,"e_imp":21,"IFF":22,"e_and":23,"IMPLIES":24,"e_or":25,"AND":26,"e_eq":27,"OR":28,"e_not":29,"EQUALS":30,"NOT":31,"atom":32,"term":33,"LPAREN":34,"RPAREN":35,"term_list":36,"COMMA":37,"infix_term":38,"JUSTIFICATION":39,"$accept":0,"$end":1},
@@ -765,9 +765,9 @@ return new Parser;
 
 
 if (typeof require !== 'undefined' && typeof exports !== 'undefined') {
-exports.parser = foljsParser;
-exports.Parser = foljsParser.Parser;
-exports.parse = function () { return foljsParser.parse.apply(foljsParser, arguments); };
+exports.parser = folproofParser;
+exports.Parser = folproofParser.Parser;
+exports.parse = function () { return folproofParser.parse.apply(folproofParser, arguments); };
 exports.main = function commonjsMain(args) {
     if (!args[1]) {
         console.log('Usage: '+args[0]+' FILE');

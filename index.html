@@ -4,17 +4,16 @@
 <link rel="stylesheet" href="http://getbootstrap.com/dist/css/bootstrap.min.css">
 <link rel="stylesheet" href="http://getbootstrap.com/assets/css/docs.min.css">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>
-<script type='text/javascript' src='foljs-parser.js'></script>
-<script type='text/javascript' src='foljs-web.js'></script>
-<script type='text/javascript' src='verifier.js'></script>
+<script type='text/javascript' src='folproof-parser.js'></script>
+<script type='text/javascript' src='folproof-web.js'></script>
+<script type='text/javascript' src='folproof-verifier.js'></script>
 <script type='text/javascript'>
 $(document).ready(function() {
 	$("#proof-input").keyup(function(v) {
 		var proof = $(this).val();
 		try {
-			var ast = foljsParser.parse(proof);
-			var result = foljsVerifier.verifyFromAST(ast);
-			console.log(result);
+			var ast = folproofParser.parse(proof);
+			var result = folproof.Verifier.verifyFromAST(ast);
 			$("#result").text(result.message);
 			if (!result.valid) {
 				$("#result").append("<p>Step: " + result.errorStep + ", Src Line: " + result.errorSrcLoc.first_line + "</p>");
@@ -27,13 +26,12 @@ $(document).ready(function() {
 			$("#result-box").css({ background: "", 'border-left' : "", color : "" });
 			//throw err;
 		}
-		var html = foljsWeb.render(ast);
+		var html = folproofWeb.render(ast);
 		$("#render-panel").empty().append(html);
 	});
 	$("#proof-input").keyup(); // force invocation on load
 	$("button.examples").click(function() {
 		var i = $(this).val();
-		console.log("example " + i);
 		var proof = $("#proof-input");
 		proof.val($("#example" + i).text().substr(1))
 		proof.keyup();
