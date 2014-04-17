@@ -12,6 +12,10 @@ exports["Test Justifier rejects unexpected params."] = function(test) {
 	test.equal(typeof msg, "string", "Should return error, when steps given, but unexpected.");
 	msg = j.checkParams(1, null, null, "a/x");
 	test.equal(typeof msg, "string", "Should return error, when substitution given, but unexpected.");
+	
+	j = new Justifier({ }, dummyFn);
+	msg = j.checkParams(1, null, null, null);
+	test.deepEqual(msg, [null, [], null], "Omitted options should be treated like null expectations.");
 	test.done();
 };
 

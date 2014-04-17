@@ -1,9 +1,11 @@
+var u = require("./util");
+
 var Justifier = function Justifier(format, fn) {
 	// format = { hasPart : (true/false), stepRefs : ("num" | "range")*, subst : (true/false) };
 	var self = this;
 
 	this.exec = function(proof, step, part, steps, subst) {
-		debug(step, part, steps, subst);
+		u.debug(step, part, steps, subst);
 		var checked = self.checkParams(step, part, steps, subst);
 		if (typeof checked === "string") return checked;
 		return fn(proof, step, checked[0], checked[1], checked[2]);
@@ -57,7 +59,7 @@ var Justifier = function Justifier(format, fn) {
 		}
 		
 		if (format.subst) {
-			if (subst == null)
+			if (!subst || !subst.trim())
 				return "Substitution specification required: id/id.";
 			w = subst.match("([A-Za-z_][A-Za-z_0-9]*)/([A-Za-z_][A-Za-z_0-9]*)");
 			if (!w || w.length != 3)
@@ -65,7 +67,7 @@ var Justifier = function Justifier(format, fn) {
 
 			w = [w[1], w[2]];
 		} else {
-			if (subst != null)
+			if (subst && subst.trim())
 				return "Substitution unexpected.";
 		}
 
