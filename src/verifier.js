@@ -14,7 +14,7 @@ var Verifier = (function() {
 	obj.verify = function(proof) {
 		var result = { message : "Proof is valid.", valid : true };
 		for (var i=0; i<proof.steps.length; i++) {
-			validateStatement(result, proof, i);
+			obj.validateStatement(result, proof, i);
 			if (! result.valid) {
 				break;
 			}
@@ -22,13 +22,13 @@ var Verifier = (function() {
 		return result;
 	};
 
-	var validateStatement = function validateStatement(result, proof, step) {
+	obj.validateStatement = function validateStatement(result, proof, step) {
 		var stmt = proof.steps[step];
 		var why = stmt.getJustification();
 		var newv = null;
 		if (why[0].split('.').length == 2)
 			newv = why[0].split('.')[1];
-		var validator = lookupValidator(why);
+		var validator = obj.lookupValidator(why);
 		if (typeof validator === 'function') {
 			var part = why[2], lines = why[3];
 			var isValid = validator(proof, step, part, lines, newv);
@@ -50,7 +50,7 @@ var Verifier = (function() {
 		result.valid = false;
 	};
 
-	function lookupValidator(why) {
+	obj.lookupValidator = function lookupValidator(why) {
 		var name = why[0].toLowerCase();
 		if (name.split('.').length == 2)
 			name = name.split('.')[0] + ".";
@@ -79,41 +79,38 @@ var Verifier = (function() {
 		return "Unrecognized rule: " + why[0] + " " + (why[1] ? why[1] : "")  + (why[2] ? why[2] : "") + " " + (why[3] ? why[3] : "");
 	}
 
-	function preprocess(ast) {
+	obj.preprocess = function preprocess(ast) {
 		var proof = { steps : [] };
-		preprocessBox(proof, ast, 0, []);
+		obj.preprocessBox(proof, ast, 0, []);
 		return proof;
 	}
 
-	function preprocessBox(proof, ast, step, scope) {
+	obj.preprocessBox = function preprocessBox(proof, ast, step, scope) {
 		for(var i=0; i<ast.length; i++) {
 			if (ast[i][0] === 'rule') {
-				proof.steps[step] = new Statement(ast[i][1], ast[i][2], scope, ast[i][3]);
+				proof.steps[step] = new Statement(ast[i][1], ast[i][2], scope, ast[i][3], i == 0, i == ast.length - 1);
 				step = step + 1;
 			} else if (ast[i][0] === 'folbox') {
 				var newScope = scope.slice(0)
 				newScope.push([ast[i][2][1], ast[i][2][2]]);
-				step = preprocessBox(proof, ast[i][1], step, newScope);
+				step = obj.preprocessBox(proof, ast[i][1], step, newScope);
 			} else if (ast[i][0] === 'box') {
-				step = preprocessBox(proof, ast[i][1], step, scope);
+				var newScope = scope.slice(0)
+				newScope.push(null, null);
+				step = obj.preprocessBox(proof, ast[i][1], step, newScope);
 			}
 		}
 		return step;
 	}
 
-	var Statement = function(sentenceAST, justificationAST, scope, loc) {
-		this.getSentence = function getSentence() {
-			return sentenceAST;
-		};
-		this.getScope = function getScope() {
-			return scope;
-		}
-		this.getJustification = function getJustification() {
-			return justificationAST;
-		};
+	var Statement = function(sentenceAST, justificationAST, scope, loc, isFirst, isLast) {
+		this.isFirstStmt = function() { return isFirst; };
+		this.isLastStmt = function() { return isLast; };
+		this.getSentence = function getSentence() { return sentenceAST;	};
+		this.getScope = function getScope() { return scope; }
+		this.getJustification = function getJustification() { return justificationAST; };
 		this.getMeta = function() { return loc; }
 	};
-
 	
 	return obj;
 })();

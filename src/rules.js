@@ -11,7 +11,11 @@ var rules = {
 	"assumption" : new Rule({
 		name : "Assumption",
 		type : "simple",
-		verifier : new Justifier(null, function(proof, step) { return true; })
+		verifier : new Justifier(null, function(proof, step) {
+				if (proof.steps[step].isFirstStmt())
+					return true;
+				return "Assumptions can only be made at the start of an assumption box.";
+			})
 		}),
 	"pbc" : new Rule({
 		name : "PBC",
@@ -164,7 +168,7 @@ var rules = {
 		introduction : new Justifier(
 			{ stepRefs: ["range"] },
 			function(proof, step, part, steps) {
-				var assumptionExpr = proof.steps[steps[0][1]].getSentence();
+				var assumptionExpr = proof.steps[steps[0][0]].getSentence();
 				var contraExpr = proof.steps[steps[0][1]].getSentence();
 				if (! isContradiction(contraExpr)) {
 					return "Not-Intro: Final step in range must be a contradiction.";
@@ -181,7 +185,7 @@ var rules = {
 				}
 			}),
 		elimination : new Justifier(
-			{ hasPart: true, stepRefs: ["num", "num"] },
+			{ stepRefs: ["num", "num"] },
 			function(proof, step, part, steps) {
 				var s = proof.steps[step].getSentence();
 				if (! isContradiction(s))

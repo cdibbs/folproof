@@ -7,5 +7,5 @@ folproof:
 	./node_modules/.bin/browserify --standalone folproof src/verifier.js > folproof-verifier.js
 
 test:
-	./node_modules/nodeunit/bin/nodeunit tests/*
+	./node_modules/nodeunit/bin/nodeunit tests/*.js
 
