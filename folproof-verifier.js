@@ -267,7 +267,6 @@ var rules = {
 			{ stepRefs: ["range"] },
 			function(proof, step, part, steps) {
 				var assumptionExpr = proof.steps[steps[0][0]].getSentence();
-				console.log(assumptionExpr, steps[0][1]);
 				var contraExpr = proof.steps[steps[0][1]].getSentence();
 				if (! isContradiction(contraExpr)) {
 					return "Not-Intro: Final step in range must be a contradiction.";

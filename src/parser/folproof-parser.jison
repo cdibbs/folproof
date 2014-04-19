@@ -14,6 +14,8 @@ clause_list
 	{ $$ = [$box]; }
 	| clause_list EOL box
 	{ $$ = $clause_list; $$.push($box); }
+	| 
+	{ $$ = []; }
 	;
 
 box

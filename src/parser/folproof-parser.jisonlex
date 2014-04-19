@@ -52,41 +52,7 @@ justify				":".*
 ")"				return 'RPAREN';
 {id}				return 'ID';
 ","				return 'COMMA';
-"|"*"-"+			%{ /* manually close an assumption box */
-				this._log("MANUAL DEBOX");
-				var expectedNewIndent = this._iemitstack.length - 1;
-				var actualNewIndent = (yytext.match(/\|/g)||[]).length;
-				if (actualNewIndent > 0 && expectedNewIndent != actualNewIndent) {
-					this._log("Indentation " + actualNewIndent + ", expected: " + expectedNewIndent);
-					throw new Error("End assumption indentation mismatch");
-				}
-				this._iemitstack.shift();
-				return 'DEBOX';
-				%}
-"|"+				%{
-				/* Similar to the idea of semantic whitespace, we keep track of virtual
-				 * BOX/DEBOX characters based on a stack of | occurrences
-				 */
-				    var indentation = yytext.length;
-				    if (indentation > this._iemitstack[0]) {
-					this._iemitstack.unshift(indentation);
-					this._log(this.topState(), "BOX", this.stateStackSize());
-					this.myBegin(this.topState(), 'deepening, due to indent'); // deepen our current state
-					return 'BOX';
-				    }
-
-				    var tokens = [];
-
-				    while (indentation < this._iemitstack[0]) {
-					this.myPopState();
-					this._log(this.topState(), "DEBOX", this.stateStackSize());
-					tokens.push("DEBOX");
-					this._iemitstack.shift();
-				    }
-				    if (tokens.length) return tokens;
-
-				%}
-<<EOF>>				%{
+[\n\r]*<<EOF>>		%{
 				// remaining DEBOXes implied by EOF
 				var tokens = [];
 
@@ -97,8 +63,36 @@ justify				":".*
 				tokens.unshift("ENDOFFILE");
 				if (tokens.length) return tokens;
 				%}
+\n{spc}*"-"+			%{ /* manually close an assumption box */
+				this._log("MANUAL DEBOX");
+				this._iemitstack.shift();
+				return ['DEBOX', 'EOL'];
+				%}
+\n{spc}*\d*{spc}*"|"*		%{
+				/* Similar to the idea of semantic whitespace, we keep track of virtual
+				 * BOX/DEBOX characters based on a stack of | occurrences
+				 */
+				    var indentation = (yytext.match(/\|/g)||[]).length;
+				    if (indentation > this._iemitstack[0]) {
+					this._iemitstack.unshift(indentation);
+					this._log(this.topState(), "BOX", this.stateStackSize());
+					this.myBegin(this.topState(), 'deepening, due to indent'); // deepen our current state
+					return ['BOX', 'EOL'];
+				    }
+
+				    var tokens = ["EOL"];
+				    while (indentation < this._iemitstack[0]) {
+					this.myPopState();
+					this._log(this.topState(), "DEBOX", this.stateStackSize());
+					tokens.push("DEBOX");
+					this._iemitstack.shift();
+				    }
+				    if (tokens[tokens.length-1] === "DEBOX")
+					    tokens.push("EOL");
+				    return tokens;
+				%}
 [\n\r]+{spc}*/![^\n\r]		/* eat blank lines */
-\n				return 'EOL';
+\n				return 'EOL'; 
 {spc}+				/* ignore whitespace */
 
 %%
