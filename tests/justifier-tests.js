@@ -62,13 +62,13 @@ exports["Test justifier rejects parts != 1 or 2"] = function(test) {
 	test.done();
 };
 
-exports["Test justifier accepts proper format when expected"] = function(test) {
+exports["Test justifier accepts proper substitution format when expected"] = function(test) {
 	var j = new Justifier({ hasPart : false, stepRefs : null, subst : true }, dummyFn);
 	var msg = j.checkParams(1, null, null, null);	
 	test.equal(typeof msg, "string", "Should return error, when substitution expected, but not provided.");
-	var msg = j.checkParams(1, null, null, "1psi/2gamma");	
+	var msg = j.checkParams(1, null, null, ["2gamma", "0x"]);	
 	test.equal(typeof msg, "string", "Should return error, when substitution ids not valid ids.");
-	msg = j.checkParams(1, null, null, "psi/gamma");
-	test.deepEqual(msg, [null, [], ["psi", "gamma"]]);
+	msg = j.checkParams(1, null, null, ["gamma2", "x0"]);
+	test.deepEqual(msg, [null, [], ["gamma2", "x0"]]);
 	test.done();
 };

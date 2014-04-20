@@ -28,8 +28,8 @@ box
 	;
 
 with
-	: WITH ID OF ID
-	{ $$ = ['with', $2, $4]; }
+	: WITH ID
+	{ $$ = ['with', $2]; }
 	;
 
 sentence
@@ -45,36 +45,36 @@ e_quant
 	;
 
 e_iff
-	: e_imp IFF e_iff
-	{ $$ = ['iff', $e_imp, $e_iff]; }
+	: e_iff IFF e_imp
+	{ $$ = ['iff', $e_iff, $e_imp]; }
 	| e_imp
 	{ $$ = $1; }
 	;
 
 e_imp
-	: e_and IMPLIES e_imp
-	{ $$ = ['->', $e_and, $e_imp]; }
-	| e_and
-	{ $$ = $1; }
-	;
-
-e_and
-	: e_or AND e_and
-	{ $$ = ['and', $e_or, $e_and]; }
+	: e_imp IMPLIES e_or
+	{ $$ = ['->', $e_imp, $e_or]; }
 	| e_or
 	{ $$ = $1; }
 	;
 
 e_or
-	: e_eq OR e_or
-	{ $$ = ['or', $e_eq, $e_or]; }
+	: e_or OR e_and
+	{ $$ = ['or', $e_or, $e_and]; }
+	| e_and
+	{ $$ = $1; }
+	;
+
+e_and
+	: e_and AND e_eq
+	{ $$ = ['and', $e_and, $e_eq]; }
 	| e_eq
 	{ $$ = $1; }
 	;
 
 e_eq
-	: e_not EQUALS e_eq
-	{ $$ = ['=', $e_not, $e_eq]; }
+	: e_eq EQUALS e_not
+	{ $$ = ['=', $e_eq, $e_not]; }
 	| e_not
 	{ $$ = $1; }
 	;

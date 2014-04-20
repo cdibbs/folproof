@@ -59,15 +59,16 @@ var Justifier = function Justifier(format, fn) {
 		}
 		
 		if (format.subst) {
-			if (!subst || !subst.trim())
-				return "Substitution specification required: id/id.";
-			w = subst.match("([A-Za-z_][A-Za-z_0-9]*)/([A-Za-z_][A-Za-z_0-9]*)");
-			if (!w || w.length != 3)
-				return "Substitution format must match: id1/id2.";
+			if (!subst)
+				return "Substitution specification required (e.g., A.x/x0 intro n-m)";
+			w = subst.map(function(e) { return e.match("^[A-Za-z_][A-Za-z_0-9]*$"); });
+			var allValidIds = w.reduce(function(a, e) { return a && e && e.length == 1 && e[0] });
+			if (w.length != 2 || !allValidIds)
+				return "Substitution format must match (e.g., A.x/x0 intro n-m.)";
 
-			w = [w[1], w[2]];
+			w = w.map(function(e) { return e[0] });
 		} else {
-			if (subst && subst.trim())
+			if (subst)
 				return "Substitution unexpected.";
 		}
 

@@ -31,7 +31,9 @@ var Verifier = (function() {
 		var validator = obj.lookupValidator(why);
 		if (typeof validator === 'function') {
 			var part = why[2], lines = why[3];
-			var isValid = validator(proof, step, part, lines, newv);
+			var subst = null;
+			if (newv && why[4]) subst = [newv, why[4]];
+			var isValid = validator(proof, step, part, lines, subst);
 			if (isValid === true) {
 				result.valid = true;
 			} else {
@@ -92,11 +94,11 @@ var Verifier = (function() {
 				step = step + 1;
 			} else if (ast[i][0] === 'folbox') {
 				var newScope = scope.slice(0)
-				newScope.push([ast[i][2][1], ast[i][2][2]]);
+				newScope.push(ast[i][2][1]);
 				step = obj.preprocessBox(proof, ast[i][1], step, newScope);
 			} else if (ast[i][0] === 'box') {
 				var newScope = scope.slice(0)
-				newScope.push(null, null);
+				newScope.push(null);
 				step = obj.preprocessBox(proof, ast[i][1], step, newScope);
 			}
 		}

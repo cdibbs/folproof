@@ -60,15 +60,16 @@ var Justifier = function Justifier(format, fn) {
 		}
 		
 		if (format.subst) {
-			if (!subst || !subst.trim())
-				return "Substitution specification required: id/id.";
-			w = subst.match("([A-Za-z_][A-Za-z_0-9]*)/([A-Za-z_][A-Za-z_0-9]*)");
-			if (!w || w.length != 3)
-				return "Substitution format must match: id1/id2.";
+			if (!subst)
+				return "Substitution specification required (e.g., A.x/x0 intro n-m)";
+			w = subst.map(function(e) { return e.match("^[A-Za-z_][A-Za-z_0-9]*$"); });
+			var allValidIds = w.reduce(function(a, e) { return a && e && e.length == 1 && e[0] });
+			if (w.length != 2 || !allValidIds)
+				return "Substitution format must match (e.g., A.x/x0 intro n-m.)";
 
-			w = [w[1], w[2]];
+			w = w.map(function(e) { return e[0] });
 		} else {
-			if (subst && subst.trim())
+			if (subst)
 				return "Substitution unexpected.";
 		}
 
@@ -309,8 +310,8 @@ var rules = {
 		name : "ForAll",
 		type : "normal",
 		introduction : new Justifier(
-			{ stepRefs : ["range"] },
-			function(proof, step, part, steps, newv) {
+			{ stepRefs : ["range"], subst : true },
+			function(proof, step, part, steps, subst) {
 				var currStep = proof.steps[step];
 				var currExpr = currStep.getSentence();
 				var startStep = proof.steps[steps[0][0]];
@@ -323,15 +324,19 @@ var rules = {
 					return "All-x-Intro: Not valid without a scoping assumption (e.g., an x0 box).";
 			
 				// check if any substitutions from our scope match refExpr
-				var scopeVars = scope[scope.length-1];
-				var endExprSub = substitute(endExpr, scopeVars[0], newv);
+				var scopeVar = scope[scope.length-1];
+				var found = scope.slice().reverse().reduce(function(a,e) { return a && (e == null || e == subst[1]); }, true);
+				if (! found)
+					return "All-x-intro: Substitution " + subst[1] + " doesn't match scope: " + scope.filter(function(e) { if (e != null) return e; }).join(", ");
+
+				var endExprSub = substitute(endExpr, subst[1], subst[0]);
 				if (semanticEq(endExprSub, currExpr[2]))
 					return true;
-				return "All-x-Intro: Last step in range doesn't match current step after " + scopeVars[0] + "/" + scopeVars[1] + ".";
+				return "All-x-Intro: Last step in range doesn't match current step after " + subst[0] + "/" + subst[1] + ".";
 			}),
 		elimination : new Justifier(
-			{ stepRefs : ["num"] },
-			function(proof, step, part, steps) {
+			{ stepRefs : ["num"], subst: true },
+			function(proof, step, part, steps, subst) {
 				var currStep = proof.steps[step];
 				var currExpr = currStep.getSentence();
 				var scope = currStep.getScope(); // ex: [['x0','x'], ['y0', 'y'], ...], LIFO
@@ -342,24 +347,23 @@ var rules = {
 					return "All-x-Elim: Not valid outside an assumption scope (e.g., an x0 box).";
 		
 				// check if any substitutions from our scope match refExpr
-				var checked = [];
-				for (var i=scope.length-1; i>=0; i--) {
-					checked.push(scope[i][0]);
-					var refExprSub = substitute(refExpr[2], scope[i][1], scope[i][0]);
+				if (! arrayContains(scope, subst[1]))
+					return "All-x-Elim: Substition " + subst[1] + "/" + subst[0] + " does not exist in any outer scope.";
+
+					var refExprSub = substitute(refExpr[2], subst[0], subst[1]);
 					if (semanticEq(refExprSub, currExpr))
 						return true;
-				}
 
-				return "All-x-Elim: Referenced step did not match current step under: " + checked.join(", ") + ".";
+				return "All-x-Elim: Referenced step did not match current step after " + scopeVars[1] + "/" + scopeVars[0] + ".";
 			})
 	}),
 	"e." : new Rule({
 		name : "Exists",
 		type : "normal",
 		introduction : new Justifier(
-			{ stepRefs: ["num"] },
-			function(proof, step, part, steps, newv) {
-				var currStep = proof.steps[steps[0]];
+			{ stepRefs: ["num"], subst: true },
+			function(proof, step, part, steps, subst) {
+				var currStep = proof.steps[step];
 				var currExpr = currStep.getSentence();
 				var scope = currStep.getScope(); // ex: [['x0','x'], ['y0', 'y'], ...], LIFO
 				var refExpr = proof.steps[steps[0]].getSentence();
@@ -369,19 +373,18 @@ var rules = {
 					return "Exists-x-Intro: Not valid outside an assumption scope (e.g., an x0 box).";
 		
 				// check if any substitutions from our scope match refExpr
-				var checked = [];
-				for (var i=scope.length-1; i>=0; i--) {
-					checked.push(scope[i][0]);
-					var refExprSub = substitute(refExpr, scope[i][0], scope[i][1]);
-					if (semanticEq(refExprSub, currExpr[2]))
+				if (! arrayContains(scope, subst[1]))
+					return "Exists-x-Intro: Substition " + subst[1] + "/" + subst[0] + " does not exist in any outer scope.";
+
+				var refExprSub = substitute(refExpr, subst[1], subst[0]);
+				if (semanticEq(refExprSub, currExpr[2]))
 					return true;
-				}
 	
-				return "Exists-x-Elim: Referenced step did not match current step under: " + checked.join(", ") + ".";
+				return "Exists-x-Intro: Referenced step did not match current step after " + subst[1] + "/" + subst[0] + " substitution.";
 			}),
 		elimination : new Justifier(
-			{ stepRefs: ["num", "range"] },
-			function(proof, step, part, steps) {
+			{ stepRefs: ["num", "range"], subst: true },
+			function(proof, step, part, steps, subst) {
 				var currStep = proof.steps[step];
 				var currExpr = currStep.getSentence();
 				var refExpr = proof.steps[steps[0]].getSentence();
@@ -394,9 +397,9 @@ var rules = {
 				if (scope.length == 0)
 					return "Exists-x-Elim: Not valid outside an assumption scope (e.g., an x0 box).";
 		
-				// check if any substitutions from our scope match refExpr
+				// check whether substition matches ref line with current line
 				var scopeVars = scope[scope.length-1];
-				var refExprSub = substitute(refExpr[2], scopeVars[1], scopeVars[0]);
+				var refExprSub = substitute(refExpr[2], subst[0], subst[1]);
 				if (semanticEq(refExprSub, startExpr)) {
 					if (semanticEq(endExpr, currExpr))
 						return true;
@@ -640,7 +643,9 @@ var Verifier = (function() {
 		var validator = obj.lookupValidator(why);
 		if (typeof validator === 'function') {
 			var part = why[2], lines = why[3];
-			var isValid = validator(proof, step, part, lines, newv);
+			var subst = null;
+			if (newv && why[4]) subst = [newv, why[4]];
+			var isValid = validator(proof, step, part, lines, subst);
 			if (isValid === true) {
 				result.valid = true;
 			} else {
@@ -701,11 +706,11 @@ var Verifier = (function() {
 				step = step + 1;
 			} else if (ast[i][0] === 'folbox') {
 				var newScope = scope.slice(0)
-				newScope.push([ast[i][2][1], ast[i][2][2]]);
+				newScope.push(ast[i][2][1]);
 				step = obj.preprocessBox(proof, ast[i][1], step, newScope);
 			} else if (ast[i][0] === 'box') {
 				var newScope = scope.slice(0)
-				newScope.push(null, null);
+				newScope.push(null);
 				step = obj.preprocessBox(proof, ast[i][1], step, newScope);
 			}
 		}

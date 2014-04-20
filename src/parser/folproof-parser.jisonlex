@@ -41,7 +41,15 @@ justify				":".*
 						side = parts[2];
 					}
 				}
-				yytext = [name, rtype, side, lineranges];
+				var sub = name.split('/');
+				if (sub.length == 2) {
+					name = sub[0];
+					sub = sub[1];
+				} else {
+					sub = null;
+				}
+				yytext = [name, rtype, side, lineranges, sub];
+				console.log(yytext);
 				return 'JUSTIFICATION';
 				%};
 "E."				return 'EXISTS';
