@@ -33,15 +33,7 @@ with
 	;
 
 sentence
-	: e_quant
-	| e_iff
-	;
-
-e_quant
-	: FORALL ID sentence
-	{ $$ = ['forall', $ID, $sentence]; }
-	| EXISTS ID sentence
-	{ $$ = ['exists', $ID, $sentence]; }
+	: e_iff
 	;
 
 e_iff
@@ -52,10 +44,24 @@ e_iff
 	;
 
 e_imp
-	: e_imp IMPLIES e_or
-	{ $$ = ['->', $e_imp, $e_or]; }
-	| e_or
+	: e_imp IMPLIES e_exists
+	{ $$ = ['->', $e_imp, $e_exists]; }
+	| e_exists
 	{ $$ = $1; }
+	;
+
+e_exists
+	: EXISTS ID e_forall
+	{ $$ = ['exists', $ID, $e_forall]; }
+	| e_forall
+	{ $$ = $1; }
+	;
+
+e_forall
+	: FORALL ID e_or
+	{ $$ = ['forall', $ID, $e_or]; }
+	| e_or
+	{ $$ = $e_or; }
 	;
 
 e_or
@@ -90,7 +96,7 @@ atom
 	: term
 	{ $$ = $term; }
 	| LPAREN sentence RPAREN
-	{ $$ = ['paren', $sentence]; }
+	{ $$ = $sentence; }
 	;
 
 term_list
@@ -99,12 +105,6 @@ term_list
 	| term COMMA term_list
 	{ $$ = $term_list; $$.unshift($term); }
 	;
-
-infix_term
-	: term EQUALS term
-	{ $$ = ['id', '=', [$term, $term]]; }
-	| term
-	{ $$ = $term; };
 
 term
 	: ID LPAREN term_list RPAREN

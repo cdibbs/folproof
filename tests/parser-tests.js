@@ -60,3 +60,25 @@ exports["And precedes or."] = function(test) {
 	test.equal(result[2][2][1], 'c');
 	test.done();
 };
+
+exports["Exists binds stronger than implication."] = function(test) {
+	var src = "E.x x -> y";
+	var result = parser.parse(src);
+	result = result[0][1];
+	test.equal(result[0], '->');
+	test.equal(result[1][0], 'exists');
+	test.equal(result[1][2][1], 'x');
+	test.equal(result[2][1], 'y');
+	test.done();
+};
+
+exports["Forall binds stronger than implication."] = function(test) {
+	var src = "A.x x -> y";
+	var result = parser.parse(src);
+	result = result[0][1];
+	test.equal(result[0], '->');
+	test.equal(result[1][0], 'forall');
+	test.equal(result[1][2][1], 'x');
+	test.equal(result[2][1], 'y');
+	test.done();
+};

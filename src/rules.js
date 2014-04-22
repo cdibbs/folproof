@@ -39,6 +39,37 @@ var rules = {
 			return "PBC: Negation of assumption doesn't match current step.";
 		})
 		}),
+	"contra" : new Rule({
+			name : "Contradiction",
+			type : "normal",
+			elimination : new Justifier(
+				{ hasPart : false, stepRefs : ["num"], subst : false },
+				function(proof, step, part, steps) {
+					var refStep = proof.steps[steps[0]].getSentence();
+					if (refStep[0] != 'id' || (refStep[1] != 'contradiction' && refStep[1] != '_|_'))
+						return "Contra-elim: Referenced step is not a contradiction.";
+
+					return true;
+				})
+		}),
+	"notnot" : new Rule({
+			name : "Double-negation",
+			type : "normal",
+			elimination : new Justifier(
+				{ hasPart : false, stepRefs : ["num"], subst : false },
+				function(proof, step, part, steps) {
+					var curStep = proof.steps[step].getSentence();
+					var refStep = proof.steps[steps[0]].getSentence();
+					console.log(curStep, refStep);
+					if (refStep[0] !== 'not' || refStep[1][0] !== 'not')
+						return "Notnot-elim: Referenced step is not a double-negation.";
+					
+					if (!semanticEq(refStep[1][1], curStep))
+						return "Notnot-elim: Does not result in current step.";
+
+					return true;
+				})
+		}),
 	"->" : new Rule({
 		name : "Implication",
 		type : "normal",
