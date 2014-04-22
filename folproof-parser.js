@@ -132,7 +132,7 @@ case 25: this.$ = $$[$0];
 break;
 case 26: this.$ = $$[$0]; 
 break;
-case 27: this.$ = $$[$0-1]; 
+case 27: this.$ = $$[$0-1]; this.$.userParens = true; 
 break;
 case 28: this.$ = [$$[$0]]; 
 break;

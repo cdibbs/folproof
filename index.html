@@ -10,8 +10,11 @@
 <script type='text/javascript'>
 $(document).ready(function() {
 	var debugMode = true;
+	$("#parentheses").bind("click change", function() { $("#proof-input").keyup(); });
 	$("#proof-input").keyup(function(v) {
 		var proof = $(this).val();
+		var paren = $("#parentheses").val();
+		console.log(paren);
 		try {
 			var ast = folproofParser.parse(proof);
 			var result = folproof.Verifier.verifyFromAST(ast);
@@ -27,7 +30,7 @@ $(document).ready(function() {
 			$("#result-box").css({ background: "", 'border-left' : "", color : "" });
 			//throw err;
 		}
-		var html = folproofWeb.render(ast);
+		var html = folproofWeb.render(ast, { parentheses : paren });
 		$("#render-panel").empty().append(html);
 	});
 	$("#proof-input").keyup(); // force invocation on load
@@ -95,7 +98,19 @@ $(document).ready(function() {
 				</textarea>
 			</div>
 			<div id='rightcol' class='col-md-6'>
+			</div>
+			<div id='rightcol' class='col-md-6'>
 				<div id='render-panel' class='highlight'>
+				</div>
+				<div id='options'>
+					<label>
+						Parentheses:
+						<select id='parentheses'>
+							<option value='minimal'>Minimal (order-of-ops overrides)</option>
+							<option value='user' selected='selected'>User-defined</option>
+							<option value='explicit'>Explicit order-of-ops</option>
+						</select>
+					</label>
 				</div>
 				<div id='result-box' class='bs-callout bs-callout-warning'>
 					<h4>Result:</h4>

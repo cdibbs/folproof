@@ -96,7 +96,7 @@ atom
 	: term
 	{ $$ = $term; }
 	| LPAREN sentence RPAREN
-	{ $$ = $sentence; }
+	{ $$ = $sentence; $$.userParens = true; }
 	;
 
 term_list

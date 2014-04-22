@@ -2,49 +2,56 @@
 var folproofWeb = (function() {
 	var debugMode = false;
 	var obj = {};
+	var defaultOpts = {
+		parentheses : "user"
+	};
+
 	// Top-level AST will be an array of rules and boxes. Render them to HTML. :-)
-	obj.render = function(ast) {
+	obj.render = function(ast, opts) {
+		var options = $.extend({}, defaultOpts, opts);
 		var dom = $("<div></div>");
 		if (!ast) return dom;
-		renderRules(dom, ast, 1);
+		renderRules(dom, ast, 1, options);
 		return dom;
 	}
 
-	function renderRules(dom, ast, line) {
+	function renderRules(dom, ast, line, options) {
 		for (var i=0; i<ast.length; i++) {
 			debug(ast[i]);
 			if (ast[i][0] === 'rule') {
-				line = renderRule(dom, ast[i], line);
+				line = renderRule(dom, ast[i], line, options);
 			} else if (ast[i][0] === 'box') {
-				line = renderSimpleBox(dom, ast[i], line);
+				line = renderSimpleBox(dom, ast[i], line, options);
 			} else if (ast[i][0] === 'folbox') {
-				line = renderFOLBox(dom, ast[i], line);
+				line = renderFOLBox(dom, ast[i], line, options);
 			}
 		}
 		return line;
 	};
 
-	function renderRule(dom, ast, line) {
+	function renderRule(dom, ast, line, options) {
 		var nest = $("<div class='rule'></div>");
 		nest.append("<span class='lineno'>" + line + "</span>");
-		nest.append(renderClause(ast[1]));
-		nest.append(renderJustification(ast[2]));
+		nest.append(renderClause(ast[1], options));
+		nest.append(renderJustification(ast[2], options));
 		dom.append(nest);
 		return line + 1;
 	}
 
-	function renderClause(ast) {
-		var c, l, r, op;
+	function renderClause(ast, options) {
+		var c, l, r, op, reqParens = requireParens(ast, options);
 
 		switch(ast[0]) {
 			case "forall": op = "&forall;"; break;
 			case "exists": op = "&exist;";
 		}
 		if (op) {
-			t = renderTerm(ast[1]);
-			c = renderClause(ast[2]);
+			t = renderTerm(ast[1], options);
+			c = renderClause(ast[2], options);
 			t.prepend(op);
-			t.append("(", c, ")");
+			if (reqParens) t.append("(");
+			t.append(c);
+			if (reqParens) t.append(")");
 			return t;
 		}
 		switch(ast[0]) {
@@ -56,36 +63,44 @@ var folproofWeb = (function() {
 		}
 		if (op) {
 			debug(ast[1], ast[2]);
-			l = renderClause(ast[1]);
-			r = renderClause(ast[2]);
+			l = renderClause(ast[1], options);
+			r = renderClause(ast[2], options);
 			l.append(" ", op, " ").append(r);
+			if (reqParens)
+				l.prepend("(").append(")");
 			return l;
 		}
-		if (ast[0] === "paren") {
-			c = renderClause(ast[1]);
-			c.prepend("(").append(")");
-			return c;
-		} else if (ast[0] === "id") {
-			return renderTerm(ast);
+		
+		if (ast[0] === "id") {
+			return renderTerm(ast, options);
 		} else if (ast[0] === "not") {
-			l = renderClause(ast[1]);
+			l = renderClause(ast[1], options);
 			l.prepend("&not;");
+			if (reqParens)
+				l.prepend("(").append(")");
 			return l;
 		}
 		return renderTerm(ast);
 	}
 
+	function requireParens(ast, options) {
+		if (options.parentheses === "user") {
+			return ast.userParens;
+		}
+		return true;
+	}
+
 	var infixTerms = ['='];
-	function renderTerm(ast) {
+	function renderTerm(ast, options) {
 		if (ast instanceof Array) {
 			if (ast.length === 2) {
-				return $("<span></span>").append(renderSimpleTerm(ast[1]));
+				return $("<span></span>").append(renderSimpleTerm(ast[1], options));
 			} else if (ast.length >= 3) {
 				var term = $("<span class='term parameterized'></span>");
 				if ($.inArray(ast[1], infixTerms) == -1) {
-					term.append(renderSimpleTerm(ast[1]), "(");
+					term.append(renderSimpleTerm(ast[1], options), "(");
 					for (var i=0; i<ast[2].length; i++) {
-						term.append(renderSimpleTerm(ast[2][i][1]));
+						term.append(renderSimpleTerm(ast[2][i][1], options));
 						if (i < ast[2].length-1) term.append(", ");
 					}
 					term.append(")");
@@ -95,11 +110,11 @@ var folproofWeb = (function() {
 				return term;
 			}
 		} else {
-			return renderSimpleTerm(ast);
+			return renderSimpleTerm(ast, options);
 		}
 	}
 
-	function renderSimpleTerm(t) {
+	function renderSimpleTerm(t, options) {
 		var symbols = "alpha beta gamma delta epsilon zeta eta theta iota kappa lambda mu nu xi omicron pi rho sigma tau upsilon phi chi psi omega".split(" ");
 		var others = {
 			"_|_" : "&perp;", "contradiction" : "&perp;"
@@ -120,7 +135,7 @@ var folproofWeb = (function() {
 		}
 	}
 	
-	function renderJustification(ast) {
+	function renderJustification(ast, options) {
 		var nest = $("<div class='justification'></div>");
 		nest.append(ast[0], " ", ast[1]);
 		if (ast[2]) nest.append(ast[2]);
@@ -129,9 +144,9 @@ var folproofWeb = (function() {
 		return nest;
 	}
 
-	function renderSimpleBox(dom, ast, line) {
+	function renderSimpleBox(dom, ast, line, options) {
 		var nest = $("<div class='simple-box'></div>");
-		var lines = renderRules(nest, ast[1], line);
+		var lines = renderRules(nest, ast[1], line, options);
 		dom.append(nest);
 		return lines;
 	}
@@ -140,7 +155,7 @@ var folproofWeb = (function() {
 		var nest = $("<div class='FOL-box'></div>");
 		debug(ast);
 		nest.append(renderSimpleTerm(ast[2][1]));
-		var line = renderRules(nest, ast[1], line);
+		var line = renderRules(nest, ast[1], line, options);
 		dom.append(nest);
 		return line;
 	}
