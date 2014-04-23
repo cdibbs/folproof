@@ -16,7 +16,7 @@
         "nodeunit" : "latest"
   },
   "scripts" : {
-    "test" : "echo Not implemented, yet, sorry."
+    "test" : "make test"
   },
   "repository": "",
   "keywords": [
