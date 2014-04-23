@@ -39,7 +39,7 @@ var folproofWeb = (function() {
 	}
 
 	function renderClause(ast, options) {
-		var c, l, r, op, reqParens = requireParens(ast, options);
+		var c, l, r, op, reqParens;
 
 		switch(ast[0]) {
 			case "forall": op = "&forall;"; break;
@@ -49,9 +49,10 @@ var folproofWeb = (function() {
 			t = renderTerm(ast[1], options);
 			c = renderClause(ast[2], options);
 			t.prepend(op);
-			if (reqParens) t.append("(");
-			t.append(c);
-			if (reqParens) t.append(")");
+
+			if (requireParens(ast[0], ast[1], true, options)) t.append("(", c, ")");
+			else t.append(c);
+
 			return t;
 		}
 		switch(ast[0]) {
@@ -64,10 +65,14 @@ var folproofWeb = (function() {
 		if (op) {
 			debug(ast[1], ast[2]);
 			l = renderClause(ast[1], options);
-			r = renderClause(ast[2], options);
-			l.append(" ", op, " ").append(r);
-			if (reqParens)
+			if (requireParens(ast[0], ast[1], true, options))
 				l.prepend("(").append(")");
+
+			r = renderClause(ast[2], options);
+			if (requireParens(ast[0], ast[2], false, options))
+				r.prepend("(").append(")");
+
+			l.append(" ", op, " ").append(r);
 			return l;
 		}
 		
@@ -75,19 +80,36 @@ var folproofWeb = (function() {
 			return renderTerm(ast, options);
 		} else if (ast[0] === "not") {
 			l = renderClause(ast[1], options);
-			l.prepend("&not;");
-			if (reqParens)
+			if (requireParens(ast[0], ast[1], true, options))
 				l.prepend("(").append(")");
+			l.prepend("&not;");
 			return l;
 		}
 		return renderTerm(ast);
 	}
 
-	function requireParens(ast, options) {
+	var opOrder = { "not": 1, "=": 1, "forall": 2, "exists": 2, "and":3, "or":4, "->":5, "iff":6 };
+	function requireParens(parentOp, ast, leftTerm, options) {
+		if (ast[0] === 'id') return false;
+
 		if (options.parentheses === "user") {
 			return ast.userParens;
+		} else if (options.parentheses === "minimal") {
+			console.log(parentOp, opOrder[parentOp], ast[0], opOrder[ast[0]]);
+			if (opOrder[parentOp] == opOrder[ast[0]] && leftTerm) return false;
+			else if (opOrder[parentOp] < opOrder[ast[0]]) return true;
+			else if (opOrder[parentOp] > opOrder[ast[0]] && !leftTerm) return false;
+			return true;
 		}
 		return true;
+	}
+
+	function unaryOp(op) {
+		return op === "not" || op === "forall" || op === "exists";
+	}
+
+	function binaryOp(op) {
+		return op === "iff" || op === "->" || op === "and" || op === "or" || op === "=";
 	}
 
 	var infixTerms = ['='];
