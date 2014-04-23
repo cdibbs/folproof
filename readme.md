@@ -1,5 +1,7 @@
+[![Build Status](https://travis-ci.org/cdibbs/folproof.svg?branch=master)](https://travis-ci.org/cdibbs/folproof) 
+
 ## Demo
-TL;DR? Take it for a test drive: [//cdibbs.github.io/folproof](//cdibbs.github.io/folproof)
+Take it for a test drive: [//cdibbs.github.io/folproof](//cdibbs.github.io/folproof)
 
 ## Building
 1. If you don't have node and npm installed, please install it.
