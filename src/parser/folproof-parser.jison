@@ -24,7 +24,7 @@ box
 	| BOX clause_list EOL DEBOX
 	{ $$ = ['box', $clause_list, @$]; }
 	| sentence JUSTIFICATION?
-	{ $$ = ['rule', $sentence, $2 ? $2 : ["premise", null], @$]; }
+	{ $$ = $sentence[0] != 'error' ? ['rule', $sentence, $2 ? $2 : ["premise", null], @$] : $sentence; }
 	;
 
 with
@@ -34,6 +34,8 @@ with
 
 sentence
 	: e_iff
+	| error
+	{ $$ = ['error', yytext]; }
 	;
 
 e_iff

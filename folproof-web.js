@@ -24,6 +24,8 @@ var folproofWeb = (function() {
 				line = renderSimpleBox(dom, ast[i], line, options);
 			} else if (ast[i][0] === 'folbox') {
 				line = renderFOLBox(dom, ast[i], line, options);
+			} else if (ast[i][0] === 'error') {
+				line = renderSyntaxError(dom, ast[i], line, options);
 			}
 		}
 		return line;
@@ -34,6 +36,14 @@ var folproofWeb = (function() {
 		nest.append("<span class='lineno'>" + line + "</span>");
 		nest.append(renderClause(ast[1], options));
 		nest.append(renderJustification(ast[2], options));
+		dom.append(nest);
+		return line + 1;
+	}
+
+	function renderSyntaxError(dom, ast, line, options) {
+		var nest = $("<div class='folproof-error'></div>");
+		nest.append("<span class='lineno'>" + line + "</span>");
+		nest.append("Syntax error near: ", ast[1]);
 		dom.append(nest);
 		return line + 1;
 	}
@@ -175,7 +185,6 @@ var folproofWeb = (function() {
 
 	function renderFOLBox(dom, ast, line) {
 		var nest = $("<div class='FOL-box'></div>");
-		debug(ast);
 		nest.append(renderSimpleTerm(ast[2][1]));
 		var line = renderRules(nest, ast[1], line, options);
 		dom.append(nest);

@@ -60,7 +60,6 @@ var rules = {
 				function(proof, step, part, steps) {
 					var curStep = proof.steps[step].getSentence();
 					var refStep = proof.steps[steps[0]].getSentence();
-					console.log(curStep, refStep);
 					if (refStep[0] !== 'not' || refStep[1][0] !== 'not')
 						return "Notnot-elim: Referenced step is not a double-negation.";
 					

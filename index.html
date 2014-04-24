@@ -14,7 +14,6 @@ $(document).ready(function() {
 	$("#proof-input").keyup(function(v) {
 		var proof = $(this).val();
 		var paren = $("#parentheses").val();
-		console.log(paren);
 		try {
 			var ast = folproofParser.parse(proof);
 			var result = folproof.Verifier.verifyFromAST(ast);
@@ -48,6 +47,7 @@ $(document).ready(function() {
 #result-box { height: 7em; margin-top: 0.8em;}
 .justification { width: 50%; float: right; }
 .FOL-box, .simple-box { border: 1px solid black; border-radius: 3px; padding: 2px;}
+.folproof-error { color: red; font-weight: bold; }
 .lineno { display: block; float: left; width: 1.8em; }
 .rule { clear: both; }
 #examples { display: none; }

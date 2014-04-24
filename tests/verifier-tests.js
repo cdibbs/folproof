@@ -15,3 +15,17 @@ exports["Sets first/last statements"] = function(test) {
 	test.ok(proof.steps[1].isFirstStmt() && proof.steps[1].isLastStmt(), "Second step is both the first and last step of the assumption.");
 	test.done();
 };
+
+exports["Syntax errors result in invalid proofs"] = function(test) {
+	var proofAST = [['rule', ['id', 'a'], ['premise'], null], ['box', [['rule', ['id', 'b'], ['assumption'], null], ['error']], null] ];
+	var result = v.verifyFromAST(proofAST);
+	test.ok(! result.valid, "Proof should be invalid when syntax errors exist.");
+	test.done();
+};
+
+exports["Proofs can be valid"] = function(test) {
+	var proofAST = [['rule', ['id', 'a'], ['premise'], null], ['box', [['rule', ['id', 'b'], ['assumption'], null]], null] ];
+	var result = v.verifyFromAST(proofAST);
+	test.ok(result.valid, "Proof should be invalid when syntax errors exist.");
+	test.done();
+};

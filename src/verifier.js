@@ -24,6 +24,13 @@ var Verifier = (function() {
 
 	obj.validateStatement = function validateStatement(result, proof, step) {
 		var stmt = proof.steps[step];
+		if (stmt[0] === 'error') {
+			result.valid = false;
+			result.message = "Proof invalid due to syntax errors."; 
+			result.errorStep = step + 1;
+			return;
+		}
+
 		var why = stmt.getJustification();
 		var newv = null;
 		if (why[0].split('.').length == 2)
@@ -100,6 +107,8 @@ var Verifier = (function() {
 				var newScope = scope.slice(0)
 				newScope.push(null);
 				step = obj.preprocessBox(proof, ast[i][1], step, newScope);
+			} else if (ast[i][0] === 'error') {
+				proof.steps[step] = ast[i];
 			}
 		}
 		return step;
