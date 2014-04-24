@@ -19,7 +19,11 @@ $(document).ready(function() {
 			var result = folproof.Verifier.verifyFromAST(ast);
 			$("#result").text(result.message);
 			if (!result.valid) {
-				$("#result").append("<p>Step: " + result.errorStep + ", Src Line: " + result.errorSrcLoc.first_line + "</p>");
+				var str = "<p>Step: " + result.errorStep;
+				if (result.errorSrcLine)
+					str += ", Src Line: " + result.errorSrcLoc.first_line;
+				str += "</p>";
+				$("#result").append(str);
 				$("#result-box").css({ background: "", 'border-left' : "", color : "" });
 			} else {
 				$("#result-box").css({ background: "#ccffcc", 'border-left' : "3px solid green", color : "" });

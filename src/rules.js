@@ -17,6 +17,40 @@ var rules = {
 				return "Assumptions can only be made at the start of an assumption box.";
 			})
 		}),
+	"lem" : new Rule({
+		name : "LEM",
+		type : "derived",
+		verifier : new Justifier(null, function(proof, step) {
+			var s = proof.steps[step].getSentence();
+			if (s[0] !== "or")
+				return "LEM: must be phi or not phi.";
+			var left = s[1], right = s[2];
+			if (right[0] !== "not" || !semanticEq(left, right[1]))
+				return "LEM: right side must be negation of left.";
+			
+			return true;
+		})
+	}),
+	"mt" : new Rule({
+		name : "MT",
+		type : "derived",
+		verifier : new Justifier({stepRefs:["num","num"]},
+			function(proof, step, part, steps) {
+			var impStep = proof.steps[steps[0]].getSentence();
+			if (impStep[0] !== "->")
+				return "MT: 1st referenced step must be implication.";
+			var left = impStep[1], right = impStep[2];
+			var negStep = proof.steps[steps[1]].getSentence();
+			if (negStep[0] !== "not" || !semanticEq(negStep[1], right))
+				return "MT: 2nd ref step must be negation of right side of 1st ref step.";
+			
+			var s = proof.steps[step].getSentence();
+			if (s[0] !== 'not' || !semanticEq(left, s[1]))
+				return "MT: current step must be negation of left side of ref step.";
+			
+			return true;
+		})
+	}),
 	"pbc" : new Rule({
 		name : "PBC",
 		type : "derived",

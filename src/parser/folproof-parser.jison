@@ -53,15 +53,15 @@ e_imp
 	;
 
 e_exists
-	: EXISTS ID e_forall
-	{ $$ = ['exists', $ID, $e_forall]; }
+	: EXISTS ID e_exists
+	{ $$ = ['exists', $ID, $e_exists]; }
 	| e_forall
 	{ $$ = $1; }
 	;
 
 e_forall
-	: FORALL ID e_or
-	{ $$ = ['forall', $ID, $e_or]; }
+	: FORALL ID e_forall
+	{ $$ = ['forall', $ID, $e_forall]; }
 	| e_or
 	{ $$ = $e_or; }
 	;
@@ -88,8 +88,8 @@ e_eq
 	;
 
 e_not
-	: NOT atom
-	{ $$ = ['not', $atom]; }
+	: NOT e_not
+	{ $$ = ['not', $e_not]; }
 	| atom
 	{ $$ = $atom; }
 	;

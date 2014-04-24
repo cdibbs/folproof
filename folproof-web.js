@@ -56,14 +56,18 @@ var folproofWeb = (function() {
 			case "exists": op = "&exist;";
 		}
 		if (op) {
+			var wrapper = $("<span class='folproof-quantifier'></span>");
+			wrapper.append(op);
 			t = renderTerm(ast[1], options);
+			wrapper.append(t," ");
 			c = renderClause(ast[2], options);
-			t.prepend(op);
+			wrapper.append(c);
+			
+			if (requireParens(ast[0], ast[2], true, options))
+				wrapper.append("(", c, ")");
+			else wrapper.append(c);
 
-			if (requireParens(ast[0], ast[2], true, options)) t.append("(", c, ")");
-			else t.append(c);
-
-			return t;
+			return wrapper;
 		}
 		switch(ast[0]) {
 			case "iff": op = "&harr;"; break;
