@@ -363,8 +363,7 @@ var rules = {
 				if (equalityExpr[0] !== '=')
 					return "Equality-Elim: First referenced step is not an equality.";
 					
-				var elimExprT = elimTransform(elimExpr, equalityExpr[1], equalityExpr[2]);
-				if (elimExprT === false || !semanticEq(elimExprT, proposedResult))
+				if (!semanticEq(elimExpr, proposedResult, equalityExpr[1], equalityExpr[2]))
 					return "Equality-Elim: Does not result in current step.";
 
 				return true;
@@ -413,105 +412,72 @@ function substitute(startExpr, a, b, bound) {
 	}
 }
 
-function elimTransform(startExpr, origSubExpr, newSubExpr) {
-	u.debug("elimTransform", startExpr, origSubExpr, newSubExpr);
-	var binOps = ["->", "and", "or", "<->", "="];
-	var unOps = ["not"];
+/**
+ * Determines whether two expressions are semantically equivalent
+ * under the given (and optional) substitution.
+ * a, b - abstract syntax trees of the expressions to be compared.
+ * suba, subb (optional) - does comparison after substituting suba in a with subb.
+ */
+function semanticEq(A, B, suba, subb) {
+	u.debug("semanticEq", A, B);
+	var bound = {}, sub;
+	if (suba) {
+		sub = true;
+		return _rec(A, B, {});
+	} else {
+		sub = false;
+		return _rec(A, B);
+	}
 
-	// remove parens, which are basically stylistic no-ops
-	while (startExpr[0] === 'paren') startExpr = startExpr[1];
+	function _rec(a, b, bound) {
+		var binOps = ["->", "and", "or", "<->", "="];
+		var unOps = ["not"];
 
-	// Are we the thing to replace? Then return the new thing.
-	if (semanticEq(startExpr, origSubExpr)) return newSubExpr;
+		// if eq w/substitution, return true, otherwise continue
+		if (sub && semanticEq(a, suba)) {
+				if ((a[0] !== 'id' || !bound[a[1]]) && _rec(subb, b, bound)) return true;
+		}
 
-	// if the rec call to elimT returns anything but false, return our part
-	// of the AST rebuilt using what was returned.
-	if (arrayContains(binOps, startExpr[0])) {
-		var leftSide = elimTransform(startExpr[1], origSubExpr, newSubExpr);
-		if (leftSide !== false) return [startExpr[0], leftSide, startExpr[2]];
-
-		var rightSide = elimTransform(startExpr[2], origSubExpr, newSubExpr);
-		if (rightSide !== false) return [startExpr[0], startExpr[1], rightSide];
-
-		return false;
-	} else if (arrayContains(unOps, startExpr[0])) {
-		var inner = elimTransform(startExpr[1]);
-		if (inner !== false) return [startExpr[0], inner];
-		
-		return false;
-	} else if (startExpr[0] === 'id') {
-		if (startExpr.length === 2) // then this is a base case ['id', $ID]
+		if (arrayContains(binOps, a[0]) && a[0] === b[0]) {
+			if (_rec(a[1], b[1], bound) && _rec(a[2], b[2], bound)) {
+				return true;
+			}
 			return false;
-		if (startExpr.length === 3) {
-			var newTerms = [], found = false;
-			for (var i=0; i<startExpr[2].length; i++) {
-				var inner = elimTransform(startExpr[2][i], origSubExpr, newSubExpr);
-				if (inner !== false) {
-					newTerms.push(inner);
-					found = true;
-				} else {
-					newTerms.push(startExpr[2][i]);
-				}
+		} else if (arrayContains(unOps, a[0]) && a[0] === b[0]) {
+			if (_rec(a[1], b[1], bound)) {
+				return true;
 			}
-			if (found) return [startExpr[0], startExpr[1], newTerms];
-		}
-		return false;
-	}	
-}
-
-function semanticEq(a, b) {
-	u.debug("semanticEq", a, b);
-	var binOps = ["->", "and", "or", "<->", "="];
-	var unOps = ["not"];
-	// remove parens, which are basically stylistic no-ops
-	while (a[0] === 'paren') a = a[1];
-	while (b[0] === 'paren') b = b[1];
-
-	if (arrayContains(binOps, a[0]) && a[0] === b[0]) {
-		if (semanticEq(a[1], b[1]) && semanticEq(a[2], b[2])) {
-			u.debug("sEq path 1");
-			return true;
-		}
-		u.debug("sEq path 1.1");
-		return false;
-	} else if (arrayContains(unOps, a[0]) && a[0] === b[0]) {
-		if (semanticEq(a[1], b[1])) {
-			u.debug("sEq path 2");
-			return true;
-		}
-		u.debug("sEq path 2.1");
-		return false;
-	} else if (a[0] === 'exists' || a[0] === 'forall' && a[0] === b[0]) {
-		if (semanticEq(a[2], b[2])) {
-			u.debug("sEq path 2.5");
-			return true;
-		}
-		u.debug("sEq path 2.6");
-		return false;
-	} else if (a[0] === "id") {
-		if (a[1] !== b[1]) return false;
-		if (a.length == 2 && b.length == 2) {
-			u.debug("sEq path 3");
-			return true;
-		}
-
-		if (a.length == 3 && b.length == 3) {
-			if (a[2].length != b[2].length) {
-				u.debug("sEq path 3.1");
-				return false;
+			return false;
+		} else if (a[0] === 'exists' || a[0] === 'forall' && a[0] === b[0]) {
+			var newb;
+			if (sub) {
+				newb = clone(bound);
+				newb[a[1]] = true;
 			}
-			for (var i=0; i<a[2].length; i++) {
-				if (!semanticEq(a[2][i], b[2][i])) {
-					u.debug("sEq path 3.2");
+			if (_rec(a[2], b[2], newb)) {
+				return true;
+			}
+			return false;
+		} else if (a[0] === "id") {
+			if (b && a[1] !== b[1]) return false;
+			if (a.length == 2 && b.length == 2) {
+				return true;
+			}
+
+			if (a.length == 3 && b.length == 3) {
+				if (a[2].length != b[2].length) {
 					return false;
 				}
+				for (var i=0; i<a[2].length; i++) {
+					if (!_rec(a[2][i], b[2][i], bound)) {
+						return false;
+					}
+				}
+				return true;
 			}
-			u.debug("sEq path 3.3");
-			return true;
 		}
+		return false;
 	}
-	u.debug("sEq path 4");
-	return false;
 }
 
 function isContradiction(s) {
@@ -523,6 +489,14 @@ function arrayContains(arr, el) {
 		if (arr[i] === el) return true;
 	}
 	return false;
+}
+
+function clone(obj) {
+	var newo = {};
+	for(var k in Object.keys(obj)) {
+		newo[k] = obj[k];
+	}
+	return newo;
 }
 
 if (typeof require !== 'undefined' && typeof exports !== 'undefined') {
