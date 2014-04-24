@@ -50,7 +50,7 @@ var folproofWeb = (function() {
 			c = renderClause(ast[2], options);
 			t.prepend(op);
 
-			if (requireParens(ast[0], ast[1], true, options)) t.append("(", c, ")");
+			if (requireParens(ast[0], ast[2], true, options)) t.append("(", c, ")");
 			else t.append(c);
 
 			return t;

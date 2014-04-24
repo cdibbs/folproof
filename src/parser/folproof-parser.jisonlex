@@ -4,7 +4,7 @@ numrange			[0-9]+(\-[0-9]+)?
 justify				":".*
 
 %%
-"#".*[\n\r]+			/* comments are ignored */
+"#".*?[\n\r]			/* comments are ignored */
 "and"				return 'AND';
 "or"				return 'OR';
 "implies"|"->"|"=>"		return 'IMPLIES';
@@ -49,7 +49,6 @@ justify				":".*
 					sub = null;
 				}
 				yytext = [name, rtype, side, lineranges, sub];
-				console.log(yytext);
 				return 'JUSTIFICATION';
 				%};
 "E."				return 'EXISTS';
@@ -76,6 +75,7 @@ justify				":".*
 				this._iemitstack.shift();
 				return ['DEBOX', 'EOL'];
 				%}
+[\n\r]+{spc}*/![^\n\r]		/* eat blank lines */
 \n{spc}*\d*{spc}*"|"*		%{
 				/* Similar to the idea of semantic whitespace, we keep track of virtual
 				 * BOX/DEBOX characters based on a stack of | occurrences
@@ -99,7 +99,6 @@ justify				":".*
 					    tokens.push("EOL");
 				    return tokens;
 				%}
-[\n\r]+{spc}*/![^\n\r]		/* eat blank lines */
 \n				return 'EOL'; 
 {spc}+				/* ignore whitespace */
 
