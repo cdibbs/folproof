@@ -4,7 +4,7 @@ numrange			[0-9]+(\-[0-9]+)?
 justify				":".*
 
 %%
-"#".*?[\n\r]			/* comments are ignored */
+[\n\r]?"#".*			/* comments are ignored */
 "and"				return 'AND';
 "or"				return 'OR';
 "implies"|"->"|"=>"		return 'IMPLIES';
@@ -101,6 +101,7 @@ justify				":".*
 				%}
 \n				return 'EOL'; 
 {spc}+				/* ignore whitespace */
+.*				return 'error';
 
 %%
 jisonLexerFn = lexer.setInput;
