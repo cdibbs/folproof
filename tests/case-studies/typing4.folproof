@@ -6,4 +6,3 @@
 5 || not P(x0)                : not intro 2-4
 6 || P(x0) or not P(x0)       : or intro2 5
 7 || _|_                      : not elim 6,1
-~                                                         

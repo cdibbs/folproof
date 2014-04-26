@@ -1,4 +1,5 @@
 var parser = require("../folproof-parser.js").parser;
+var Verifier = require("../folproof-verifier.js").Verifier;
 var fs = require('fs');
 var path = require('path');
 
@@ -10,10 +11,12 @@ var srcs = fs.readdirSync(__dirname + baseDir)
   .filter(function(filename) { return /.folproof$/.test(filename); });
 
 for (var i=0, l=srcs.length; i<l; i++) {
-  srcTests["File " + srcs[i] + " parses, correctly."] = (function(path) {
+  srcTests["File " + srcs[i] + " parses and validates."] = (function(path) {
     return function(test) {
       var src = fs.readFileSync(path, "utf8");
-      test.ok(parser.parse(src));
+			var ast = parser.parse(src);
+      test.ok(ast);
+			test.ok(Verifier.verifyFromAST(ast).valid);
 			test.done();
     };
   })(__dirname + baseDir + srcs[i]);
