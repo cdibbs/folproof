@@ -130,6 +130,19 @@ var rules = {
 			return true;
 		})
 	}),
+	"copy" : new Rule({
+		name : "COPY",
+		type : "normal",
+		verifier : new Justifier({stepRefs:["num"]},
+			function(proof, step, part, steps) {
+				var curStep = proof.steps[step].getSentence();
+				var refStep = proof.steps[steps[0]].getSentence();
+				if (!semanticEq(curStep, refStep))
+					return "Copy: Current step is not semantically equal to the referenced step.";
+				return true;
+			}
+		)
+	}),
 	"mt" : new Rule({
 		name : "MT",
 		type : "derived",
@@ -156,8 +169,8 @@ var rules = {
 		verifier : new Justifier(
 		{ hasPart : false, stepRefs : ["range"], subst : false },
 		function(proof, step, part, steps) {	
-			var assumptionExpr = proof.steps[stepRange[0]].getSentence();
-			var contraExpr = proof.steps[stepRange[1]].getSentence();
+			var assumptionExpr = proof.steps[steps[0][0]].getSentence();
+			var contraExpr = proof.steps[steps[0][1]].getSentence();
 			if (! isContradiction(contraExpr)) {
 			return "PBC: Final step in range must be a contradiction.";
 			}
@@ -403,17 +416,10 @@ var rules = {
 			function(proof, step, part, steps, subst) {
 				var currStep = proof.steps[step];
 				var currExpr = currStep.getSentence();
-				var scope = currStep.getScope(); // ex: [['x0','x'], ['y0', 'y'], ...], LIFO
 				var refExpr = proof.steps[steps[0]].getSentence();
 				if (refExpr[0] !== 'forall')
 					return "All-x-Elim: Referenced step is not a for-all expression.";
-				if (scope.length == 0)
-					return "All-x-Elim: Not valid outside an assumption scope (e.g., an x0 box).";
 		
-				// check if any substitutions from our scope match refExpr
-				if (! arrayContains(scope, subst[1]))
-					return "All-x-Elim: Substition " + subst[1] + "/" + subst[0] + " does not exist in any outer scope.";
-
 					var refExprSub = substitute(refExpr[2], subst[0], subst[1]);
 					if (semanticEq(refExprSub, currExpr))
 						return true;
@@ -429,17 +435,10 @@ var rules = {
 			function(proof, step, part, steps, subst) {
 				var currStep = proof.steps[step];
 				var currExpr = currStep.getSentence();
-				var scope = currStep.getScope(); // ex: [['x0','x'], ['y0', 'y'], ...], LIFO
 				var refExpr = proof.steps[steps[0]].getSentence();
 				if (currExpr[0] !== 'exists')
 					return "Exists-x-Intro: Current step is not an 'exists' expression.";
-				if (scope.length == 0)
-					return "Exists-x-Intro: Not valid outside an assumption scope (e.g., an x0 box).";
 		
-				// check if any substitutions from our scope match refExpr
-				if (! arrayContains(scope, subst[1]))
-					return "Exists-x-Intro: Substition " + subst[1] + "/" + subst[0] + " does not exist in any outer scope.";
-
 				var refExprSub = substitute(refExpr, subst[1], subst[0]);
 				if (semanticEq(refExprSub, currExpr[2]))
 					return true;

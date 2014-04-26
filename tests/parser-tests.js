@@ -1,14 +1,15 @@
 var parser = require("../folproof-parser.js").parser;
 
-exports["Implication order is left to right."] = function(test) {
-	var src = "a -> b -> c"; // (a -> b) -> c
+exports["Implication order is right-associative."] = function(test) {
+	var src = "a -> b -> c"; // a -> (b -> c)
 	var result = parser.parse(src);
 	result = result[0][1];
-	// roughly... [['->', ['->', ['id', 'a'], ['id', 'b']], ['id', 'c']]]
-	test.equal(result[1][0], '->');
-	test.equal(result[1][1][1], 'a');
-	test.equal(result[1][2][1], 'b');
-	test.equal(result[2][1], 'c');
+	// roughly... [['->', ['id', 'a'], ['->', ['id', 'a'], ['id', 'b']], ['id', 'c']]]
+	test.equal(result[1][0], 'id');
+	test.equal(result[1][1], 'a');
+	test.equal(result[2][0], '->');
+	test.equal(result[2][1][1], 'b');
+	test.equal(result[2][2][1], 'c');
 	test.done();
 };
 

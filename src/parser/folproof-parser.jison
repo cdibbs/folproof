@@ -19,12 +19,25 @@ clause_list
 	;
 
 box
-	: BOX with EOL clause_list EOL DEBOX
-	{ $$ = ['folbox', $clause_list, $with, @$]; }
-	| BOX clause_list EOL DEBOX
-	{ $$ = ['box', $clause_list, @$]; }
+	: BOX with EOL clause_list EOL? DEBOX
+	{ $$ = ['folbox', $clause_list, $with, @$]; 
+		if ($clause_list && $clause_list[0] && $clause_list[0][0] == 'rule' && $clause_list[0][2].auto)
+			$clause_list[0][2] = ['assumption', null];
+	}	
+	| BOX clause_list EOL? DEBOX
+	{ $$ = ['box', $clause_list, @$]; 
+		if ($clause_list && $clause_list[0] && $clause_list[0][0] == 'rule' && $clause_list[0][2].auto)
+			$clause_list[0][2] = ['assumption', null];
+	}	
 	| sentence JUSTIFICATION?
-	{ $$ = $sentence[0] != 'error' ? ['rule', $sentence, $2 ? $2 : ["premise", null], @$] : $sentence; }
+	{ $$ = $sentence[0] != 'error'
+			? ['rule', $sentence, $2, @$]
+			: $sentence; 
+		if ($$[0] === 'rule' && !$$[2]) {
+			$$[2] = ['premise', null];
+			$$[2].auto = true;
+		}
+	}
 	;
 
 with
@@ -46,8 +59,8 @@ e_iff
 	;
 
 e_imp
-	: e_imp IMPLIES e_exists
-	{ $$ = ['->', $e_imp, $e_exists]; }
+	: e_exists IMPLIES e_imp
+	{ $$ = ['->', $e_exists, $e_imp]; }
 	| e_exists
 	{ $$ = $1; }
 	;

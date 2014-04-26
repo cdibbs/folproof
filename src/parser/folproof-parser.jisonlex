@@ -70,13 +70,13 @@ justify				":".*
 				tokens.unshift("ENDOFFILE");
 				if (tokens.length) return tokens;
 				%}
-\n{spc}*"-"+			%{ /* manually close an assumption box */
+\n{spc}*"|"*"-"+			%{ /* manually close an assumption box */
 				this._log("MANUAL DEBOX");
 				this._iemitstack.shift();
 				return ['DEBOX', 'EOL'];
 				%}
 [\n\r]+{spc}*/![^\n\r]		/* eat blank lines */
-\n{spc}*\d*{spc}*"|"*		%{
+[\n|^]{spc}*\d*{spc}*"|"*		%{
 				/* Similar to the idea of semantic whitespace, we keep track of virtual
 				 * BOX/DEBOX characters based on a stack of | occurrences
 				 */
