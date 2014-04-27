@@ -173,9 +173,9 @@ parseError: function parseError(str, hash) {
 parse: function parse(input) {
     var self = this,
         stack = [0],
+        tstack = [], // token stack
         vstack = [null], // semantic value stack
         lstack = [], // location stack
-				tstack = [],
         table = this.table,
         yytext = '',
         yylineno = 0,
@@ -214,13 +214,13 @@ parse: function parse(input) {
 
     function lex() {
         var token;
-        token = tstack.pop() || self.lexer.lex() || EOF; // $end = 1
+        token = tstack.pop() || self.lexer.lex() || EOF;
         // if token isn't its numeric value, convert
         if (typeof token !== 'number') {
-						if (token instanceof Array) {
-							tstack = token;
-							token = tstack.pop();
-						}
+            if (token instanceof Array) {
+                tstack = token;
+                token = tstack.pop();
+            }
             token = self.symbols_[token] || token;
         }
         return token;

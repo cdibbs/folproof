@@ -13,7 +13,8 @@
   },
   "devDependencies": {
 	"jison": "0.4.x",
-        "nodeunit" : "latest"
+  "nodeunit" : "latest",
+  "browserify" : "latest"
   },
   "scripts" : {
     "test" : "make test"

@@ -298,7 +298,7 @@ var rules = {
 				var endExpr = proof.steps[steps[0][1]].getSentence();
 				if (currExpr[0] !== 'forall')
 					return "All-x-Intro: Current step is not a 'for-all' expression.";
-				if (scope.length == 0)
+				if (scope.length == 0 || scope[0] == null)
 					return "All-x-Intro: Not valid without a scoping assumption (e.g., an x0 box).";
 			
 				// check if any substitutions from our scope match refExpr
@@ -325,7 +325,7 @@ var rules = {
 					if (semanticEq(refExprSub, currExpr))
 						return true;
 
-				return "All-x-Elim: Referenced step did not match current step after " + scopeVars[1] + "/" + scopeVars[0] + ".";
+				return "All-x-Elim: Referenced step did not match current step after " + subst[1] + "/" + subst[0] + ".";
 			})
 	}),
 	"e." : new Rule({
@@ -358,7 +358,7 @@ var rules = {
 				var endExpr = proof.steps[steps[1][1]].getSentence();
 				if (refExpr[0] !== 'exists')
 					return "Exists-x-Elim: Referenced step is not an 'exists' expression.";
-				if (scope.length == 0)
+				if (scope.length == 0 || scope[0] == null)
 					return "Exists-x-Elim: Not valid outside an assumption scope (e.g., an x0 box).";
 		
 				// check whether substition matches ref line with current line

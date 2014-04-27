@@ -109,7 +109,6 @@ var folproofWeb = (function() {
 		if (options.parentheses === "user") {
 			return ast.userParens;
 		} else if (options.parentheses === "minimal") {
-			console.log(parentOp, opOrder[parentOp], ast[0], opOrder[ast[0]]);
 			if (opOrder[parentOp] == opOrder[ast[0]] && leftTerm) return false;
 			else if (opOrder[parentOp] < opOrder[ast[0]]) return true;
 			else if (opOrder[parentOp] > opOrder[ast[0]] && !leftTerm) return false;
