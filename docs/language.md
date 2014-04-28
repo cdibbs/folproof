@@ -32,7 +32,7 @@ Describing how each proof step should be formed, logically, is beyond the scope 
 FOLProof accepts the following logical operators, in order of preference:
 
 Operator    | Precedence   | LTR/RTL
----------------------------------
+------------|--------------|--------
 term(a,..)  | 1            | N/A
 not         | 1            | N/A
 and         | 2            | LTR
@@ -48,9 +48,9 @@ The fact that 'and' and 'or' bind stronger than the quantifiers A.x and E.x mean
 Justifications are the reasons why your current proof step follows logically from what is already there. They take the form:
 
 ```
-: ruleName[.var<sub>1</sub>/var<sub>2</sub>] [elim/intro[1/2]] [[(num/range), ]*]
-^     ^                    ^                      ^       ^       ^
-1     2                    3                      4       5       6
+: ruleName[.v1/v2] [elim/intro[1/2]] [[(num/range), ]*]
+^     ^       ^            ^       ^       ^
+1     2       3            4       5       6
 ```
 
 1. Justifications are indicated by a leading colon. If omitted, either "premise" or "assumption" will be assumed, depending on the context.
