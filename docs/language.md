@@ -4,7 +4,7 @@
 Every proof in FOLProof consists of a list of proof steps, where each step has the basic form:
 
 ```
-[lineNum] [|*] phi : reason <NEWLINE>
+[lineNum] [|*] phi [: reason] <NEWLINE>
    ^       ^     ^        ^       ^
    1       2     3        4       5
 ```
