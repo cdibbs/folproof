@@ -54,7 +54,7 @@ Justifications are the reasons why your current proof step follows logically fro
 ```
 
 1. Justifications are indicated by a leading colon. If omitted, either "premise" or "assumption" will be assumed, depending on the context.
-2. Rule names are single words, like "premise" or "and". See [Appendix A][#Appendix-A], for a complete list.
+2. Rule names are single words, like "premise" or "and". See [Appendix A](#Appendix-A), for a complete list.
 3. Rules that indicate a variable substitution specify it like `A.x/x0`.
 4. Non-derived rules often have elimination or introduction versions, like `phi : or elim a,b-c,d-e`. Single letters, like "e" and "i", are valid shorthand.
 5. In some cases, rules need to refer to a side, 1 or 2 (left or right), like `phi1 or phi2 : or i1 n`.
@@ -78,7 +78,9 @@ Notice how the first assumption is terminated, explicitly, out of necessity, sin
 
 ## Appendix
 
-### Appendix A - A list of justifications accepted by FOLProof
+### Appendix A
+#### A list of justifications accepted by FOLProof
+
 Rule Name     | Type  | Forms       | References | Substitutions
 --------------|-------|-------------|------------|--------------
 Premise       | intro | N/A         | N/A        | N/A
