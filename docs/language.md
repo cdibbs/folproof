@@ -79,25 +79,25 @@ Notice how the first assumption is terminated, explicitly, out of necessity, sin
 ## Appendix
 
 ### Appendix A - A list of justifications accepted by FOLProof
-Rule Name   | Type  | Forms       | References | Substitutions
-------------|-------|-------------|------------|--------------
-Premise     | intro | N/A         | N/A        | N/A
-Assumption  | intro | N/A         | N/A        | N/A
-Copy        | intro | N/A         | a          | N/A
-And         | basic | elim        | a          | N/A
-            |       | intro       | a,b        | N/A
-Or          | basic | elim        | a,b-c,d-e  | N/A
-            |       | intro       | a          | N/A
-Not         | basic | elim        | a,b        | N/A
-            |       | intro       | a-b        | N/A
-Implication | basic | elim        | a,b        | N/A
-            |       | intro       | a-b        | N/A
-Forall (A.?)| basic | elim        | a          | Y
-            |       | intro       | a-b        | Y
-Exists (E.?)| basic | elim        | a-b        | Y
-            |       | intro       | a          | Y
-_|_         | basic | elim        | a          | N/A
-PBC         | deriv.| N/A         | a-b        | N/A
-MT          | deriv.| N/A         | a,b        | N/A
-NOTNOT      | deriv.| intro       | a          | N/A
-LEM         | deriv.| N/A         | N/A        | N/A
+Rule Name     | Type  | Forms       | References | Substitutions
+--------------|-------|-------------|------------|--------------
+Premise       | intro | N/A         | N/A        | N/A
+Assumption    | intro | N/A         | N/A        | N/A
+Copy          | intro | N/A         | a          | N/A
+And           | basic | elim        | a          | N/A
+              |       | intro       | a,b        | N/A
+Or            | basic | elim        | a,b-c,d-e  | N/A
+              |       | intro       | a          | N/A
+Not           | basic | elim        | a,b        | N/A
+              |       | intro       | a-b        | N/A
+Implication   | basic | elim        | a,b        | N/A
+              |       | intro       | a-b        | N/A
+Forall (A.?)  | basic | elim        | a          | Y
+              |       | intro       | a-b        | Y
+Exists (E.?)  | basic | elim        | a-b        | Y
+              |       | intro       | a          | Y
+Contradiction | basic | elim        | a          | N/A
+PBC           | deriv.| N/A         | a-b        | N/A
+MT            | deriv.| N/A         | a,b        | N/A
+NOTNOT        | deriv.| intro       | a          | N/A
+LEM           | deriv.| N/A         | N/A        | N/A
