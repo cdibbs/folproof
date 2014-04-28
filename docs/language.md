@@ -20,8 +20,8 @@ Every proof consists of a list of proof steps, where each step has the basic for
    
    They can be ended explicitly, with any number of dashes on a new line, or implicitly, by simply omitting the pipe.
    See [Example 1](#example-1---assumption-boxes) under [Examples].
-3. phi is a formula in first-order logic. Greater detail can be found under [Formulas](#Formulas).
-4. Colons separate the formula, phi, from the reason it follows logically. See [Justifications](#Justifications).
+3. phi is a formula in first-order logic. Greater detail can be found under [Formulas](#formulas).
+4. Colons separate the formula, phi, from the reason it follows logically. See [Justifications](#justifications).
 5. Every line is terminated by a newline.
 
 
@@ -54,7 +54,7 @@ Justifications are the reasons why your current proof step follows logically fro
 ```
 
 1. Justifications are indicated by a leading colon. If omitted, either "premise" or "assumption" will be assumed, depending on the context.
-2. Rule names are single words, like "premise" or "and". See [Appendix A](#Appendix-A), for a complete list.
+2. Rule names are single words, like "premise" or "and". See [Appendix A](#appendix-a), for a complete list.
 3. Rules that indicate a variable substitution specify it like `A.x/x0`.
 4. Non-derived rules often have elimination or introduction versions, like `phi : or elim a,b-c,d-e`. Single letters, like "e" and "i", are valid shorthand.
 5. In some cases, rules need to refer to a side, 1 or 2 (left or right), like `phi1 or phi2 : or i1 n`.
