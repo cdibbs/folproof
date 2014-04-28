@@ -18,7 +18,8 @@ Every proof in FOLProof consists of a list of proof steps, where each step has t
    
    `|| phi2 : assumption`
    
-   They can be ended explicitly, with any number of dashes on a new line, or implicitly, by simply omitting the pipe. See    [Example 1][Example 1] under [Examples].
+   They can be ended explicitly, with any number of dashes on a new line, or implicitly, by simply omitting the pipe.
+   See [Example 1][Example 1] under [Examples].
 3. &phi; is a formula in first-order logic. Greater detail can be found under [Formulas][Formulas].
 4. Colons separate the formula, &phi;, from the reason it follows logically. See [Justifications][Justifications].
 5. Every line is terminated by a newline.
