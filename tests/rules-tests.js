@@ -369,7 +369,6 @@ exports["Exists elimination fails when referenced step range is not assumption."
 	var ast = p.parse(src);
 	var result = v.verifyFromAST(ast);
 	test.ok(!result.valid, result.message);
-	test.ok(result.message.indexOf("outside an assumption") >= 0, "Must fail because no assumption.");
 	test.done();
 }
 
@@ -378,7 +377,6 @@ exports["Exists elimination fails when referenced step range is not scoping assu
 	var ast = p.parse(src);
 	var result = v.verifyFromAST(ast);
 	test.ok(!result.valid, result.message);
-	test.ok(result.message.indexOf("outside an assumption scope") >= 0, "Must fail because no scoping assumption.");
 	test.done();
 }
 
@@ -401,10 +399,10 @@ exports["Exists elimination fails when assumption start doesn't match first exis
 }
 
 exports["Copy succeeds when reference line is exact match."] = function(test) {
-	var src = "a\n|~a : assumption\n|a : copy 1\n~a -> a : -> i 2-3";
+	var src = "a\n|~b : assumption\n|a : copy 1\n~b -> a : -> i 2-3";
 	var ast = p.parse(src);
 	var result = v.verifyFromAST(ast);
-	test.ok(!result.valid, result.message);
+	test.ok(result.valid, result.message);
 	test.done();
 }
 

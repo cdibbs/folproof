@@ -33,7 +33,7 @@ var rules = {
 	}),
 	"copy" : new Rule({
 		name : "COPY",
-		type : "normal",
+		type : "derived",
 		verifier : new Justifier({stepRefs:["num"]},
 			function(proof, step, part, steps) {
 				var curStep = proof.steps[step].getSentence();
@@ -358,8 +358,8 @@ var rules = {
 				var endExpr = proof.steps[steps[1][1]].getSentence();
 				if (refExpr[0] !== 'exists')
 					return "Exists-x-Elim: Referenced step is not an 'exists' expression.";
-				if (scope.length == 0 || scope[0] == null)
-					return "Exists-x-Elim: Not valid outside an assumption scope (e.g., an x0 box).";
+				if (scope.length == 0 || scope[scope.length - 1] == null)
+					return "Exists-x-Elim: Range must be within an assumption scope (e.g., an x0 box).";
 		
 				// check whether substition matches ref line with current line
 				var scopeVars = scope[scope.length-1];
