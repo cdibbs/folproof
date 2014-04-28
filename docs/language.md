@@ -4,7 +4,7 @@
 Every proof in FOLProof consists of a list of proof steps, where each step has the basic form:
 
 ```
-[lineNum] [|*] &phi; : reason <NEWLINE>
+[lineNum] [|*] phi : reason <NEWLINE>
    ^       ^     ^        ^       ^
    1       2     3        4       5
 ```
@@ -12,11 +12,11 @@ Every proof in FOLProof consists of a list of proof steps, where each step has t
 1. Integer line numbers are optional, but recommended. The verifier ignores user line numbers, instead keeping count, itself.
 2. Assumption boxes begin with a pipe, like:
 
-   `| &phi; : assumption`.
+   `| phi : assumption`.
    
    Nested boxes can be created by adding more pipes:
    
-   `|| &phi<sub>2</sub>; : assumption`
+   `|| phi2 : assumption`
    
    They can be ended explicitly, with any number of dashes on a new line, or implicitly, by simply omitting the pipe. See    [Example 1][Example 1] under [Examples].
 3. &phi; is a formula in first-order logic. Greater detail can be found under [Formulas][Formulas].
@@ -27,6 +27,20 @@ Every proof in FOLProof consists of a list of proof steps, where each step has t
 Describing how each proof step should be formed, logically, is beyond the scope of this document.
 
 ## Formulas
+
+FOLProof accepts the following logical operators, in order of preference:
+
+Operator    | Precedence   | LTR/RTL
+---------------------------------
+term(a,..)  | 1            | N/A
+not         | 1            | N/A
+and         | 2            | LTR
+or          | 3            | LTR
+A.x         | 4            | N/A
+E.x         | 4            | N/A
+->          | 5            | RTL
+
+The fact that 'and' and 'or' bind stronger than the quantifiers A.x and E.x means that, for example, `A.x Q(x) and P(x)` is interpreted as `A.x (Q(x) and P(x))` and *not* `(A.x Q(x)) and P(x)`, while `A.x Q(x) -> P(x)` is interpreted as `(A.x Q(X)) -> P(x)`.
 
 ## Justifications
 
@@ -41,8 +55,8 @@ Justifications are the reasons why your current proof step follows logically fro
 1. Justifications are indicated by a leading colon. If omitted, either "premise" or "assumption" will be assumed, depending on the context.
 2. Rule names are single words, like "premise" or "and". See [Appendix A][Appendix A], for a complete list.
 3. Rules that indicate a variable substitution specify it like `A.x/x0`.
-4. Non-derived rules often have elimination or introduction versions, like `&phi; : or elim a,b-c,d-e`. Single letters, like "e" and "i", are valid shorthand.
-5. In some cases, rules need to refer to a side, 1 or 2 (left or right), like `&phi,<sub>1</sub>; or &phi;<sub>2</sub> : or i1 n`.
+4. Non-derived rules often have elimination or introduction versions, like `phi : or elim a,b-c,d-e`. Single letters, like "e" and "i", are valid shorthand.
+5. In some cases, rules need to refer to a side, 1 or 2 (left or right), like `phi1 or phi2 : or i1 n`.
 6. Rules that need to reference prior proof steps can do so with a comma-separated list of step numbers and ranges, like `a,b-c,d-e`.
 
 ## Examples
