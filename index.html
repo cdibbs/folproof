@@ -15,8 +15,8 @@ $(document).ready(function() {
 		var proof = $(this).val();
 		var paren = $("#parentheses").val();
 		try {
-			folproofParser.trace = function() { if (console && console.log) console.log(arguments); };
-			var ast = folproofParser.parse(proof);
+			parser.trace = function() { if (console && console.log) console.log(arguments); };
+			var ast = parser.parse(proof);
 			var result = folproof.Verifier.verifyFromAST(ast);
 			$("#result").text(result.message);
 			if (!result.valid) {
