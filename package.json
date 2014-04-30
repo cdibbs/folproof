@@ -13,7 +13,7 @@
 	"path" : "0.4.9"
   },
   "devDependencies": {
-	"jison": "0.4.x",
+	"jison": "git://github.com/zaach/jison.git#5389a5890f",
   "nodeunit" : "latest",
   "browserify" : "latest"
   },
