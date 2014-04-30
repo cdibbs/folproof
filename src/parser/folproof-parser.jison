@@ -1,5 +1,6 @@
 /* FOL.js grammar by Chris Dibbern */
 %options flex
+%options token-stack
 %ebnf
 
 %%
