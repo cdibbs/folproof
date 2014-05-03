@@ -26,6 +26,6 @@ exports["Syntax errors result in invalid proofs"] = function(test) {
 exports["Proofs can be valid"] = function(test) {
 	var proofAST = [['rule', ['id', 'a'], ['premise'], null], ['box', [['rule', ['id', 'b'], ['assumption'], null]], null] ];
 	var result = v.verifyFromAST(proofAST);
-	test.ok(result.valid, "Proof should be invalid when syntax errors exist.");
+	test.ok(result.valid, "A proof with only premises and assumptions should be valid.");
 	test.done();
 };
