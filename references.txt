@@ -1,5 +1,0 @@
-The grammar was taken from here:
-http://people.sju.edu/~jhodgson/ugai/1order.html
-
-Inspiration and idea from here:
-http://suo.ieee.org/IFF/metalevel/lower/ontology/fol/grammar.html
