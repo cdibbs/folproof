@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/cdibbs/folproof.svg?branch=master)](https://travis-ci.org/cdibbs/folproof) 
 
 ## Demo
-Take it for a test drive: [//cdibbs.github.io/folproof](//cdibbs.github.io/folproof)
+Take it for a test drive: [cdibbs.github.io/folproof](https://cdibbs.github.io/folproof)
 
 ## Building
 1. If you don't have node and npm installed, please install it.
@@ -24,7 +24,7 @@ There are several ways to run FOLProof:
  * Without installation: type `node cli.js [your-proof].fol`, from within the folproof directory.
 2. From the web
  * Please look in the included index.html for an example of how to use FOLProof in a website.
- * You can test the included index.html [at the demo site](//cdibbs.github.io/folproof).
+ * You can test the included index.html [at the demo site](https://cdibbs.github.io/folproof).
 
 ## Architecture Overview
 * folproof-parser.js - built automatically from ./src/parser/folproof-parser.jison and folproof-parser.jisonlex
