@@ -1,6 +1,6 @@
-var u = require("./util");
-var Rule = require("./rule.js");
-var Justifier = require("./justifier.js");
+///<reference path='Utilities.ts' />
+///<reference path='rule.ts' />
+///<reference path='justifier.ts' />
 
 var rules = {
 	"premise" : new Rule({
@@ -27,7 +27,7 @@ var rules = {
 			var left = s[1], right = s[2];
 			if (right[0] !== "not" || !semanticEq(left, right[1]))
 				return "LEM: right side must be negation of left.";
-			
+
 			return true;
 		})
 	}),
@@ -56,11 +56,11 @@ var rules = {
 			var negStep = proof.steps[steps[1]].getSentence();
 			if (negStep[0] !== "not" || !semanticEq(negStep[1], right))
 				return "MT: 2nd ref step must be negation of right side of 1st ref step.";
-			
+
 			var s = proof.steps[step].getSentence();
 			if (s[0] !== 'not' || !semanticEq(left, s[1]))
 				return "MT: current step must be negation of left side of ref step.";
-			
+
 			return true;
 		})
 	}),
@@ -69,16 +69,16 @@ var rules = {
 		type : "derived",
 		verifier : new Justifier(
 		{ hasPart : false, stepRefs : ["range"], subst : false },
-		function(proof, step, part, steps) {	
+		function(proof, step, part, steps) {
 			var assumptionExpr = proof.steps[steps[0][0]].getSentence();
 			var contraExpr = proof.steps[steps[0][1]].getSentence();
 			if (! isContradiction(contraExpr)) {
 			return "PBC: Final step in range must be a contradiction.";
 			}
-	
+
 			if (assumptionExpr[0] !== 'not')
 			return "PBC: Assumption is not a negation. Might you be thinking of not-introduction?";
-		
+
 			var semEq = semanticEq(assumptionExpr[1], proof.steps[step].getSentence());
 			if (semEq)
 			return true;
@@ -109,7 +109,7 @@ var rules = {
 					var refStep = proof.steps[steps[0]].getSentence();
 					if (refStep[0] !== 'not' || refStep[1][0] !== 'not')
 						return "Notnot-elim: Referenced step is not a double-negation.";
-					
+
 					if (!semanticEq(refStep[1][1], curStep))
 						return "Notnot-elim: Does not result in current step.";
 
@@ -121,7 +121,7 @@ var rules = {
 		type : "normal",
 		introduction : new Justifier(
 			{ hasPart : false, stepRefs : ["range"], subst : false },
-			function(proof, step, part, steps) {	
+			function(proof, step, part, steps) {
 			var truth = proof.steps[steps[0][0]].getSentence();
 			var result = proof.steps[steps[0][1]].getSentence();
 			var implies = proof.steps[step].getSentence();
@@ -135,7 +135,7 @@ var rules = {
 			var resultSemEq = semanticEq(implies[2], result);
 			if (! resultSemEq)
 			return "Implies-Intro: The result does not match the right side.";
-	
+
 			return true;
 			}
 		),
@@ -159,11 +159,11 @@ var rules = {
 				return "Implies-Elim: The left side does not imply this result.";
 			}
 			}
-		
+
 			return "Implies-Elim: The implication's left side does not match the referenced step.";
 			}
 		)
-		}),	
+		}),
 	"and" : new Rule({
 		name : "And",
 		type : "normal",
@@ -181,7 +181,7 @@ var rules = {
 						return "And-Intro: Right side doesn't match referenced step.";
 					}
 				}
-		
+
 				return "And-Intro: Left side doesn't match referenced step.";
 			}),
 		elimination : new Justifier(
@@ -223,7 +223,7 @@ var rules = {
 				var a1p2Expr = proof.steps[steps[1][1]].getSentence();
 				var a2p1Expr = proof.steps[steps[2][0]].getSentence();
 				var a2p2Expr = proof.steps[steps[2][1]].getSentence();
-		
+
 				// and through the gauntlet...
 				if (orStepExpr[0] !== 'or')
 					return "Or-Elim: First referenced step is not an 'or'-expression.";
@@ -280,7 +280,7 @@ var rules = {
 				}
 
 				if (semEq) return true;
-		
+
 				return "Not-Elim: Subexpression in not-expr does not match other expr.";
 			})
 	}),
@@ -300,7 +300,7 @@ var rules = {
 					return "All-x-Intro: Current step is not a 'for-all' expression.";
 				if (scope.length == 0 || scope[0] == null)
 					return "All-x-Intro: Not valid without a scoping assumption (e.g., an x0 box).";
-			
+
 				// check if any substitutions from our scope match refExpr
 				var scopeVar = scope[scope.length-1];
 				var found = scope.slice().reverse().reduce(function(a,e) { return a && (e == null || e == subst[1]); }, true);
@@ -320,7 +320,7 @@ var rules = {
 				var refExpr = proof.steps[steps[0]].getSentence();
 				if (refExpr[0] !== 'forall')
 					return "All-x-Elim: Referenced step is not a for-all expression.";
-		
+
 					var refExprSub = substitute(refExpr[2], subst[0], subst[1]);
 					if (semanticEq(refExprSub, currExpr))
 						return true;
@@ -339,11 +339,11 @@ var rules = {
 				var refExpr = proof.steps[steps[0]].getSentence();
 				if (currExpr[0] !== 'exists')
 					return "Exists-x-Intro: Current step is not an 'exists' expression.";
-		
+
 				var refExprSub = substitute(refExpr, subst[1], subst[0]);
 				if (semanticEq(refExprSub, currExpr[2]))
 					return true;
-	
+
 				return "Exists-x-Intro: Referenced step did not match current step after " + subst[1] + "/" + subst[0] + " substitution.";
 			}),
 		elimination : new Justifier(
@@ -360,7 +360,7 @@ var rules = {
 					return "Exists-x-Elim: Referenced step is not an 'exists' expression.";
 				if (scope.length == 0 || scope[scope.length - 1] == null)
 					return "Exists-x-Elim: Range must be within an assumption scope (e.g., an x0 box).";
-		
+
 				// check whether substition matches ref line with current line
 				var scopeVars = scope[scope.length-1];
 				var refExprSub = substitute(refExpr[2], subst[0], subst[1]);
@@ -371,7 +371,7 @@ var rules = {
 				}
 				return "Exists-x-Elim: assumption beginning step doesn't match ref step for " + scopeVars[0] + ".";
 			})
-	}),	
+	}),
 	"=" : new Rule({
 		name : "Equality",
 		type : "normal",
@@ -384,7 +384,7 @@ var rules = {
 
 				if (semanticEq(s[1], s[2]))
 					return true;
-		
+
 				return "Equality-Intro: Left and right sides do not match.";
 			}),
 		elimination : new Justifier(
@@ -395,7 +395,7 @@ var rules = {
 				var proposedResult = proof.steps[step].getSentence();
 				if (equalityExpr[0] !== '=')
 					return "Equality-Elim: First referenced step is not an equality.";
-					
+
 				if (!semanticEq(elimExpr, proposedResult, equalityExpr[1], equalityExpr[2]))
 					return "Equality-Elim: Does not result in current step.";
 
@@ -424,7 +424,7 @@ function substitute(startExpr, a, b, bound) {
 			return [startExpr[0], startExpr[1],
 				substitute(startExpr[2], a, b, bound)];
 		}
-		
+
 		return [startExpr[0], substitute(startExpr[1], a, b, bound)];
 	} else if (startExpr[0] === 'id') {
 		if (startExpr.length === 2) { // our loverly base case
