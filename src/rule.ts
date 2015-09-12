@@ -1,5 +1,5 @@
 module Verifier {
-    export class Rule {
+    export class Rule implements IRule {
         constructor(
             private name: string,
             private type: string,
@@ -19,5 +19,13 @@ module Verifier {
         get SimpleVerifier() { return this.verifier || null; }
         get IntroVerifier() { return this.introduction || null; }
         get ElimVerifier() { return this.elimination || null; }
+    }
+
+    export interface IRule {
+        Name:string;
+        Type:string;
+        SimpleVerifier: any;
+        IntroVerifier: any;
+        ElimVerifier: any;
     }
 }

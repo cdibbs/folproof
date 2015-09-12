@@ -1,4 +1,4 @@
-///<reference path='rules.ts' />
+///<reference path='FOLRulebookFactory.ts' />
 ///<reference path='Utilities.ts' />
 ///<reference path='Statement.ts' />;
 ///<reference path='VerificationResult.ts' />
@@ -8,12 +8,15 @@ module Verifier {
     export class Verifier {
         public util:Utilities.Utility;
         public log:() => void;
+        private rulebookFactory: IRulebookFactory;
+        private rules:{ [id: string] : IRule };
 
         constructor(
             public debugMode:boolean = false)
         {
             this.util = new Utilities.Utility(debugMode);
             this.log = this.util.debug;
+            this.rulebookFactory = new FOLRulebookFactory(this.log);
         }
 
         public VerifyFromAST(ast: any): VerificationResult {
@@ -22,6 +25,7 @@ module Verifier {
         }
 
         public Verify(proof: Proof): VerificationResult {
+            this.rules = this.rulebookFactory.BuildRulebook();
             var result = new VerificationResult(true, "Proof is valid.");
             for (var i=0; i<proof.Steps.length; i++) {
                 result = this.ValidateStatement(result, proof, i);
@@ -74,10 +78,10 @@ module Verifier {
             var name = why[0].toLowerCase();
             if (name.split('.').length == 2)
                 name = name.split('.')[0] + ".";
-            var rule = rules[name];
+            var rule = this.rules[name];
             if (!rule) return "Cannot find rule: " + name;
-            if (rule.getType() === "simple" || rule.getType() === "derived") {
-                var fn = rule.getSimpleVerifier();
+            if (rule.Type === "simple" || rule.Type === "derived") {
+                var fn = rule.SimpleVerifier;
                 if (!fn) throw new Error("Not implemented for " + name);
                 return fn.exec;
             }
@@ -85,11 +89,11 @@ module Verifier {
             if (why[1]) {
                 var elimOrIntro = why[1].toLowerCase();
                 if ("introduction".indexOf(elimOrIntro) === 0) {
-                    var fn = rule.getIntroVerifier();
+                    var fn = rule.IntroVerifier;
                     if (!fn) throw new Error("Not implemented for " + name);
                     return fn.exec;
                 } else if ("elimination".indexOf(elimOrIntro) === 0) {
-                    var fn = rule.getElimVerifier();
+                    var fn = rule.ElimVerifier;
                     if (!fn) throw new Error("Not implemented for " + name);
                     return fn.exec;
                 }
