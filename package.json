@@ -1,32 +1,42 @@
 {
   "bugs": {
-	"url": "http://github.com/cdibbs/folproof/issues"  
+    "url": "http://github.com/cdibbs/folproof/issues"
   },
   "name": "folproof",
-	"author": "Chris Dibbern <c.dibbern@gmail.com>",
+  "author": "",
   "version": "0.1.1",
-	"engines" : { "npm" : ">=1.3.24" },
+  "engines": {
+    "npm": ">=1.3.24"
+  },
   "description": "A first-order logic proof verifier",
   "main": "./",
-  "bin" : "./cli.js",
-  "dependencies" : {
-	"nomnom": "1.5.2",
-	"path" : "0.4.9"
+  "bin": "./lib/cli.js",
+  "dependencies": {
+    "nomnom": "1.5.2",
+    "path": "0.4.9",
+    "typescript-require": "^0.2.9-1"
   },
   "devDependencies": {
-	"jison": "git://github.com/zaach/jison.git#5389a5890f",
-  "nodeunit" : "latest",
-  "browserify" : "latest"
+    "jison": "git://github.com/zaach/jison.git#5389a5890f",
+    "nodeunit": "latest",
+    "browserify": "latest"
   },
-	"preferGlobal" : true,
-  "scripts" : {
-    "test" : "make test"
+  "preferGlobal": true,
+  "scripts": {
+    "test": "make test"
   },
-  "repository": { "type" : "git", "url" : "git://github.com/cdibbs/folproof.git" },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/cdibbs/folproof.git"
+  },
   "keywords": [
-    "fol", "folproof", "proof", "logic", "language", "first-order"
+    "fol",
+    "folproof",
+    "proof",
+    "logic",
+    "language",
+    "first-order"
   ],
-  "author": "",
   "license": "MIT",
   "readmeFilename": "readme.md"
 }

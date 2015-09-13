@@ -130,3 +130,6 @@ module Verifier {
         }
     }
 }
+module.exports = {
+    Verifier : Verifier
+};
