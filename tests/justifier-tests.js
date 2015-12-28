@@ -1,9 +1,9 @@
-var Justifier = require("../src/justifier.js");
+var Justifier = require("../build/justifier.js");
 
 function dummyFn() { }
 
 exports["Test Justifier rejects unexpected params."] = function(test) {
-	var j = new Justifier({ hasPart : false, stepRefs : null, subst : false }, dummyFn);	
+	var j = new Justifier({ hasPart : false, stepRefs : null, subst : false }, dummyFn);
 	var msg = j.checkParams(1, null, null, null);
 	test.deepEqual(msg, [null, [], null], "Should return empty params, when params were expected empty.");
 	msg = j.checkParams(1, "1", null, null);
@@ -12,7 +12,7 @@ exports["Test Justifier rejects unexpected params."] = function(test) {
 	test.equal(typeof msg, "string", "Should return error, when steps given, but unexpected.");
 	msg = j.checkParams(1, null, null, "a/x");
 	test.equal(typeof msg, "string", "Should return error, when substitution given, but unexpected.");
-	
+
 	j = new Justifier({ }, dummyFn);
 	msg = j.checkParams(1, null, null, null);
 	test.deepEqual(msg, [null, [], null], "Omitted options should be treated like null expectations.");
@@ -64,9 +64,9 @@ exports["Test justifier rejects parts != 1 or 2"] = function(test) {
 
 exports["Test justifier accepts proper substitution format when expected"] = function(test) {
 	var j = new Justifier({ hasPart : false, stepRefs : null, subst : true }, dummyFn);
-	var msg = j.checkParams(1, null, null, null);	
+	var msg = j.checkParams(1, null, null, null);
 	test.equal(typeof msg, "string", "Should return error, when substitution expected, but not provided.");
-	var msg = j.checkParams(1, null, null, ["2gamma", "0x"]);	
+	var msg = j.checkParams(1, null, null, ["2gamma", "0x"]);
 	test.equal(typeof msg, "string", "Should return error, when substitution ids not valid ids.");
 	msg = j.checkParams(1, null, null, ["gamma2", "x0"]);
 	test.deepEqual(msg, [null, [], ["gamma2", "x0"]]);

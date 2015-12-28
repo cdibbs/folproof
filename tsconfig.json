@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "ES5",
+    "preserveConstEnums": true,
+    "emitDecoratorMetadata": true,
+    "sourceMap": true,
+    "experimentalDecorators": true,
+    "outDir": "build"
+  },
+  "exclude": [
+      "node_modules"
+  ]
+}
