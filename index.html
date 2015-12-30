@@ -1,15 +1,51 @@
-<html ng-app='app'>
+<html>
 <head>
 <title>FOLProof First-Order Logic Checker</title>
 <link rel="stylesheet" href="http://getbootstrap.com/dist/css/bootstrap.min.css">
 <link rel="stylesheet" href="http://getbootstrap.com/assets/css/docs.min.css">
-<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular.min.js"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular-route.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>
 <script type='text/javascript' src='folproof-parser.js'></script>
 <script type='text/javascript' src='folproof-web.js'></script>
-<script type='text/javascript' src='ng-folproof.js'></script>
 <script type='text/javascript' src='folproof-verifier.js'></script>
+<script type='text/javascript'>
+$(document).ready(function() {
+	var debugMode = true;
+	$("#parentheses").bind("click change", function() { $("#proof-input").keyup(); });
+	$("#proof-input").keyup(function(v) {
+		var proof = $(this).val();
+		var paren = $("#parentheses").val();
+		try {
+			parser.trace = function() { if (console && console.log) console.log(arguments); };
+			var ast = parser.parse(proof);
+			var result = folproof.Verifier.verifyFromAST(ast);
+			$("#result").text(result.message);
+			if (!result.valid) {
+				var str = "<p>Step: " + result.errorStep;
+				if (result.errorSrcLine)
+					str += ", Src Line: " + result.errorSrcLoc.first_line;
+				str += "</p>";
+				$("#result").append(str);
+				$("#result-box").css({ background: "", 'border-left' : "", color : "" });
+			} else {
+				$("#result-box").css({ background: "#ccffcc", 'border-left' : "3px solid green", color : "" });
+			}
+		} catch (err) {
+			$("#result").text(err);
+			$("#result-box").css({ background: "", 'border-left' : "", color : "" });
+			//throw err;
+		}
+		var html = folproofWeb.render(ast, { parentheses : paren });
+		$("#render-panel").empty().append(html);
+	});
+	$("#proof-input").keyup(); // force invocation on load
+	$("button.examples").click(function() {
+		var i = $(this).val();
+		var proof = $("#proof-input");
+		proof.val($("#example" + i).text().substr(1))
+		proof.keyup();
+	});
+});
+</script>
 <style type='text/css' rel='stylesheet'>
 #proof-input { height: 32em; width: 100%; font-family: monospace;}
 #render-panel { height: 21em; font-family: monospace; }
@@ -20,12 +56,10 @@
 .lineno { display: block; float: left; width: 1.8em; }
 .rule { clear: both; }
 #examples { display: none; }
-.valid-proof { background: '#ccffcc'; border-left: 5px solid green; }
-
 </style>
 </head>
 <body>
-	<div class='container' ng-controller='ProofController as ctrl'>
+	<div class='container'>
 		<div class='row'>
 			<div class='col-md-12'>
 				<h1>FOLProof</h1>
@@ -44,39 +78,49 @@
 						Javascript is enabled.
 					</p>
 					<strong>Examples:<strong>
-					<button class='examples' value='0' ng-click='ctrl.setProof(0)'>HW3 Problem 5</button>
-					<button class='examples' value='1' ng-click='ctrl.setProof(1)'>HW3 Problem 4</button>
-					<button class='examples' value='2' ng-click='ctrl.setProof(2)'>HW3 Problem 7</button>
-					<button class='examples' value='3' ng-click='ctrl.setProof(3)'>Page 115</button>
+					<button class='examples' value='0'>HW3 Problem 5</button>
+					<button class='examples' value='1'>HW3 Problem 4</button>
+					<button class='examples' value='2'>HW3 Problem 7</button>
+					<button class='examples' value='3'>Page 115</button>
 				</div>
 			</div>
 		</div>
 		<div class='row'>
 			<div id='leftcol' class='col-md-6'>
-				<textarea id='proof-input' ng-model='proofSrc'></textarea>
+				<textarea id='proof-input'>
+1 A.x(P(x) -> ~Q(x))	: premise
+2 | E.x(P(x) and Q(x))	: assumption
+  || with x0
+3 || P(x0) and Q(x0)	: assumption
+4 || P(x0)		: and elim1 3
+5 || P(x0) -> ~Q(x0)	: A.x/x0 elim 1
+6 || ~Q(x0)		: -> e 5,4
+7 || Q(x0)		: and elim2 3
+8 || contradiction	: not elim 6,7
+   ---
+9 | contradiction	: E.x/x0 elim 2,3-8
+  ---
+10 ~(E.x(P(x) and Q(x)))        : not introduction 2-9
+				</textarea>
 			</div>
 			<div id='rightcol' class='col-md-6'>
 			</div>
 			<div id='rightcol' class='col-md-6'>
-				<div id='render-panel' class='highlight' ng-bind-html='proofHtml'>
+				<div id='render-panel' class='highlight'>
 				</div>
 				<div id='options'>
 					<label>
 						Parentheses:
-						<select id='parentheses' ng-model='paren'>
+						<select id='parentheses'>
 							<option value='minimal'>Minimal (order-of-ops overrides)</option>
 							<option value='user' selected='selected'>User-defined</option>
 							<option value='explicit'>Explicit order-of-ops</option>
 						</select>
 					</label>
 				</div>
-				<div id='result-box' ng-class='{false:"bs-callout bs-callout-warning", true: "bs-callout valid-proof"}[result.valid]'>
+				<div id='result-box' class='bs-callout bs-callout-warning'>
 					<h4>Result:</h4>
-					<div id='result' ng-class='{true:"",false:invalid-proof}[result.valid]'>
-						<span ng-bind='result.message'></span>
-						<p ng-show='!result.valid'>
-							Step: <span ng-bind='result.errorStep'></span>, Src Line: <span ng-bind='result.errorSrcLoc.first_line'></span>
-						</p>
+					<div id='result'>
 					</div>
 				</div>
 			</div>
