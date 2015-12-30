@@ -7,21 +7,6 @@
   "installed": {
     "nodeunit/nodeunit.d.ts": {
       "commit": "1da639a106527e0c4010b354a1efe52a3059a291"
-    },
-    "sinon-chai/sinon-chai.d.ts": {
-      "commit": "dc9dabe74a5be62613b17a3605309783a12ff28a"
-    },
-    "assertion-error/assertion-error.d.ts": {
-      "commit": "dc9dabe74a5be62613b17a3605309783a12ff28a"
-    },
-    "sinon/sinon.d.ts": {
-      "commit": "dc9dabe74a5be62613b17a3605309783a12ff28a"
-    },
-    "chai/chai.d.ts": {
-      "commit": "dc9dabe74a5be62613b17a3605309783a12ff28a"
-    },
-    "node/node.d.ts": {
-      "commit": "dc9dabe74a5be62613b17a3605309783a12ff28a"
     }
   }
 }
