@@ -129,7 +129,7 @@ class Verifier {
     }
 }
 
-export = Verifier;
+export { Verifier };
 
 /*module.exports = {
     Verifier : Verifier
