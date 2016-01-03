@@ -1,18 +1,24 @@
 .PHONY: test folproof
+colorful := '\n\n\e[1;34m%-6s\e[m\n'
 
 all: folproof test
 
 folproof:
-	@printf "Compiling verifier from TypeScript...\n\t"
-	./node_modules/typescript/bin/tsc -t es5 --module commonjs --outFile build/verifier.js src/verifier.ts
-	@printf "\n\nCompiling FOLProof parser from Jison grammar...\n\t"
-	node ./node_modules/jison/lib/cli.js src/parser/parser.jison src/parser/parser.jisonlex
-	@printf "\n\nConcatenating parser and verifier...\n\t"
-	./node_modules/.bin/browserify --standalone folproof build/*.js > folproof-verifier.js
-	@printf "Done.\n\n"
+	@printf ${colorful} "Compiling verifier from TypeScript..."
+	./node_modules/typescript/bin/tsc -t es5 -d --module commonjs --outFile build/verifier/verifier.js src/verifier/
+	@printf ${colorful} "Compiling FOLProof parser from Jison grammar..."
+	if [ ! -d build/parser ]; then mkdir build/parser; fi
+	./node_modules/jison/lib/cli.js src/parser/parser.jison src/parser/parser.jisonlex -o build/parser/parser.js
+	@printf ${colorful} "Concatenating parser and verifier..."
+	./node_modules/.bin/browserify --standalone folproof build/verifier/*.js build/parser/*.js > folproof-verifier.js
+	@printf ${colorful} "Done building folproof.\n\n"
 
 test:
-	@printf "Running tests...\n"
+	@printf ${colorful} "Compiling tests..."
+	if [ ! -d build/tests ]; then mkdir build/tests; fi
+	./node_modules/typescript/bin/tsc -t es5 --module commonjs --outDir build src/tests/verifier-tests.ts
+
+	@printf ${colorful} "Running tests..."
 	./node_modules/nodeunit/bin/nodeunit build/tests/*.js
 
 clean:

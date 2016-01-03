@@ -1,4 +1,0 @@
-| a : assumption
-| a or b : or intro1 1
----
-a -> a or b : -> intro 1-2

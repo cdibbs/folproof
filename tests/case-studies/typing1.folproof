@@ -1,2 +1,0 @@
-  | with x0
-1 || not (P(x0) or not P(x0))

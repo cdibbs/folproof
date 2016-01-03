@@ -1,9 +1,10 @@
-///<reference path="../typings/tsd.d.ts"/>
-///<reference path="../src/parser/Parser.d.ts" />
+///<reference path="../../typings/tsd.d.ts"/>
+///<reference path="../parser/Parser.d.ts" />
+///<reference path="../verifier/verifier.d.ts"/>
 
 import {Test, ITestGroup} from 'nodeunit';
-import {Parser} from "../src/parser/parser";
-import {Verifier} from "../src/Verifier";
+import {Parser} from "../parser/parser";
+import {Verifier} from "../verifier/Verifier";
 import FS = require('fs');
 import Path = require('path');
 
