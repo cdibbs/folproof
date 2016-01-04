@@ -5,7 +5,7 @@ all: folproof test
 
 folproof:
 	@printf ${colorful} "Compiling verifier from TypeScript..."
-	./node_modules/typescript/bin/tsc -t es5 -d --module commonjs --outFile build/verifier/verifier.js src/verifier/
+	./node_modules/typescript/bin/tsc -t es5 -d --module commonjs --outDir build/verifier/ src/verifier/_VerifierBase/BaseVerifier.ts
 	@printf ${colorful} "Compiling FOLProof parser from Jison grammar..."
 	if [ ! -d build/parser ]; then mkdir build/parser; fi
 	./node_modules/jison/lib/cli.js src/parser/parser.jison src/parser/parser.jisonlex -o build/parser/parser.js
