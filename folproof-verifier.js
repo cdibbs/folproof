@@ -92,19 +92,19 @@ case 3: this.$ = $$[$0-2]; this.$.push($$[$0]);
 break;
 case 4: this.$ = []; 
 break;
-case 5: this.$ = ['folbox', $$[$0-2], $$[$0-4], this._$]; 
+case 5: this.$ = ['folbox', $$[$0-2], $$[$0-4], this._$];
 		if ($$[$0-2] && $$[$0-2][0] && $$[$0-2][0][0] == 'rule' && $$[$0-2][0][2].auto)
 			$$[$0-2][0][2] = ['assumption', null];
 	
 break;
-case 6: this.$ = ['box', $$[$0-2], this._$]; 
+case 6: this.$ = ['box', $$[$0-2], this._$];
 		if ($$[$0-2] && $$[$0-2][0] && $$[$0-2][0][0] == 'rule' && $$[$0-2][0][2].auto)
 			$$[$0-2][0][2] = ['assumption', null];
 	
 break;
 case 7: this.$ = $$[$0-1][0] != 'error'
 			? ['rule', $$[$0-1], $$[$0], this._$]
-			: $$[$0-1]; 
+			: $$[$0-1];
 		if (this.$[0] === 'rule' && !this.$[2]) {
 			this.$[2] = ['premise', null];
 			this.$[2].auto = true;
@@ -710,10 +710,10 @@ case 12:/* ignore digits, for now */
 break;
 case 13:
 				// Syntax: "[...] : ruleName [[elim/intro] [NumOrRange[, NumOrRange]*]]
-				
+
 				// strip the leading colon and spaces
 				yy_.yytext = yy_.yytext.substr(yy_.yytext.substr(1).search(/\S/));
-				
+
 				// find the beginning of the first line number
 				yy_.yytext = yy_.yytext.trim();
 				var pos = yy_.yytext.search(/\s+\d+/);
@@ -751,15 +751,19 @@ case 16:return 'EMPTYSET';
 break;
 case 17:return 25;
 break;
-case 18:return 36;
+case 18:return "UNARY_EXT";
 break;
-case 19:return 37;
+case 19:return "BINARY_EXT";
 break;
-case 20:return 17;
+case 20:return 36;
 break;
-case 21:return 39;
+case 21:return 37;
 break;
-case 22:
+case 22:return 17;
+break;
+case 23:return 39;
+break;
+case 24:
 				// remaining DEBOXes implied by EOF
 				var tokens = [];
 
@@ -771,15 +775,15 @@ case 22:
 				if (tokens.length) return tokens;
 				
 break;
-case 23: /* manually close an assumption box */
+case 25: /* manually close an assumption box */
 				this._log("MANUAL DEBOX");
 				this._iemitstack.shift();
 				return ['DEBOX', 'EOL'];
 				
 break;
-case 24:/* eat blank lines */
+case 26:/* eat blank lines */
 break;
-case 25:
+case 27:
 				/* Similar to the idea of semantic whitespace, we keep track of virtual
 				 * BOX/DEBOX characters based on a stack of | occurrences
 				 */
@@ -803,18 +807,18 @@ case 25:
 				    return tokens;
 				
 break;
-case 26:return 8; 
+case 28:return 8;
 break;
-case 27:/* ignore whitespace */
+case 29:/* ignore whitespace */
 break;
-case 28:return 2;
+case 30:return 2;
 break;
 }
 },
-rules: [/^(?:[\n\r]?#.*)/,/^(?:and\b)/,/^(?:or\b)/,/^(?:implies|->|=>)/,/^(?:iff|<->|=>)/,/^(?:not|~|!)/,/^(?:union\b)/,/^(?:intersection\b)/,/^(?:=)/,/^(?:every\b)/,/^(?:with\b)/,/^(?:of\b)/,/^(?:\d+)/,/^(?:(:.*))/,/^(?:E\.)/,/^(?:in\b)/,/^(?:empty\b)/,/^(?:A\.)/,/^(?:\()/,/^(?:\))/,/^(?:([a-zA-Z_][a-zA-Z_'"0-9\|]*))/,/^(?:,)/,/^(?:[\n\r]*$)/,/^(?:\n([\t \u00a0\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u3000])*\|*-+)/,/^(?:[\n\r]+([\t \u00a0\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u3000])*(?![^\n\r]))/,/^(?:[\n|^]([\t \u00a0\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u3000])*\d*([\t \u00a0\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u3000])*\|*)/,/^(?:\n)/,/^(?:([\t \u00a0\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u3000])+)/,/^(?:.*)/],
-conditions: {"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28],"inclusive":true}}
+rules: [/^(?:[\n\r]?#.*)/,/^(?:and\b)/,/^(?:or\b)/,/^(?:implies|->|=>)/,/^(?:iff|<->|=>)/,/^(?:not|~|!)/,/^(?:union\b)/,/^(?:intersection\b)/,/^(?:=)/,/^(?:every\b)/,/^(?:with\b)/,/^(?:of\b)/,/^(?:\d+)/,/^(?:(:.*))/,/^(?:E\.)/,/^(?:in\b)/,/^(?:empty\b)/,/^(?:A\.)/,/^(?:([a-zA-Z_][a-zA-Z_'"0-9\|]*)\.)/,/^(?:\.([a-zA-Z_][a-zA-Z_'"0-9\|]*)\.)/,/^(?:\()/,/^(?:\))/,/^(?:([a-zA-Z_][a-zA-Z_'"0-9\|]*))/,/^(?:,)/,/^(?:[\n\r]*$)/,/^(?:\n([\t \u00a0\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u3000])*\|*-+)/,/^(?:[\n\r]+([\t \u00a0\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u3000])*(?![^\n\r]))/,/^(?:[\n|^]([\t \u00a0\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u3000])*\d*([\t \u00a0\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u3000])*\|*)/,/^(?:\n)/,/^(?:([\t \u00a0\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u3000])+)/,/^(?:.*)/],
+conditions: {"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30],"inclusive":true}}
 });
-jisonLexerFn = lexer.setInput;
+var jisonLexerFn = lexer.setInput;
 lexer.setInput = function(input) {
         var debug = false;
         this._iemitstack = [0];
@@ -851,7 +855,208 @@ if (typeof module !== 'undefined' && require.main === module) {
 }
 }
 }).call(this,require('_process'))
-},{"_process":5,"fs":3,"path":4}],2:[function(require,module,exports){
+},{"_process":12,"fs":10,"path":11}],2:[function(require,module,exports){
+
+},{}],3:[function(require,module,exports){
+///<reference path="IJustification.ts" />
+
+},{}],4:[function(require,module,exports){
+///<reference path="IJustification.ts" />
+/**
+ * Represents the justification component of a proof line.
+ */
+var Justification = (function () {
+    /**
+     * @param ast     Abstract Syntax Tree fragment of the form ['justification',
+     *                ['name', 'A.', ['/', 'x', 'y']], 'intro'/'elim', '1'/'2',
+     *                [[a], [b,c], ...]]
+     */
+    function Justification(ast) {
+        this.name = ast[1][1];
+        this.sub1 = ast[1].length == 3 ? ast[1][3][1] : null;
+        this.sub2 = ast[1].length == 3 ? ast[1][3][2] : null;
+        this.type = ast[2];
+        this.side = ast[3];
+        this.lineRefs = ast[4];
+    }
+    Justification.prototype.ruleName = function () { return this.name; };
+    Justification.prototype.substitutionLeft = function () { return this.sub1; };
+    Justification.prototype.substitutionRight = function () { return this.sub2; };
+    Justification.prototype.ruleType = function () { return this.type; };
+    Justification.prototype.sideReference = function () { return this.side; };
+    Justification.prototype.lineReferences = function () { return this.lineRefs; };
+    return Justification;
+})();
+exports.Justification = Justification;
+
+},{}],5:[function(require,module,exports){
+///<reference path="IJustificationFactory.ts" />
+///<reference path="Justification.ts" />
+var Justification_1 = require("./Justification");
+var JustificationFactory = (function () {
+    function JustificationFactory() {
+    }
+    /**
+     * Takes an abstract syntax tree fragment representing a proof justification
+     * and returns an instance of the Justification object.
+     * @param ast   A justification, e.g., "PBC 1,3-5". For the moment, this
+     *              is a lexer-generated string array further parsed by a regex,
+     *              not a true AST.
+     * @returns     A Justification object.
+     */
+    JustificationFactory.prototype.buildFromASTFrag = function (ast) {
+        var processedAST = this.parseJustification(ast);
+        return new Justification_1.Justification(processedAST);
+    };
+    /**
+     * Takes a string representation of a Justification AST and parses it.
+     * TODO: Ideally, someday this will be handled via a separate parser with a
+     * well-defined, extensible grammar.
+     */
+    JustificationFactory.prototype.parseJustification = function (why) {
+        // input:
+        // yytext = [name, rtype, side, lineranges, sub]
+        // output:
+        // ['justification', ['name', 'A.', ['/', 'x', 'y']], 'intro'/'elim', '1'/'2', [[a], [b,c], ...]]
+        var name = this.parseName(why[0], why[4]), jType = why[1], jSide = why[2], jLineRanges = this.parseLineRanges(why[3]);
+        return ['justification', name, jType, jSide, jLineRanges];
+    };
+    JustificationFactory.prototype.parseName = function (jName, sub) {
+        var ast = ['name'];
+        var nameParts = jName.split('.');
+        if (nameParts.length == 2) {
+            nameParts[0] = nameParts[0] + ".";
+            ast.push(nameParts[0], ['/', nameParts[1], sub]);
+        }
+        else {
+            ast.push(jName);
+        }
+        return ast;
+    };
+    JustificationFactory.prototype.parseLineRanges = function (linesRaw) {
+        var lines = [];
+        for (var rline in linesRaw) {
+            var parts = rline.split('-');
+            if (parts.length == 2) {
+                lines.push([parseInt(parts[0]), parseInt(parts[1])]);
+            }
+            else {
+                lines.push(parseInt(parts[0]));
+            }
+        }
+        return lines;
+    };
+    return JustificationFactory;
+})();
+exports.JustificationFactory = JustificationFactory;
+
+},{"./Justification":4}],6:[function(require,module,exports){
+///<reference path='Statement.ts' />;
+var Proof = (function () {
+    function Proof() {
+        this.Steps = new Array();
+    }
+    return Proof;
+})();
+exports.Proof = Proof;
+
+},{}],7:[function(require,module,exports){
+///<reference path='Proof.ts' />
+///<reference path='Statement.ts' />;
+///<reference path='JustificationFactory.ts' />
+///<reference path='IJustificationFactory.ts' />
+///<reference path='Justification.ts' />
+var Proof_1 = require("./Proof");
+var Statement_1 = require("./Statement");
+/**
+ * Given a proof represented as an Abstract Syntax Tree output by our parser,
+ * preprocess it and return an object-oriented representation for consumption
+ * by our verifier.
+ */
+var ProofFactory = (function () {
+    function ProofFactory() {
+    }
+    /**
+     * Preprocesses an AST into a Proof object. Among other things, it generates
+     * variable scopes for assumption boxes.
+     * @param ast   An Abstract Syntax Tree returned by the proof parser.
+     * @return      An object of type Proof.
+     */
+    ProofFactory.prototype.Preprocess = function (ast) {
+        var proof = new Proof_1.Proof();
+        this.PreprocessBox(proof, ast, 0, []);
+        return proof;
+    };
+    ProofFactory.prototype.PreprocessBox = function (proof, ast, step, scope) {
+        for (var i = 0; i < ast.length; i++) {
+            if (ast[i][0] === 'rule') {
+                proof.Steps[step] = new Statement_1.Statement(ast[i][1], ast[i][2], scope, ast[i][3], i == 0, i == ast.length - 1);
+                step = step + 1;
+            }
+            else if (ast[i][0] === 'folbox') {
+                var newScope = scope.slice(0);
+                newScope.push(ast[i][2][1]);
+                step = this.PreprocessBox(proof, ast[i][1], step, newScope);
+            }
+            else if (ast[i][0] === 'box') {
+                var newScope = scope.slice(0);
+                newScope.push(null);
+                step = this.PreprocessBox(proof, ast[i][1], step, newScope);
+            }
+            else if (ast[i][0] === 'error') {
+                proof.Steps[step] = ast[i];
+            }
+        }
+        return step;
+    };
+    return ProofFactory;
+})();
+
+},{"./Proof":6,"./Statement":8}],8:[function(require,module,exports){
+var Statement = (function () {
+    function Statement(sentenceAST, justificationAST, scope, loc, isFirst, isLast) {
+        this.sentenceAST = sentenceAST;
+        this.justificationAST = justificationAST;
+        this.scope = scope;
+        this.loc = loc;
+        this.isFirst = isFirst;
+        this.isLast = isLast;
+    }
+    Object.defineProperty(Statement.prototype, "isFirstStmt", {
+        get: function () { return this.isFirst; },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Statement.prototype, "isLastStmt", {
+        get: function () { return this.isLast; },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Statement.prototype, "Sentence", {
+        get: function () { return this.sentenceAST; },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Statement.prototype, "Scope", {
+        get: function () { return this.scope; },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Statement.prototype, "Justification", {
+        get: function () { return this.justificationAST; },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Statement.prototype, "Meta", {
+        get: function () { return this.loc; },
+        enumerable: true,
+        configurable: true
+    });
+    return Statement;
+})();
+exports.Statement = Statement;
+
+},{}],9:[function(require,module,exports){
 var Utility = (function () {
     function Utility(debugMode) {
         if (debugMode === void 0) { debugMode = true; }
@@ -868,9 +1073,9 @@ var Utility = (function () {
     return Utility;
 })();
 
-},{}],3:[function(require,module,exports){
-
-},{}],4:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
+arguments[4][2][0].apply(exports,arguments)
+},{"dup":2}],11:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -1098,7 +1303,7 @@ var substr = 'ab'.substr(-1) === 'b'
 ;
 
 }).call(this,require('_process'))
-},{"_process":5}],5:[function(require,module,exports){
+},{"_process":12}],12:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -1191,5 +1396,5 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}]},{},[2,1])(2)
+},{}]},{},[2,3,4,5,6,7,8,9,1])(9)
 });

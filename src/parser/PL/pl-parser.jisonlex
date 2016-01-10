@@ -8,7 +8,6 @@ justify		":".*
 "and"									return 'AND';
 "or"									return 'OR';
 "implies"|"->"|"=>"		return 'IMPLIES';
-"iff"|"<->"|"=>"			return 'IFF';
 "not"|"~"|"!"					return 'NOT';
 "union"								return 'UNION';
 "intersection"				return 'INTERSECTION';

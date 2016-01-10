@@ -5,9 +5,3 @@ class ReasonFormat implements IReasonFormat {
   public StepRefs: string[]; // ("num" | "range")*
   public Substitution: boolean = false;
 }
-
-interface IReasonFormat {
-  HasPart?: boolean; // (true/false)
-  StepRefs: string[]; // ("num" | "range")*
-  Substitution?: boolean;
-}

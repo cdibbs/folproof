@@ -1,4 +1,4 @@
-/// <reference path="ReasonFormat.ts" />
+/// <reference path="IReasonFormat.ts" />
 
 class Justifier {
   constructor(

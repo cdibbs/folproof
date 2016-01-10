@@ -1,6 +1,17 @@
-var parser = require("../folproof-parser.js").parser;
+///<reference path="../../typings/tsd.d.ts"/>
+///<reference path="../parser/parser" />
 
-exports["Implication order is right-associative."] = function(test) {
+import { Test, ITestGroup } from 'nodeunit';
+import { Parser } from "../parser/parser";
+
+// Setup test group and mocks...
+var parserTests: ITestGroup = {
+  setUp: (callback) => { callback(); },
+  tearDown: (callback) => { callback(); }
+};
+
+parserTests["Implication order is right-associative."] = (test: Test) => {
+	var parser = new Parser();
 	var src = "a -> b -> c"; // a -> (b -> c)
 	var result = parser.parse(src);
 	result = result[0][1];
@@ -13,7 +24,8 @@ exports["Implication order is right-associative."] = function(test) {
 	test.done();
 };
 
-exports["And order is left to right."] = function(test) {
+parserTests["And order is left to right."] = (test: Test) => {
+	var parser = new Parser();
 	var src = "a and b and c";
 	var result = parser.parse(src);
 	result = result[0][1];
@@ -25,7 +37,8 @@ exports["And order is left to right."] = function(test) {
 	test.done();
 };
 
-exports["Or order is left to right."] = function(test) {
+parserTests["Or order is left to right."] = (test: Test) => {
+	var parser = new Parser();
 	var src = "a or b or c"; // (a or b) or c
 	var result = parser.parse(src);
 	result = result[0][1];
@@ -37,7 +50,8 @@ exports["Or order is left to right."] = function(test) {
 	test.done();
 };
 
-exports["Not precedes and."] = function(test) {
+parserTests["Not precedes and."] = (test: Test) => {
+	var parser = new Parser();
 	var src = "not a and b"; // (not a) and b
 	var result = parser.parse(src);
 	result = result[0][1];
@@ -49,7 +63,8 @@ exports["Not precedes and."] = function(test) {
 	test.done();
 };
 
-exports["And precedes or."] = function(test) {
+parserTests["And precedes or."] = (test: Test) => {
+	var parser = new Parser();
 	var src = "a or b and c"; // a or (b and c)
 	var result = parser.parse(src);
 	result = result[0][1];
@@ -62,7 +77,8 @@ exports["And precedes or."] = function(test) {
 	test.done();
 };
 
-exports["Exists binds stronger than implication."] = function(test) {
+parserTests["Exists binds stronger than implication."] = (test: Test) => {
+	var parser = new Parser();
 	var src = "E.x x -> y";
 	var result = parser.parse(src);
 	result = result[0][1];
@@ -73,7 +89,8 @@ exports["Exists binds stronger than implication."] = function(test) {
 	test.done();
 };
 
-exports["Forall binds stronger than implication."] = function(test) {
+parserTests["Forall binds stronger than implication."] = (test: Test) => {
+	var parser = new Parser();
 	var src = "A.x x -> y";
 	var result = parser.parse(src);
 	result = result[0][1];
@@ -83,3 +100,17 @@ exports["Forall binds stronger than implication."] = function(test) {
 	test.equal(result[2][1], 'y');
 	test.done();
 };
+
+parserTests["Can parse unary extension operators."] = (test: Test) => {
+	var parser = new Parser();
+	// future p and global q implies p weak-until r
+	console.log("Running!");
+	var src = "F. p and G. q -> p .W. r";
+	var result = parser.parse(src);
+
+	result = result[0][1];
+	test.equal(result[0], 'F.');
+	test.done();
+};
+
+export { parserTests }
