@@ -1,18 +1,19 @@
-/// <reference path='Utilities.ts' />
-/// <reference path='Rule.ts' />
-/// <reference path='Justifier.ts' />
-/// <reference path='IRulebookFactory.ts' />
+/// <reference path='../_VerifierBase/Rule.ts' />
+/// <reference path='../_VerifierBase/Justifier.ts' />
+/// <reference path='../_VerifierBase/IRulebookFactory.ts' />
 
+import { Rule } from "../_VerifierBase/Rule";
+import { Justifier } from "../_VerifierBase/Justifier";
 
-    class FOLRulebookFactory implements IRulebookFactory {
-        constructor(
-            private debug: (...args: any[]) => void = () => {})
-        {
-        }
+  class FOLRulebookFactory implements IRulebookFactory {
+    constructor(
+        private debug: (...args: any[]) => void = () => {})
+    {
+    }
 
-        BuildRulebook(): { [id: string] : IRule } {
-            return this.rules;
-        }
+    BuildRulebook(): { [id: string] : IRule } {
+        return this.rules;
+    }
 
         private rules: { [id: string] : IRule } =
         {
@@ -548,3 +549,5 @@
             return newo;
         }
     }
+
+export { FOLRulebookFactory }

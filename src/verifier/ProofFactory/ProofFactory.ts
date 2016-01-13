@@ -46,3 +46,5 @@ class ProofFactory {
       return step;
   }
 }
+
+export { ProofFactory }

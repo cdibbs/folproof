@@ -12,8 +12,11 @@ folproof:
 	./node_modules/jison/lib/cli.js src/parser/PL/pl-parser.jison src/parser/PL/pl-parser.jisonlex -o build/parser/PL/pl-parser.js
 	if [ ! -d build/parser/FOL ]; then mkdir -p build/parser/FOL; fi
 	./node_modules/jison/lib/cli.js src/parser/FOL/fol-parser.jison src/parser/FOL/fol-parser.jisonlex -o build/parser/FOL/fol-parser.js
+	@printf ${colorful} "Compiling CLI..."
+	if [ ! -d build/console ]; then mkdir -p build/console; fi
+	./node_modules/typescript/bin/tsc -t es5 --module commonjs --outFile build/console/cli.js src/console/cli.ts
 	@printf ${colorful} "Concatenating parser and verifier..."
-	./node_modules/.bin/browserify --standalone folproof build/verifier/*.js build/parser/*.js > folproof-verifier.js
+	./node_modules/.bin/browserify --standalone folproof build/verifier/*.js build/parser/**/*.js > folproof-verifier.js
 	@printf ${colorful} "Done building folproof.\n\n"
 
 test:

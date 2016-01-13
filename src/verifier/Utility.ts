@@ -11,8 +11,4 @@ class Utility {
     }
 }
 
-interface IUtility {
-  debugMode:boolean;
-
-  debug(...args: any[]): void;
-}
+export { Utility }

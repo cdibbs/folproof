@@ -1,5 +1,5 @@
 ///<reference path='IRulebookFactory.ts' />
-///<reference path='../Utilities.ts' />
+///<reference path='../Utility.ts' />
 ///<reference path='VerificationResult.ts' />
 ///<reference path='../ProofFactory/Proof.ts' />
 
