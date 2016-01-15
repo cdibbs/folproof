@@ -10,7 +10,7 @@
   },
   "description": "A first-order logic proof verifier",
   "main": "./",
-  "bin": "./lib/cli.js",
+  "bin": "./lib/wrapper.js",
   "dependencies": {
     "es6-collections": "^0.5.5",
     "nomnom": "1.5.2",

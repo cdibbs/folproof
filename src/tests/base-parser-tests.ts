@@ -1,8 +1,8 @@
 ///<reference path="../../typings/tsd.d.ts"/>
-///<reference path="../parser/parser" />
+///<reference path="../parsers/PL/pl" />
 
 import { Test, ITestGroup } from 'nodeunit';
-import { Parser } from "../parser/PL/pl-parser";
+import { Parser } from "../parsers/PL/pl";
 
 class PredLogParserTestFactory {
   getParserTests(MyParser: new () => Parser): ITestGroup {

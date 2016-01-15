@@ -1,8 +1,8 @@
 ///<reference path="../../typings/tsd.d.ts"/>
-///<reference path="../parser/parser" />
+///<reference path="../parsers/FOL/fol" />
 
 import { Test, ITestGroup } from 'nodeunit';
-import { Parser } from "../parser/FOL/fol-parser";
+import { Parser } from "../parsers/FOL/fol";
 import { PredLogParserTestFactory } from "./base-parser-tests";
 
 var parserTestsFOL = new PredLogParserTestFactory().getParserTests(Parser);
