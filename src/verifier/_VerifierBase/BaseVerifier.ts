@@ -2,6 +2,7 @@
 ///<reference path='../IUtility.ts' />
 ///<reference path='VerificationResult.ts' />
 ///<reference path='../ProofFactory/Proof.ts' />
+///<reference path='../ProofFactory/IJustification.ts' />
 
 import { Proof } from "../ProofFactory/Proof";
 import { VerificationResult } from "./VerificationResult";
@@ -53,13 +54,11 @@ class BaseVerifier {
           return new VerificationResult(false, validator, step + 1, stmt.Meta);
         }
 
-        throw new Error("Unknown validator type: " + (typeof validator));
+        throw new Error(`Unknown validator type ${(typeof validator)} for ${(typeof why)} ${why}.`);
     }
 
-    private LookupValidator(why:any) {
-        var name = why[0].toLowerCase();
-        if (name.split('.').length == 2)
-            name = name.split('.')[0] + ".";
+    private LookupValidator(why:IJustification) {
+        var name = why.ruleName();
         var rule = this.rules[name];
         if (!rule) return "Cannot find rule: " + name;
         if (rule.Type === "simple" || rule.Type === "derived") {

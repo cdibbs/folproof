@@ -12,8 +12,8 @@ import nomnom = require('nomnom');
 var pkg = require('../../package.json');
 
 class Program {
-	public main(opts: any = this.parseCmdLine()): void {
-    if (opts.file) {
+	public main(opts:any = this.parseCmdLine()): void {
+		if (opts.file) {
         var raw = fs.readFileSync(path.normalize(opts.file), 'utf8');
         var ast, proof, result;
         //try {

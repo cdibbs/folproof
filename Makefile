@@ -13,11 +13,10 @@ folproof:
 	if [ ! -d build/parsers/FOL ]; then mkdir -p build/parsers/FOL; fi
 	./node_modules/jison/lib/cli.js src/parsers/FOL/fol-parser.jison src/parsers/FOL/fol-parser.jisonlex -o build/parsers/FOL/fol.js
 	./node_modules/typescript/bin/tsc -t es5 -d --module commonjs --outDir build/parsers/ src/parsers/parsers.ts
-
 	@printf ${colorful} "Compiling CLI..."
 	if [ ! -d build/console ]; then mkdir -p build/console; fi
-	./node_modules/typescript/bin/tsc -t es5 --module commonjs --outDir build/ src/console/cli.ts
-	cp src/console/wrapper.js build/console/
+	./node_modules/typescript/bin/tsc -t es5 --module commonjs --outDir build/ src/console/program.ts
+	cp src/console/cli.js build/console/
 	@printf ${colorful} "Concatenating parser and verifier..."
 	./node_modules/.bin/browserify --standalone folproof build/verifier/*.js build/parser/**/*.js > folproof-verifier.js
 	@printf ${colorful} "Done building folproof.\n\n"
@@ -27,7 +26,7 @@ test:
 	if [ ! -d build/tests ]; then mkdir build/tests; fi
 	./node_modules/typescript/bin/tsc -t es5 --module commonjs --outDir build/tests src/tests/parser-tests-*.ts
 	@printf ${colorful} "Running tests..."
-	./node_modules/nodeunit/bin/nodeunit build/tests/parser*.js
+	./node_modules/nodeunit/bin/nodeunit build/tests/test*.js
 
 clean:
-	rm build/*.js
+	rm build/*.js -r

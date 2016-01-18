@@ -2284,6 +2284,7 @@ exports.Proof = Proof;
 ///<reference path='JustificationFactory.ts' />
 ///<reference path='IJustificationFactory.ts' />
 ///<reference path='Justification.ts' />
+var JustificationFactory_1 = require("./JustificationFactory");
 var Proof_1 = require("./Proof");
 var Statement_1 = require("./Statement");
 /**
@@ -2293,6 +2294,7 @@ var Statement_1 = require("./Statement");
  */
 var ProofFactory = (function () {
     function ProofFactory() {
+        this.justificationFactory = new JustificationFactory_1.JustificationFactory();
     }
     /**
      * Preprocesses an AST into a Proof object. Among other things, it generates
@@ -2308,7 +2310,8 @@ var ProofFactory = (function () {
     ProofFactory.prototype.preprocessBox = function (proof, ast, step, scope) {
         for (var i = 0; i < ast.length; i++) {
             if (ast[i][0] === 'rule') {
-                proof.Steps[step] = new Statement_1.Statement(ast[i][1], ast[i][2], scope, ast[i][3], i == 0, i == ast.length - 1);
+                var justif = this.justificationFactory.buildFromASTFrag(ast[i][2]);
+                proof.Steps[step] = new Statement_1.Statement(ast[i][1], justif, scope, ast[i][3], i == 0, i == ast.length - 1);
                 step = step + 1;
             }
             else if (ast[i][0] === 'folbox') {
@@ -2331,11 +2334,15 @@ var ProofFactory = (function () {
 })();
 exports.ProofFactory = ProofFactory;
 
-},{"./Proof":10,"./Statement":12}],12:[function(require,module,exports){
+},{"./JustificationFactory":9,"./Proof":10,"./Statement":12}],12:[function(require,module,exports){
+///<reference path='IJustification.ts' />
+///<reference path='Justification.ts' />
+var Justification_1 = require("./Justification");
 var Statement = (function () {
     function Statement(sentenceAST, justificationAST, scope, loc, isFirst, isLast) {
         this.sentenceAST = sentenceAST;
         this.justificationAST = justificationAST;
+        this.justification = new Justification_1.Justification(this.justificationAST);
         this.scope = scope;
         this.loc = loc;
         this.isFirst = isFirst;
@@ -2362,7 +2369,7 @@ var Statement = (function () {
         configurable: true
     });
     Object.defineProperty(Statement.prototype, "Justification", {
-        get: function () { return this.justificationAST; },
+        get: function () { return this.justification; },
         enumerable: true,
         configurable: true
     });
@@ -2375,7 +2382,7 @@ var Statement = (function () {
 })();
 exports.Statement = Statement;
 
-},{}],13:[function(require,module,exports){
+},{"./Justification":8}],13:[function(require,module,exports){
 var Utility = (function () {
     function Utility(debugMode) {
         if (debugMode === void 0) { debugMode = true; }
@@ -2420,6 +2427,7 @@ exports.FOLVerifier = FOLVerifier_1.FOLVerifier;
 ///<reference path='../IUtility.ts' />
 ///<reference path='VerificationResult.ts' />
 ///<reference path='../ProofFactory/Proof.ts' />
+///<reference path='../ProofFactory/IJustification.ts' />
 var VerificationResult_1 = require("./VerificationResult");
 var BaseVerifier = (function () {
     function BaseVerifier(util, rulebookFactory) {
@@ -2460,12 +2468,10 @@ var BaseVerifier = (function () {
         else if (typeof validator === "string") {
             return new VerificationResult_1.VerificationResult(false, validator, step + 1, stmt.Meta);
         }
-        throw new Error("Unknown validator type: " + (typeof validator));
+        throw new Error("Unknown validator type " + (typeof validator) + " for " + (typeof why) + " " + why + ".");
     };
     BaseVerifier.prototype.LookupValidator = function (why) {
-        var name = why[0].toLowerCase();
-        if (name.split('.').length == 2)
-            name = name.split('.')[0] + ".";
+        var name = why.ruleName();
         var rule = this.rules[name];
         if (!rule)
             return "Cannot find rule: " + name;
