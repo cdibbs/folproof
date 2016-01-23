@@ -18,8 +18,8 @@ class Justification implements IJustification {
    */
   public constructor(ast: any) {
     this.name = ast[1][1];
-    this.sub1 = ast[1].length == 3 ? ast[1][3][1] : null;
-    this.sub2 = ast[1].length == 3 ? ast[1][3][2] : null;
+    this.sub1 = ast[1].length == 3 ? ast[1][2][1] : null;
+    this.sub2 = ast[1].length == 3 ? ast[1][2][2] : null;
     this.type = ast[2];
     this.side = ast[3];
     this.lineRefs = ast[4];
@@ -31,6 +31,10 @@ class Justification implements IJustification {
   public ruleType() { return this.type; }
   public sideReference() { return this.side; }
   public lineReferences(): number[][] { return this.lineRefs; }
+
+  public toString() {
+    return `${this.ruleName()} ${this.ruleType()}`;
+  }
 }
 
 export { Justification }

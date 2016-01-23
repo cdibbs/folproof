@@ -9,8 +9,8 @@ class Justifier {
     console.log(debug, reasonFormat, callback);
   }
 
-  public Exec(proof, step, part, steps, subst) {
-      this.debug(step, part, steps, subst);
+  public Exec(proof, step) {
+      this.debug("%j %j", proof, step);
       var checked = this.checkParams(step, part, steps, subst);
       if (typeof checked === "string") return checked;
       return this.callback(proof, step, checked[0], checked[1], checked[2]);

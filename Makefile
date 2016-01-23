@@ -18,15 +18,15 @@ folproof:
 	./node_modules/typescript/bin/tsc -t es5 --module commonjs --outDir build/ src/console/program.ts
 	cp src/console/cli.js build/console/
 	@printf ${colorful} "Concatenating parser and verifier..."
-	./node_modules/.bin/browserify --standalone folproof build/verifier/*.js build/parser/**/*.js > folproof-verifier.js
+	./node_modules/.bin/browserify --standalone folproof build/verifier/*.js build/parsers/**/*.js > folproof-verifier.js
 	@printf ${colorful} "Done building folproof.\n\n"
 
 test:
 	@printf ${colorful} "Compiling tests..."
 	if [ ! -d build/tests ]; then mkdir build/tests; fi
-	./node_modules/typescript/bin/tsc -t es5 --module commonjs --outDir build/tests src/tests/parser-tests-*.ts
+	./node_modules/typescript/bin/tsc -t es5 --module commonjs --outDir build/tests src/tests/test-*.ts
 	@printf ${colorful} "Running tests..."
 	./node_modules/nodeunit/bin/nodeunit build/tests/test*.js
 
 clean:
-	rm build/*.js -r
+	rm build/**/* -r

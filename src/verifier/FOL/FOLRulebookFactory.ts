@@ -1,14 +1,23 @@
 /// <reference path='../_VerifierBase/Rule.ts' />
 /// <reference path='../_VerifierBase/Justifier.ts' />
 /// <reference path='../_VerifierBase/IRulebookFactory.ts' />
+/// <reference path='../_VerifierBase/VerificationResult.ts' />
 
 import { Rule } from "../_VerifierBase/Rule";
 import { Justifier } from "../_VerifierBase/Justifier";
+import { VerificationResult } from "../_VerifierBase/VerificationResult";
 
   class FOLRulebookFactory implements IRulebookFactory {
     constructor(
         private debug: (...args: any[]) => void = () => {})
     {
+    }
+
+    FetchRule(name: string) {
+      if (this.rules[name])
+        return this.rules[name];
+
+      return null;
     }
 
     BuildRulebook(): { [id: string] : IRule } {
@@ -21,7 +30,7 @@ import { Justifier } from "../_VerifierBase/Justifier";
                 Name : "Premise",
                 Type : "simple",
                 SimpleVerifier : new Justifier(null,
-                    (proof, step):any => { return true; })
+                    (proof, step):any => new VerificationResult(true))
             },
             "assumption" : <Rule> {
                 Name : "Assumption",

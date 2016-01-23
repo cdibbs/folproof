@@ -11,10 +11,10 @@ class Statement {
     private isFirst: boolean;
     private isLast:boolean;
 
-    constructor(sentenceAST, justificationAST, scope, loc, isFirst, isLast) {
+    constructor(sentenceAST: any, justification: IJustification,
+      scope: any, loc: any, isFirst: boolean, isLast: boolean) {
         this.sentenceAST = sentenceAST;
-        this.justificationAST = justificationAST;
-        this.justification = new Justification(this.justificationAST);
+        this.justification = justification;
         this.scope = scope;
         this.loc = loc;
         this.isFirst = isFirst;

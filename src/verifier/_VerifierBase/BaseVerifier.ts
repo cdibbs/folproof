@@ -11,7 +11,6 @@ class BaseVerifier {
     public util:IUtility;
     public log:() => void;
     private rulebookFactory: IRulebookFactory;
-    private rules:{ [id: string] : IRule };
 
     constructor(util: IUtility, rulebookFactory: IRulebookFactory)
     {
@@ -21,7 +20,6 @@ class BaseVerifier {
     }
 
     public Verify(proof: Proof): VerificationResult {
-        this.rules = this.rulebookFactory.BuildRulebook();
         for (var i=0; i<proof.Steps.length; i++) {
             var result = this.ValidateStatement(proof, i);
             if (! result.Valid) {
@@ -36,12 +34,16 @@ class BaseVerifier {
         if (stmt[0] === 'error')
           return new VerificationResult(false, "Proof invalid due to syntax errors.", step + 1);
 
-        var why = stmt.Justification;
-        var newv = null;
-        if (why[0].split('.').length == 2)
-            newv = why[0].split('.')[1];
-        var validator = this.LookupValidator(why);
-        if (typeof validator === 'function') {
+        //var why = stmt.Justification;
+        //var newv = null;
+        /*if (why[0].split('.').length == 2)
+            newv = why[0].split('.')[1];*/
+        var validator = this.rulebookFactory.FetchRule(stmt.Justification.ruleName());
+        if (validator == null)
+          return new VerificationResult(false, `Rule not found: ${stmt.Justification}.`)
+
+        return validator.Exec(proof, step);
+        /*if (typeof validator === 'function') {
             var part = why[2], lines = why[3];
             var subst = null;
             if (newv && why[4]) subst = [newv, why[4]];
@@ -52,7 +54,7 @@ class BaseVerifier {
             return new VerificationResult(false, isValid, step + 1, stmt.Meta);
         } else if (typeof validator === "string") {
           return new VerificationResult(false, validator, step + 1, stmt.Meta);
-        }
+        }*/
 
         throw new Error(`Unknown validator type ${(typeof validator)} for ${(typeof why)} ${why}.`);
     }

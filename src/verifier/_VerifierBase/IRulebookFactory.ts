@@ -1,5 +1,6 @@
 ///<reference path="IRule.ts" />
 
   interface IRulebookFactory {
-      BuildRulebook(): { [id: string] : IRule };
+    FetchRule(name: string): IRule;
+    BuildRulebook(): { [id: string] : IRule };
   }

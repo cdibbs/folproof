@@ -18,6 +18,15 @@ class Rule implements IRule {
     get SimpleVerifier() { return this.verifier || null; }
     get IntroVerifier() { return this.introduction || null; }
     get ElimVerifier() { return this.elimination || null; }
+    Exec() {
+      if (this.Type() == "intro")
+        return this.IntroVerifier().Exec();
+      else if (this.Type() == "elim")
+        return this.ElimVerifier().Exec();
+      else if (this.Type() == "simple")
+        return this.SimpleVerifer().Exec(proof, step);
+      throw new Error("Please help!");
+    }
 }
 
 export { Rule }
