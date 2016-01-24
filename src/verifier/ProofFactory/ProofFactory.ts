@@ -1,12 +1,12 @@
-///<reference path='Proof.ts' />
-///<reference path='Statement.ts' />;
+///<reference path='../Data/IProof.ts' />
+///<reference path='../Data/Statement.ts' />;
 ///<reference path='JustificationFactory.ts' />
 ///<reference path='IJustificationFactory.ts' />
-///<reference path='Justification.ts' />
+///<reference path='../Data/Justification.ts' />
 
 import { JustificationFactory } from "./JustificationFactory";
-import { Proof } from "./Proof";
-import { Statement } from "./Statement";
+import { Proof } from "../Data/Proof";
+import { Statement } from "../Data/Statement";
 
 /**
  * Given a proof represented as an Abstract Syntax Tree output by our parser,
@@ -21,7 +21,7 @@ class ProofFactory {
    * @param ast   An Abstract Syntax Tree returned by the proof parser.
    * @return      An object of type Proof.
    */
-  public preprocess(ast:any):Proof {
+  public preprocess(ast:any):IProof {
       var proof = new Proof();
       this.preprocessBox(proof, ast, 0, []);
       return proof;

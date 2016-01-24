@@ -1,4 +1,4 @@
-///<reference path="IJustification.ts" />
+///<reference path="../Data/IJustification.ts" />
 
 interface IJustificationFactory {
   buildFromASTFrag(ast: any): IJustification;

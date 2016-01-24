@@ -1,4 +1,6 @@
-class VerificationResult {
+///<reference path="IVerificationResult.ts" />
+
+class VerificationResult implements IVerificationResult {
   constructor(
       public Valid:boolean = false,
       public Message:string = "",

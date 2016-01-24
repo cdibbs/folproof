@@ -3,7 +3,7 @@
 ///<reference path="../verifier/Verifiers" />
 ///<reference path="../verifier/ProofFactory/ProofFactory" />
 
-import { FOLVerifier } from "../verifier/Verifiers";
+import { PLVerifier } from "../verifier/Verifiers";
 import { ProofFactory } from "../verifier/ProofFactory/ProofFactory";
 import { FOL, PL } from "../parsers/parsers";
 import fs = require('fs');
@@ -19,7 +19,7 @@ class Program {
         //try {
        		ast = new FOL.Parser().parse(raw);
 					proof = new ProofFactory().preprocess(ast);
-        	result = new FOLVerifier().Verify(proof);
+        	result = new PLVerifier().Verify(proof);
 		console.log(result);
         /*} catch(ex) {
         	console.log(JSON.stringify(ast, null, 2));

@@ -1,7 +1,7 @@
 ///<reference path="IJustificationFactory.ts" />
-///<reference path="Justification.ts" />
+///<reference path="../Data/Justification.ts" />
 
-import { Justification } from "./Justification";
+import { Justification } from "../Data/Justification";
 
 class JustificationFactory implements IJustificationFactory {
 

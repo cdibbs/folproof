@@ -1,15 +1,16 @@
 ///<reference path='IRulebookFactory.ts' />
 ///<reference path='../IUtility.ts' />
-///<reference path='VerificationResult.ts' />
-///<reference path='../ProofFactory/Proof.ts' />
-///<reference path='../ProofFactory/IJustification.ts' />
+///<reference path='../Data/VerificationResult.ts' />
+///<reference path='../Data/Proof.ts' />
+///<reference path='../Data/IJustification.ts' />
 
-import { Proof } from "../ProofFactory/Proof";
-import { VerificationResult } from "./VerificationResult";
+import { Proof } from "../Data/Proof";
+import { VerificationResult } from "../Data/VerificationResult";
+import { ValidResult } from "../Data/ValidResult";
 
 class BaseVerifier {
     public util:IUtility;
-    public log:() => void;
+    public log:(... args: any[]) => void;
     private rulebookFactory: IRulebookFactory;
 
     constructor(util: IUtility, rulebookFactory: IRulebookFactory)
@@ -34,56 +35,116 @@ class BaseVerifier {
         if (stmt[0] === 'error')
           return new VerificationResult(false, "Proof invalid due to syntax errors.", step + 1);
 
-        //var why = stmt.Justification;
-        //var newv = null;
-        /*if (why[0].split('.').length == 2)
-            newv = why[0].split('.')[1];*/
-        var validator = this.rulebookFactory.FetchRule(stmt.Justification.ruleName());
+        var validator = this.rulebookFactory.FetchRule(stmt.Justification.ruleName);
         if (validator == null)
-          return new VerificationResult(false, `Rule not found: ${stmt.Justification}.`)
+          return new VerificationResult(false, `Rule not found: ${stmt.Justification}.`);
+          
+        var type = proof.Steps[step].Justification.ruleType;
+        var formatResult = this.CheckFormat(validator.ReasonFormat(type), proof, step);
+        if (! formatResult.Valid) return formatResult;
 
-        return validator.Exec(proof, step);
-        /*if (typeof validator === 'function') {
-            var part = why[2], lines = why[3];
-            var subst = null;
-            if (newv && why[4]) subst = [newv, why[4]];
-            var isValid = validator(proof, step, part, lines, subst);
-            if (isValid === true) {
-              return new VerificationResult(true, "Proof valid.");
-            }
-            return new VerificationResult(false, isValid, step + 1, stmt.Meta);
-        } else if (typeof validator === "string") {
-          return new VerificationResult(false, validator, step + 1, stmt.Meta);
-        }*/
+        var partRef = proof.Steps[step].Justification.sideReference;
+        var stepRefs = proof.Steps[step].Justification.lineReferences;
+        return validator.Exec(proof, step, partRef - 1, stepRefs);
+    }
+    
+    public CheckFormat(format: IReasonFormat, proof: IProof, step: number): IVerificationResult {
+        this.log("%j %j", proof, step);
 
-        throw new Error(`Unknown validator type ${(typeof validator)} for ${(typeof why)} ${why}.`);
+        if (step < 1 || step > proof.Steps.length)
+            return new VerificationResult(false, `Step ${step} out of range (1 - ${proof.Steps.length}).`);
+
+        var j = proof.Steps[step].Justification;
+        // 'typeof' hacks until interface type checking implemented...
+        var vPartNum = this.checkPartNumber(format, proof, j.sideReference);
+        if (typeof vPartNum === "string")
+            return new VerificationResult(false, vPartNum);
+
+        var vSteps = this.checkSteps(format, proof, j.lineReferences);
+        if (typeof vSteps === "string")
+            return new VerificationResult(false, vSteps);
+
+        var vSubst = this.checkSubstitution(format, proof, j.substitution);
+        if (typeof vSubst === "string")
+            return new VerificationResult(false, vSubst);
+
+        return new ValidResult();
     }
 
-    private LookupValidator(why:IJustification) {
-        var name = why.ruleName();
-        var rule = this.rules[name];
-        if (!rule) return "Cannot find rule: " + name;
-        if (rule.Type === "simple" || rule.Type === "derived") {
-            var fn = rule.SimpleVerifier;
-            if (!fn) throw new Error("Not implemented for " + name);
-            return fn.exec;
+    public checkPartNumber(format: IReasonFormat, proof: IProof, sideReference: number): any {
+
+    }
+
+    public checkSteps(format: IReasonFormat, proof: IProof, stepRefs: number[][]): any {
+
+    }
+
+    public checkSubstitution(format: IReasonFormat, proof: IProof, subst: ISubstitution): any {
+
+    }
+
+    private checkParams(format, proof, step): any {
+        var steps = proof.Steps;
+        var part = steps[step].Justification.sideReference;
+        var subst = steps[step].Justification.substitution;
+        if (format === null) {
+            if (steps != null || subst != null || part != null)
+                return `Justification '${steps[step].Justification.ruleName}' does not permit parameters.`;
+            return [];
         }
 
-        if (why[1]) {
-            var elimOrIntro = why[1].toLowerCase();
-            if ("introduction".indexOf(elimOrIntro) === 0) {
-                var fn = rule.IntroVerifier;
-                if (!fn) throw new Error("Not implemented for " + name);
-                return fn.exec;
-            } else if ("elimination".indexOf(elimOrIntro) === 0) {
-                var fn = rule.ElimVerifier;
-                if (!fn) throw new Error("Not implemented for " + name);
-                return fn.exec;
+        var partNum = null, refNums = [], w = null;
+        if (format.HasPart) {
+            partNum = parseInt(part);
+            if (!(partNum == 1 || partNum == 2))
+                return "Part number must be 1 or 2";
+        } else
+            if (part != null)
+                return "Step part (e.g., 2 in 'and e2') not applicable, in this context.";
+
+        if (format.StepRefs) {
+            if (steps.length != format.StepRefs.length) {
+                var f = format.StepRefs
+                    .map(function(e) { return e == "num" ? "n" : "n-m" });
+                return "Step reference mismatch; required format: " + f.join(", ") + ".";
             }
-            return "Cannot determine elim/intro rule type from " + elimOrIntro;
+            for (var i = 0; i < steps.length; i++) {
+                if (format.StepRefs[i] == "num") {
+                    var n = parseInt(steps[i]) - 1;
+                    if (!(n >= 0 && n < step))
+                        return "Step reference #" + (i + 1) + " must be 1 <= step < current.";
+                    refNums.push(n);
+                } else {
+                    var ab = steps[i].split("-");
+                    if (ab.length != 2)
+                        return "Step reference # " + (i + 1) + " must be range, a-b, with a <= b.";
+
+                    ab = [parseInt(ab[0]) - 1, parseInt(ab[1]) - 1];
+                    if (ab[0] > ab[1] || Math.max(ab[0], ab[1]) >= step)
+                        return "Step reference # " + (i + 1) + " must be range, a-b, with a <= b.";
+                    refNums.push(ab);
+                }
+            }
+        } else {
+            if (steps != null)
+                return "Step references not applicable, here.";
         }
 
-        return "Unrecognized rule: " + why[0] + " " + (why[1] ? why[1] : "")  + (why[2] ? why[2] : "") + " " + (why[3] ? why[3] : "");
+        if (format.Substitution) {
+            if (!subst)
+                return "Substitution specification required (e.g., A.x/x0 intro n-m)";
+            w = subst.map(function(e) { return e.match("^[A-Za-z_][A-Za-z_0-9]*$"); });
+            var allValidIds = w.reduce(function(a, e) { return a && e && e.length == 1 && e[0] });
+            if (w.length != 2 || !allValidIds)
+                return "Substitution format must match (e.g., A.x/x0 intro n-m.)";
+
+            w = w.map(function(e) { return e[0] });
+        } else {
+            if (subst)
+                return "Substitution unexpected.";
+        }
+
+        return [partNum, refNums, w];
     }
 }
 
