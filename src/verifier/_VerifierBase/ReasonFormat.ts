@@ -6,6 +6,8 @@ class ReasonFormat implements IReasonFormat {
       public HasPart: boolean,
       public StepRefs: string[], // ("num" | "range")*
       public Substitution: boolean) {};
+      
+  public get isParameterless() { return !this.HasPart && this.StepRefs == null && !this.Substitution; }
 }
 
 export { ReasonFormat }

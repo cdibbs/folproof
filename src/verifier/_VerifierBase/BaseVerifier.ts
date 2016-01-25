@@ -23,9 +23,8 @@ class BaseVerifier {
     public Verify(proof: Proof): VerificationResult {
         for (var i=0; i<proof.Steps.length; i++) {
             var result = this.ValidateStatement(proof, i);
-            if (! result.Valid) {
-                break;
-            }
+            if (! result.Valid)
+              return result;
         }
         return new VerificationResult(true, "Proof is valid.");
     }
@@ -38,7 +37,7 @@ class BaseVerifier {
         var validator = this.rulebookFactory.FetchRule(stmt.Justification.ruleName);
         if (validator == null)
           return new VerificationResult(false, `Rule not found: ${stmt.Justification}.`);
-          
+
         var type = proof.Steps[step].Justification.ruleType;
         var formatResult = this.CheckFormat(validator.ReasonFormat(type), proof, step);
         if (! formatResult.Valid) return formatResult;
@@ -47,49 +46,28 @@ class BaseVerifier {
         var stepRefs = proof.Steps[step].Justification.lineReferences;
         return validator.Exec(proof, step, partRef - 1, stepRefs);
     }
-    
+
     public CheckFormat(format: IReasonFormat, proof: IProof, step: number): IVerificationResult {
         this.log("%j %j", proof, step);
 
-        if (step < 1 || step > proof.Steps.length)
-            return new VerificationResult(false, `Step ${step} out of range (1 - ${proof.Steps.length}).`);
+        if (step < 0 || step > proof.Steps.length - 1)
+            return new VerificationResult(false, `Step ${step + 1} out of range (1 - ${proof.Steps.length}).`);
 
-        var j = proof.Steps[step].Justification;
-        // 'typeof' hacks until interface type checking implemented...
-        var vPartNum = this.checkPartNumber(format, proof, j.sideReference);
-        if (typeof vPartNum === "string")
-            return new VerificationResult(false, vPartNum);
-
-        var vSteps = this.checkSteps(format, proof, j.lineReferences);
-        if (typeof vSteps === "string")
-            return new VerificationResult(false, vSteps);
-
-        var vSubst = this.checkSubstitution(format, proof, j.substitution);
-        if (typeof vSubst === "string")
-            return new VerificationResult(false, vSubst);
+        var vCheck = this.checkParams(format, proof, step);
+        if (typeof vCheck === "string")
+            return new VerificationResult(false, vCheck);
 
         return new ValidResult();
     }
 
-    public checkPartNumber(format: IReasonFormat, proof: IProof, sideReference: number): any {
-
-    }
-
-    public checkSteps(format: IReasonFormat, proof: IProof, stepRefs: number[][]): any {
-
-    }
-
-    public checkSubstitution(format: IReasonFormat, proof: IProof, subst: ISubstitution): any {
-
-    }
-
     private checkParams(format, proof, step): any {
-        var steps = proof.Steps;
-        var part = steps[step].Justification.sideReference;
-        var subst = steps[step].Justification.substitution;
-        if (format === null) {
-            if (steps != null || subst != null || part != null)
-                return `Justification '${steps[step].Justification.ruleName}' does not permit parameters.`;
+        var justification = proof.Steps[step].Justification;
+        var steps = justification.lineRefs;
+        var part = justification.sideReference;
+        var subst = justification.substitution;
+        if (format.isParameterless) {
+            if (justification.hasLineReferences || justification.hasSubstitution || justification.hasSideReference)
+                return `Justification '${justification.ruleName}' does not permit parameters (${steps}, ${subst}, ${part}).`;
             return [];
         }
 
@@ -110,9 +88,10 @@ class BaseVerifier {
             }
             for (var i = 0; i < steps.length; i++) {
                 if (format.StepRefs[i] == "num") {
+                    console.log(i, steps);
                     var n = parseInt(steps[i]) - 1;
                     if (!(n >= 0 && n < step))
-                        return "Step reference #" + (i + 1) + " must be 1 <= step < current.";
+                        return `Step reference #${i + 1} to line ${n} must be 1 <= step < current ${step}.`;
                     refNums.push(n);
                 } else {
                     var ab = steps[i].split("-");

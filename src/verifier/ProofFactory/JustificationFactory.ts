@@ -32,7 +32,6 @@ class JustificationFactory implements IJustificationFactory {
         , jType = why[1]
         , jSide = why[2]
         , jLineRanges = this.parseLineRanges(why[3]);
-
     return ['justification', name, jType, jSide, jLineRanges];
   }
 
@@ -54,8 +53,8 @@ class JustificationFactory implements IJustificationFactory {
       var parts = rline.split('-');
       if (parts.length == 2) {
         lines.push([parseInt(parts[0]), parseInt(parts[1])]);
-      } else {
-        lines.push(parseInt(parts[0]));
+      } else if (parts.length == 1) {
+        lines.push([parseInt(parts[0])]);
       }
     }
     return lines;

@@ -1,0 +1,2 @@
+a and b : premise
+b : and elim1 1 # invalid -- should be elim2

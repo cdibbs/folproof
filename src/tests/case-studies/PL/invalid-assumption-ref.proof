@@ -1,0 +1,8 @@
+p -> q : premise
+~q : premise
+| p
+| q : -> elim 1,3
+| contradiction : not elim 2,4
+|------------------------------
+~p : not intro 3-5
+q : copy 4

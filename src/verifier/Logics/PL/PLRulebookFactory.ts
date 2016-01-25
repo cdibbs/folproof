@@ -10,7 +10,6 @@ class PLRulebookFactory implements IRulebookFactory {
     }
 
     FetchRule(name: string) {
-        console.log(name, this.rules[name].Exec);
         if (this.rules[name])
             return this.rules[name];
 

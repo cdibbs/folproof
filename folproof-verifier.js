@@ -1846,7 +1846,6 @@ var PLRulebookFactory = (function () {
         };
     }
     PLRulebookFactory.prototype.FetchRule = function (name) {
-        console.log(name, this.rules[name].Exec);
         if (this.rules[name])
             return this.rules[name];
         return null;
@@ -2876,9 +2875,8 @@ var BaseVerifier = (function () {
     BaseVerifier.prototype.Verify = function (proof) {
         for (var i = 0; i < proof.Steps.length; i++) {
             var result = this.ValidateStatement(proof, i);
-            if (!result.Valid) {
-                break;
-            }
+            if (!result.Valid)
+                return result;
         }
         return new VerificationResult_1.VerificationResult(true, "Proof is valid.");
     };
@@ -2899,34 +2897,21 @@ var BaseVerifier = (function () {
     };
     BaseVerifier.prototype.CheckFormat = function (format, proof, step) {
         this.log("%j %j", proof, step);
-        if (step < 1 || step > proof.Steps.length)
-            return new VerificationResult_1.VerificationResult(false, "Step " + step + " out of range (1 - " + proof.Steps.length + ").");
-        var j = proof.Steps[step].Justification;
-        // 'typeof' hacks until interface type checking implemented...
-        var vPartNum = this.checkPartNumber(format, proof, j.sideReference);
-        if (typeof vPartNum === "string")
-            return new VerificationResult_1.VerificationResult(false, vPartNum);
-        var vSteps = this.checkSteps(format, proof, j.lineReferences);
-        if (typeof vSteps === "string")
-            return new VerificationResult_1.VerificationResult(false, vSteps);
-        var vSubst = this.checkSubstitution(format, proof, j.substitution);
-        if (typeof vSubst === "string")
-            return new VerificationResult_1.VerificationResult(false, vSubst);
+        if (step < 0 || step > proof.Steps.length - 1)
+            return new VerificationResult_1.VerificationResult(false, "Step " + (step + 1) + " out of range (1 - " + proof.Steps.length + ").");
+        var vCheck = this.checkParams(format, proof, step);
+        if (typeof vCheck === "string")
+            return new VerificationResult_1.VerificationResult(false, vCheck);
         return new ValidResult_1.ValidResult();
     };
-    BaseVerifier.prototype.checkPartNumber = function (format, proof, sideReference) {
-    };
-    BaseVerifier.prototype.checkSteps = function (format, proof, stepRefs) {
-    };
-    BaseVerifier.prototype.checkSubstitution = function (format, proof, subst) {
-    };
     BaseVerifier.prototype.checkParams = function (format, proof, step) {
-        var steps = proof.Steps;
-        var part = steps[step].Justification.sideReference;
-        var subst = steps[step].Justification.substitution;
-        if (format === null) {
-            if (steps != null || subst != null || part != null)
-                return "Justification '" + steps[step].Justification.ruleName + "' does not permit parameters.";
+        var justification = proof.Steps[step].Justification;
+        var steps = justification.lineRefs;
+        var part = justification.sideReference;
+        var subst = justification.substitution;
+        if (format.isParameterless) {
+            if (justification.hasLineReferences || justification.hasSubstitution || justification.hasSideReference)
+                return "Justification '" + justification.ruleName + "' does not permit parameters (" + steps + ", " + subst + ", " + part + ").";
             return [];
         }
         var partNum = null, refNums = [], w = null;
@@ -2945,9 +2930,10 @@ var BaseVerifier = (function () {
             }
             for (var i = 0; i < steps.length; i++) {
                 if (format.StepRefs[i] == "num") {
+                    console.log(i, steps);
                     var n = parseInt(steps[i]) - 1;
                     if (!(n >= 0 && n < step))
-                        return "Step reference #" + (i + 1) + " must be 1 <= step < current.";
+                        return "Step reference #" + (i + 1) + " to line " + n + " must be 1 <= step < current " + step + ".";
                     refNums.push(n);
                 }
                 else {
@@ -2995,6 +2981,11 @@ var ReasonFormat = (function () {
         this.Substitution = Substitution;
     }
     ;
+    Object.defineProperty(ReasonFormat.prototype, "isParameterless", {
+        get: function () { return !this.HasPart && this.StepRefs == null && !this.Substitution; },
+        enumerable: true,
+        configurable: true
+    });
     return ReasonFormat;
 })();
 exports.ReasonFormat = ReasonFormat;

@@ -29,9 +29,11 @@ class Justification implements IJustification {
 
   public get ruleName():string { return this.name; }
   public get substitution(): ISubstitution { return this.sub1 != null ? new Substitution(this.sub1, this.sub2) : null; }
-  public get hasSubstitution(): boolean { return this.sub1 != null; }
   public get ruleType() { return this.type; }
   public get sideReference(): number { return parseInt(this.side); }
+  public get hasSubstitution(): boolean { return this.sub1 != null; }
+  public get hasSideReference(): boolean { return this.side != null; }
+  public get hasLineReferences(): boolean { return (this.lineRefs instanceof Array) && this.lineRefs.length > 0; }
   public get lineReferences(): number[][] { return this.lineRefs; }
 
   public toString() {

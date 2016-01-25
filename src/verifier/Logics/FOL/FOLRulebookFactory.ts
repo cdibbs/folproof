@@ -10,7 +10,6 @@ import { VerificationResult } from "../../Data/VerificationResult";
     }
 
     FetchRule(name: string) {
-        console.log(name, this.rules[name].Exec);
       if (this.rules[name])
         return this.rules[name];
 
