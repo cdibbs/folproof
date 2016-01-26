@@ -19,6 +19,7 @@ class Justification implements IJustification {
    *                [[a], [b,c], ...]]
    */
   public constructor(ast: any) {
+      console.log(ast);
     this.name = ast[1][1];
     this.sub1 = ast[1].length == 3 ? ast[1][2][1] : null;
     this.sub2 = ast[1].length == 3 ? ast[1][2][2] : null;
@@ -37,7 +38,10 @@ class Justification implements IJustification {
   public get lineReferences(): number[][] { return this.lineRefs; }
 
   public toString() {
-    return `${this.ruleName} ${this.ruleType}`;
+    return `${this.ruleName} ${this.ruleType}`
+        + this.hasSubstitution ? `, Sub: ${this.sub1}/${this.sub2}` : ""
+        + this.hasSideReference ? `, Side: ${this.sideReference}` : ""
+        + this.hasLineReferences ? `, Lines: ${this.lineReferences.join(",")}` : "";
   }
 }
 

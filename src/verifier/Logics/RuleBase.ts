@@ -7,11 +7,11 @@ class RuleBase implements IRule {
     public ReasonFormat(type: string): IReasonFormat {
         throw new Error(`Unimplemented for rule ${this.Name}`);
     }
-    
+
     Exec(proof: IProof, step: number, partRef: number, stepRefs: number[][]): IVerificationResult {
         throw new Error(`Unimplemented for rule ${this.Name}`);
     }
-            
+
     substitute(startExpr, a, b, bound?) {
         //this.debug("substitute", startExpr, a, b);
         bound = bound ? bound : [];
@@ -63,62 +63,60 @@ class RuleBase implements IRule {
         //this.debug("semanticEq", A, B);
         var bound = {}, sub;
         if (suba) {
-            sub = true;
-            return _rec(A, B, {});
+            return this._recSemanticEq(true, suba, subb, A, B, {});
         } else {
-            sub = false;
-            return _rec(A, B);
+            return this._recSemanticEq(false, suba, subb, A, B);
+        }
+    }
+
+    _recSemanticEq(sub, suba, subb, a, b, bound?): boolean {
+        var binOps = ["->", "and", "or", "<->", "="];
+        var unOps = ["not"];
+
+        // if eq w/substitution, return true, otherwise continue
+        if (sub && this.semanticEq(a, suba)) {
+                if ((a[0] !== 'id' || !bound[a[1]]) && this._recSemanticEq(sub, suba, subb, subb, b, bound)) return true;
         }
 
-        function _rec(a, b, bound?): boolean {
-            var binOps = ["->", "and", "or", "<->", "="];
-            var unOps = ["not"];
-
-            // if eq w/substitution, return true, otherwise continue
-            if (sub && this.semanticEq(a, suba)) {
-                    if ((a[0] !== 'id' || !bound[a[1]]) && _rec(subb, b, bound)) return true;
-            }
-
-            if (this.arrayContains(binOps, a[0]) && a[0] === b[0]) {
-                if (_rec(a[1], b[1], bound) && _rec(a[2], b[2], bound)) {
-                    return true;
-                }
-                return false;
-            } else if (this.arrayContains(unOps, a[0]) && a[0] === b[0]) {
-                if (_rec(a[1], b[1], bound)) {
-                    return true;
-                }
-                return false;
-            } else if (a[0] === 'exists' || a[0] === 'forall' && a[0] === b[0]) {
-                var newb;
-                if (sub) {
-                    newb = this.clone(bound);
-                    newb[a[1]] = true;
-                }
-                if (_rec(a[2], b[2], newb)) {
-                    return true;
-                }
-                return false;
-            } else if (a[0] === "id") {
-                if (b && a[1] !== b[1]) return false;
-                if (a.length == 2 && b.length == 2) {
-                    return true;
-                }
-
-                if (a.length == 3 && b.length == 3) {
-                    if (a[2].length != b[2].length) {
-                        return false;
-                    }
-                    for (var i=0; i<a[2].length; i++) {
-                        if (!_rec(a[2][i], b[2][i], bound)) {
-                            return false;
-                        }
-                    }
-                    return true;
-                }
+        if (this.arrayContains(binOps, a[0]) && a[0] === b[0]) {
+            if (this._recSemanticEq(sub, suba, subb, a[1], b[1], bound) && this._recSemanticEq(sub, suba, subb, a[2], b[2], bound)) {
+                return true;
             }
             return false;
+        } else if (this.arrayContains(unOps, a[0]) && a[0] === b[0]) {
+            if (this._recSemanticEq(sub, suba, subb, a[1], b[1], bound)) {
+                return true;
+            }
+            return false;
+        } else if (a[0] === 'exists' || a[0] === 'forall' && a[0] === b[0]) {
+            var newb;
+            if (sub) {
+                newb = this.clone(bound);
+                newb[a[1]] = true;
+            }
+            if (this._recSemanticEq(sub, suba, subb, a[2], b[2], newb)) {
+                return true;
+            }
+            return false;
+        } else if (a[0] === "id") {
+            if (b && a[1] !== b[1]) return false;
+            if (a.length == 2 && b.length == 2) {
+                return true;
+            }
+
+            if (a.length == 3 && b.length == 3) {
+                if (a[2].length != b[2].length) {
+                    return false;
+                }
+                for (var i=0; i<a[2].length; i++) {
+                    if (!this._recSemanticEq(sub, suba, subb, a[2][i], b[2][i], bound)) {
+                        return false;
+                    }
+                }
+                return true;
+            }
         }
+        return false;
     }
 
     isContradiction(s): boolean {

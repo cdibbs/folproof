@@ -2644,64 +2644,62 @@ var RuleBase = (function () {
         //this.debug("semanticEq", A, B);
         var bound = {}, sub;
         if (suba) {
-            sub = true;
-            return _rec(A, B, {});
+            return this._recSemanticEq(true, suba, subb, A, B, {});
         }
         else {
-            sub = false;
-            return _rec(A, B);
+            return this._recSemanticEq(false, suba, subb, A, B);
         }
-        function _rec(a, b, bound) {
-            var binOps = ["->", "and", "or", "<->", "="];
-            var unOps = ["not"];
-            // if eq w/substitution, return true, otherwise continue
-            if (sub && this.semanticEq(a, suba)) {
-                if ((a[0] !== 'id' || !bound[a[1]]) && _rec(subb, b, bound))
-                    return true;
-            }
-            if (this.arrayContains(binOps, a[0]) && a[0] === b[0]) {
-                if (_rec(a[1], b[1], bound) && _rec(a[2], b[2], bound)) {
-                    return true;
-                }
-                return false;
-            }
-            else if (this.arrayContains(unOps, a[0]) && a[0] === b[0]) {
-                if (_rec(a[1], b[1], bound)) {
-                    return true;
-                }
-                return false;
-            }
-            else if (a[0] === 'exists' || a[0] === 'forall' && a[0] === b[0]) {
-                var newb;
-                if (sub) {
-                    newb = this.clone(bound);
-                    newb[a[1]] = true;
-                }
-                if (_rec(a[2], b[2], newb)) {
-                    return true;
-                }
-                return false;
-            }
-            else if (a[0] === "id") {
-                if (b && a[1] !== b[1])
-                    return false;
-                if (a.length == 2 && b.length == 2) {
-                    return true;
-                }
-                if (a.length == 3 && b.length == 3) {
-                    if (a[2].length != b[2].length) {
-                        return false;
-                    }
-                    for (var i = 0; i < a[2].length; i++) {
-                        if (!_rec(a[2][i], b[2][i], bound)) {
-                            return false;
-                        }
-                    }
-                    return true;
-                }
+    };
+    RuleBase.prototype._recSemanticEq = function (sub, suba, subb, a, b, bound) {
+        var binOps = ["->", "and", "or", "<->", "="];
+        var unOps = ["not"];
+        // if eq w/substitution, return true, otherwise continue
+        if (sub && this.semanticEq(a, suba)) {
+            if ((a[0] !== 'id' || !bound[a[1]]) && this._recSemanticEq(sub, suba, subb, subb, b, bound))
+                return true;
+        }
+        if (this.arrayContains(binOps, a[0]) && a[0] === b[0]) {
+            if (this._recSemanticEq(sub, suba, subb, a[1], b[1], bound) && this._recSemanticEq(sub, suba, subb, a[2], b[2], bound)) {
+                return true;
             }
             return false;
         }
+        else if (this.arrayContains(unOps, a[0]) && a[0] === b[0]) {
+            if (this._recSemanticEq(sub, suba, subb, a[1], b[1], bound)) {
+                return true;
+            }
+            return false;
+        }
+        else if (a[0] === 'exists' || a[0] === 'forall' && a[0] === b[0]) {
+            var newb;
+            if (sub) {
+                newb = this.clone(bound);
+                newb[a[1]] = true;
+            }
+            if (this._recSemanticEq(sub, suba, subb, a[2], b[2], newb)) {
+                return true;
+            }
+            return false;
+        }
+        else if (a[0] === "id") {
+            if (b && a[1] !== b[1])
+                return false;
+            if (a.length == 2 && b.length == 2) {
+                return true;
+            }
+            if (a.length == 3 && b.length == 3) {
+                if (a[2].length != b[2].length) {
+                    return false;
+                }
+                for (var i = 0; i < a[2].length; i++) {
+                    if (!this._recSemanticEq(sub, suba, subb, a[2][i], b[2][i], bound)) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        }
+        return false;
     };
     RuleBase.prototype.isContradiction = function (s) {
         return (s[0] === 'id' && (s[1] === '_|_' || s[1] === 'contradiction'));
@@ -2893,34 +2891,34 @@ var BaseVerifier = (function () {
             return formatResult;
         var partRef = proof.Steps[step].Justification.sideReference;
         var stepRefs = proof.Steps[step].Justification.lineReferences;
-        return validator.Exec(proof, step, partRef - 1, stepRefs);
+        return validator.Exec(proof, step, partRef, stepRefs);
     };
     BaseVerifier.prototype.CheckFormat = function (format, proof, step) {
         this.log("%j %j", proof, step);
         if (step < 0 || step > proof.Steps.length - 1)
             return new VerificationResult_1.VerificationResult(false, "Step " + (step + 1) + " out of range (1 - " + proof.Steps.length + ").");
         var vCheck = this.checkParams(format, proof, step);
-        if (typeof vCheck === "string")
-            return new VerificationResult_1.VerificationResult(false, vCheck);
+        if (vCheck !== true) {
+            vCheck += " " + proof.Steps[step].Justification;
+            return new VerificationResult_1.VerificationResult(false, vCheck, step + 1);
+        }
         return new ValidResult_1.ValidResult();
     };
     BaseVerifier.prototype.checkParams = function (format, proof, step) {
         var justification = proof.Steps[step].Justification;
-        var steps = justification.lineRefs;
-        var part = justification.sideReference;
-        var subst = justification.substitution;
+        console.log("%j %j", justification, format);
         if (format.isParameterless) {
             if (justification.hasLineReferences || justification.hasSubstitution || justification.hasSideReference)
-                return "Justification '" + justification.ruleName + "' does not permit parameters (" + steps + ", " + subst + ", " + part + ").";
-            return [];
+                return "Justification '" + justification.ruleName + "' does not permit parameters.";
         }
-        var partNum = null, refNums = [], w = null;
+        var steps = justification.lineRefs;
+        var partNum = justification.sideReference;
+        var subst = justification.substitution;
         if (format.HasPart) {
-            partNum = parseInt(part);
             if (!(partNum == 1 || partNum == 2))
                 return "Part number must be 1 or 2";
         }
-        else if (part != null)
+        else if (justification.hasSideReference)
             return "Step part (e.g., 2 in 'and e2') not applicable, in this context.";
         if (format.StepRefs) {
             if (steps.length != format.StepRefs.length) {
@@ -2930,41 +2928,34 @@ var BaseVerifier = (function () {
             }
             for (var i = 0; i < steps.length; i++) {
                 if (format.StepRefs[i] == "num") {
-                    console.log(i, steps);
-                    var n = parseInt(steps[i]) - 1;
+                    if (steps[i].length != 1)
+                        return "Step reference #" + (i + 1) + " must be a single number.";
+                    var n = steps[i][0];
                     if (!(n >= 0 && n < step))
-                        return "Step reference #" + (i + 1) + " to line " + n + " must be 1 <= step < current " + step + ".";
-                    refNums.push(n);
+                        return "Step reference #" + (i + 1) + " to line " + n + " must be 1 <= step < current.";
                 }
                 else {
-                    var ab = steps[i].split("-");
+                    var ab = steps[i];
                     if (ab.length != 2)
-                        return "Step reference # " + (i + 1) + " must be range, a-b, with a <= b.";
-                    ab = [parseInt(ab[0]) - 1, parseInt(ab[1]) - 1];
+                        return "Step reference #" + (i + 1) + " must be range, a-b, with a <= b.";
                     if (ab[0] > ab[1] || Math.max(ab[0], ab[1]) >= step)
-                        return "Step reference # " + (i + 1) + " must be range, a-b, with a <= b.";
-                    refNums.push(ab);
+                        return "Step reference #" + (i + 1) + " must be range, a-b, with a <= b.";
                 }
             }
         }
-        else {
-            if (steps != null)
-                return "Step references not applicable, here.";
+        else if (justification.hasLineReference) {
+            return "Step references not applicable, here.";
         }
         if (format.Substitution) {
             if (!subst)
                 return "Substitution specification required (e.g., A.x/x0 intro n-m)";
-            w = subst.map(function (e) { return e.match("^[A-Za-z_][A-Za-z_0-9]*$"); });
-            var allValidIds = w.reduce(function (a, e) { return a && e && e.length == 1 && e[0]; });
-            if (w.length != 2 || !allValidIds)
-                return "Substitution format must match (e.g., A.x/x0 intro n-m.)";
-            w = w.map(function (e) { return e[0]; });
+            if (subst.length != 2)
+                return "Substitution format must have two components (e.g., A.x/x0 intro n-m.)";
         }
-        else {
-            if (subst)
-                return "Substitution unexpected.";
+        else if (justification.hasSubstitution) {
+            return "Substitution not applicable, here.";
         }
-        return [partNum, refNums, w];
+        return true;
     };
     return BaseVerifier;
 })();

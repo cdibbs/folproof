@@ -17,15 +17,15 @@ class OrRule extends RuleBase {
         if (type === "elim") return this.elimFormat;
         throw new Error(`Unknown ${this.Name} variation ${type}.`);
     }
-            
+
     public Exec(proof: IProof, step: number, partRef: number, stepRefs: number[][]): IVerificationResult {
         var type = proof.Steps[step].Justification.ruleType;
         if (type === "intro") return this.IntroVerifier(proof, step, partRef, stepRefs);
         if (type === "elim") return this.ElimVerifier(proof, step, partRef, stepRefs);
-        
+
         throw new Error(`Unknown ${this.Name} variation ${type}.`);
     }
-    
+
     public IntroVerifier(proof: IProof, step: number, partRef: number, stepRefs: number[][]): IVerificationResult {
         var s = proof.Steps[step].Expression;
         if (s[0] !== 'or')
@@ -33,10 +33,10 @@ class OrRule extends RuleBase {
 
         if (! this.semanticEq(s[partRef], proof.Steps[stepRefs[0][0]].Expression))
             return new InvalidResult(`Or-Intro: Side ${partRef} doesn't match referenced step.`);
-            
+
         return new ValidResult();
     }
-    
+
     public ElimVerifier(proof: IProof, step: number, partRef: number, stepRefs: number[][]): IVerificationResult {
         var currStepExpr = proof.Steps[step].Expression;
         // FIXME: What potential is there here for false valids? Can we build a custom
