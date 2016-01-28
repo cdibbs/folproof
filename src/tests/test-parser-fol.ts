@@ -1,5 +1,4 @@
 ///<reference path="../../typings/tsd.d.ts"/>
-///<reference path="../parsers/FOL/fol" />
 
 import { Test, ITestGroup } from 'nodeunit';
 import { Parser } from "../parsers/FOL/fol";

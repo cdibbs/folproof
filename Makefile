@@ -24,9 +24,9 @@ folproof:
 test:
 	@printf ${colorful} "Compiling tests..."
 	if [ ! -d build/tests ]; then mkdir build/tests; fi
-    ./node_modules/typescript/bin/tsc -t es5 --module commonjs --outDir build/tests src/tests/
+	./node_modules/typescript/bin/tsc -t es5 --module commonjs --outDir build $(shell find ./src/tests -name "test-*.ts" -type f)
 	@printf ${colorful} "Running tests..."
-	./node_modules/nodeunit/bin/nodeunit build/tests/**/test*.js
+	./node_modules/nodeunit/bin/nodeunit $(shell find ./build/tests -name "test-*.js" -type f)
 
 clean:
 	rm build/**/* -r
