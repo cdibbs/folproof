@@ -50,7 +50,7 @@ class JustificationFactory implements IJustificationFactory {
   private parseLineRanges(linesRaw: string[]): number[] {
     var lines = [];
     for (var rline in linesRaw) {
-      var parts = rline.split('-');
+      var parts = linesRaw[rline].split('-');
       if (parts.length == 2) {
         lines.push([parseInt(parts[0]), parseInt(parts[1])]);
       } else if (parts.length == 1) {

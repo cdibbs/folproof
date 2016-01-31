@@ -9,12 +9,6 @@ justify		":".*
 "or"									return 'OR';
 "implies"|"->"|"=>"		return 'IMPLIES';
 "not"|"~"|"!"					return 'NOT';
-"union"								return 'UNION';
-"intersection"				return 'INTERSECTION';
-"="										return 'EQUALS';
-"every"								return 'EVERY';
-"with"								return 'WITH';
-"of"									return "OF";
 \d+				/* ignore digits, for now */
 {justify}			%{
 				// Syntax: "[...] : ruleName [[elim/intro] [NumOrRange[, NumOrRange]*]]
@@ -50,16 +44,9 @@ justify		":".*
 				yytext = [name, rtype, side, lineranges, sub];
 				return 'JUSTIFICATION';
 				%}
-"E."				return 'EXISTS';
-"in"				return 'IN';
-"empty"			return 'EMPTYSET';
-"A."				return 'FORALL';
-{id}"."			return "UNARY_EXT";
-"."{id}"."	return "BINARY_EXT";
 "("					return 'LPAREN';
 ")"					return 'RPAREN';
 {id}				return 'ID';
-","					return 'COMMA';
 [\n\r]*<<EOF>>		%{
 				// remaining DEBOXes implied by EOF
 				var tokens = [];
@@ -83,18 +70,18 @@ justify		":".*
 				 */
 				    var indentation = (yytext.match(/\|/g)||[]).length;
 				    if (indentation > this._iemitstack[0]) {
-					this._iemitstack.unshift(indentation);
-					this._log(this.topState(), "BOX", this.stateStackSize());
-					this.myBegin(this.topState(), 'deepening, due to indent'); // deepen our current state
-					return ['BOX', 'EOL'];
+							this._iemitstack.unshift(indentation);
+							this._log(this.topState(), "BOX", this.stateStackSize());
+							this.myBegin(this.topState(), 'deepening, due to indent'); // deepen our current state
+							return ['BOX', 'EOL'];
 				    }
 
 				    var tokens = ["EOL"];
 				    while (indentation < this._iemitstack[0]) {
-					this.myPopState();
-					this._log(this.topState(), "DEBOX", this.stateStackSize());
-					tokens.push("DEBOX");
-					this._iemitstack.shift();
+							this.myPopState()
+							this._log(this.topState(), "DEBOX", this.stateStackSize());
+							tokens.push("DEBOX");
+							this._iemitstack.shift();
 				    }
 				    if (tokens[tokens.length-1] === "DEBOX")
 					    tokens.push("EOL");

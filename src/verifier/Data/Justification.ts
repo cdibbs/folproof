@@ -19,7 +19,6 @@ class Justification implements IJustification {
    *                [[a], [b,c], ...]]
    */
   public constructor(ast: any) {
-      console.log(ast);
     this.name = ast[1][1];
     this.sub1 = ast[1].length == 3 ? ast[1][2][1] : null;
     this.sub2 = ast[1].length == 3 ? ast[1][2][2] : null;
@@ -31,17 +30,18 @@ class Justification implements IJustification {
   public get ruleName():string { return this.name; }
   public get substitution(): ISubstitution { return this.sub1 != null ? new Substitution(this.sub1, this.sub2) : null; }
   public get ruleType() { return this.type; }
-  public get sideReference(): number { return parseInt(this.side); }
+  public get sideReference(): number { return this.side == null ? null : parseInt(this.side); }
+  public get lineReferences(): number[][] { return this.lineRefs; }
+
   public get hasSubstitution(): boolean { return this.sub1 != null; }
   public get hasSideReference(): boolean { return this.side != null; }
   public get hasLineReferences(): boolean { return (this.lineRefs instanceof Array) && this.lineRefs.length > 0; }
-  public get lineReferences(): number[][] { return this.lineRefs; }
 
   public toString() {
     return `${this.ruleName} ${this.ruleType}`
-        + this.hasSubstitution ? `, Sub: ${this.sub1}/${this.sub2}` : ""
-        + this.hasSideReference ? `, Side: ${this.sideReference}` : ""
-        + this.hasLineReferences ? `, Lines: ${this.lineReferences.join(",")}` : "";
+        + (this.hasSubstitution ? `, Sub: ${this.sub1}/${this.sub2}` : "")
+        + (this.hasSideReference ? `, Side: ${this.sideReference}` : "")
+        + (this.hasLineReferences ? `, Lines: ${this.lineReferences.join(",")}` : "");
   }
 }
 

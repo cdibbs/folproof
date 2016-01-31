@@ -31,7 +31,7 @@ class OrRule extends RuleBase {
         if (s[0] !== 'or')
             return new InvalidResult("Or-Intro: Current step is not an 'or'-expression.");
 
-        if (! this.semanticEq(s[partRef], proof.Steps[stepRefs[0][0]].Expression))
+        if (! this.semanticEq(s[partRef], proof.Steps[stepRefs[0][0] - 1].Expression))
             return new InvalidResult(`Or-Intro: Side ${partRef} doesn't match referenced step.`);
 
         return new ValidResult();
@@ -41,11 +41,11 @@ class OrRule extends RuleBase {
         var currStepExpr = proof.Steps[step].Expression;
         // FIXME: What potential is there here for false valids? Can we build a custom
         // stepRefs that will break this?
-        var orStepExpr = proof.Steps[stepRefs[0][0]].Expression;
-        var a1p1Expr = proof.Steps[stepRefs[1][0]].Expression;
-        var a1p2Expr = proof.Steps[stepRefs[1][1]].Expression;
-        var a2p1Expr = proof.Steps[stepRefs[2][0]].Expression;
-        var a2p2Expr = proof.Steps[stepRefs[2][1]].Expression;
+        var orStepExpr = proof.Steps[stepRefs[0][0] - 1].Expression;
+        var a1p1Expr = proof.Steps[stepRefs[1][0] - 1].Expression;
+        var a1p2Expr = proof.Steps[stepRefs[1][1] - 1].Expression;
+        var a2p1Expr = proof.Steps[stepRefs[2][0] - 1].Expression;
+        var a2p2Expr = proof.Steps[stepRefs[2][1] - 1].Expression;
 
         // and through the gauntlet...
         if (orStepExpr[0] !== 'or')

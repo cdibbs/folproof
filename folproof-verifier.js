@@ -1514,21 +1514,9 @@ case 3:return 16;
 break;
 case 4:return 21;
 break;
-case 5:return 'UNION';
+case 5:/* ignore digits, for now */
 break;
-case 6:return 'INTERSECTION';
-break;
-case 7:return 'EQUALS';
-break;
-case 8:return 'EVERY';
-break;
-case 9:return 'WITH';
-break;
-case 10:return "OF";
-break;
-case 11:/* ignore digits, for now */
-break;
-case 12:
+case 6:
 				// Syntax: "[...] : ruleName [[elim/intro] [NumOrRange[, NumOrRange]*]]
 
 				// strip the leading colon and spaces
@@ -1563,27 +1551,13 @@ case 12:
 				return 26;
 				
 break;
-case 13:return 'EXISTS';
+case 7:return 24;
 break;
-case 14:return 'IN';
+case 8:return 25;
 break;
-case 15:return 'EMPTYSET';
+case 9:return 23;
 break;
-case 16:return 'FORALL';
-break;
-case 17:return "UNARY_EXT";
-break;
-case 18:return "BINARY_EXT";
-break;
-case 19:return 24;
-break;
-case 20:return 25;
-break;
-case 21:return 23;
-break;
-case 22:return 'COMMA';
-break;
-case 23:
+case 10:
 				// remaining DEBOXes implied by EOF
 				var tokens = [];
 
@@ -1595,48 +1569,48 @@ case 23:
 				if (tokens.length) return tokens;
 				
 break;
-case 24: /* manually close an assumption box */
+case 11: /* manually close an assumption box */
 				this._log("MANUAL DEBOX");
 				this._iemitstack.shift();
 				return ['DEBOX', 'EOL'];
 				
 break;
-case 25:/* eat blank lines */
+case 12:/* eat blank lines */
 break;
-case 26:
+case 13:
 				/* Similar to the idea of semantic whitespace, we keep track of virtual
 				 * BOX/DEBOX characters based on a stack of | occurrences
 				 */
 				    var indentation = (yy_.yytext.match(/\|/g)||[]).length;
 				    if (indentation > this._iemitstack[0]) {
-					this._iemitstack.unshift(indentation);
-					this._log(this.topState(), "BOX", this.stateStackSize());
-					this.myBegin(this.topState(), 'deepening, due to indent'); // deepen our current state
-					return ['BOX', 'EOL'];
+							this._iemitstack.unshift(indentation);
+							this._log(this.topState(), "BOX", this.stateStackSize());
+							this.myBegin(this.topState(), 'deepening, due to indent'); // deepen our current state
+							return ['BOX', 'EOL'];
 				    }
 
 				    var tokens = ["EOL"];
 				    while (indentation < this._iemitstack[0]) {
-					this.myPopState();
-					this._log(this.topState(), "DEBOX", this.stateStackSize());
-					tokens.push("DEBOX");
-					this._iemitstack.shift();
+							this.myPopState()
+							this._log(this.topState(), "DEBOX", this.stateStackSize());
+							tokens.push("DEBOX");
+							this._iemitstack.shift();
 				    }
 				    if (tokens[tokens.length-1] === "DEBOX")
 					    tokens.push("EOL");
 				    return tokens;
 				
 break;
-case 27:return 8;
+case 14:return 8;
 break;
-case 28:/* ignore whitespace */
+case 15:/* ignore whitespace */
 break;
-case 29:return 2;
+case 16:return 2;
 break;
 }
 },
-rules: [/^(?:[\n\r]?#.*)/,/^(?:and\b)/,/^(?:or\b)/,/^(?:implies|->|=>)/,/^(?:not|~|!)/,/^(?:union\b)/,/^(?:intersection\b)/,/^(?:=)/,/^(?:every\b)/,/^(?:with\b)/,/^(?:of\b)/,/^(?:\d+)/,/^(?:(:.*))/,/^(?:E\.)/,/^(?:in\b)/,/^(?:empty\b)/,/^(?:A\.)/,/^(?:([a-zA-Z_][a-zA-Z_'"0-9\|]*)\.)/,/^(?:\.([a-zA-Z_][a-zA-Z_'"0-9\|]*)\.)/,/^(?:\()/,/^(?:\))/,/^(?:([a-zA-Z_][a-zA-Z_'"0-9\|]*))/,/^(?:,)/,/^(?:[\n\r]*$)/,/^(?:\n([\t \u00a0\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u3000])*\|*-+)/,/^(?:[\n\r]+([\t \u00a0\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u3000])*(?![^\n\r]))/,/^(?:[\n|^]([\t \u00a0\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u3000])*\d*([\t \u00a0\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u3000])*\|*)/,/^(?:\n)/,/^(?:([\t \u00a0\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u3000])+)/,/^(?:.*)/],
-conditions: {"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29],"inclusive":true}}
+rules: [/^(?:[\n\r]?#.*)/,/^(?:and\b)/,/^(?:or\b)/,/^(?:implies|->|=>)/,/^(?:not|~|!)/,/^(?:\d+)/,/^(?:(:.*))/,/^(?:\()/,/^(?:\))/,/^(?:([a-zA-Z_][a-zA-Z_'"0-9\|]*))/,/^(?:[\n\r]*$)/,/^(?:\n([\t \u00a0\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u3000])*\|*-+)/,/^(?:[\n\r]+([\t \u00a0\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u3000])*(?![^\n\r]))/,/^(?:[\n|^]([\t \u00a0\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u3000])*\d*([\t \u00a0\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u3000])*\|*)/,/^(?:\n)/,/^(?:([\t \u00a0\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u3000])+)/,/^(?:.*)/],
+conditions: {"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16],"inclusive":true}}
 });
 var jisonLexerFn = lexer.setInput;
 lexer.setInput = function(input) {
@@ -2002,7 +1976,7 @@ var CopyRule = (function (_super) {
     CopyRule.prototype.ReasonFormat = function (type) { return this.format; };
     CopyRule.prototype.Exec = function (proof, step, partRef, stepRefs) {
         var curStep = proof.Steps[step].Expression;
-        var refStep = proof.Steps[stepRefs[0][0]].Expression;
+        var refStep = proof.Steps[stepRefs[0][0] - 1].Expression;
         if (!this.semanticEq(curStep, refStep))
             return new InvalidResult_1.InvalidResult("Copy: Current step is not semantically equalivalent to the referenced step.");
         return new ValidResult_1.ValidResult();
@@ -2108,10 +2082,11 @@ var ImplicationRule = (function (_super) {
     };
     ImplicationRule.prototype.Exec = function (proof, step, partRef, stepRefs) {
         var type = proof.Steps[step].Justification.ruleType;
+        var stepRefsZeroBase = stepRefs.map(function (r) { return r.map(function (r2) { return r2 - 1; }); });
         if (type === "intro")
-            return this.IntroVerifier(proof, step, partRef, stepRefs);
+            return this.IntroVerifier(proof, step, partRef, stepRefsZeroBase);
         if (type === "elim")
-            return this.ElimVerifier(proof, step, partRef, stepRefs);
+            return this.ElimVerifier(proof, step, partRef, stepRefsZeroBase);
         throw new Error("Unknown " + this.Name + " variation " + type + ".");
     };
     ImplicationRule.prototype.IntroVerifier = function (proof, step, partRef, stepRefs) {
@@ -2133,7 +2108,7 @@ var ImplicationRule = (function (_super) {
         var truth = proof.Steps[truthStep].Expression;
         var implies = proof.Steps[impliesStep].Expression;
         if (implies[0] != '->')
-            return new InvalidResult_1.InvalidResult("Implies-Elim: Step " + stepRefs[0][0] + " is not an implication");
+            return new InvalidResult_1.InvalidResult("Implies-Elim: Step " + (stepRefs[0][0] + 1) + " is not an implication");
         var truthSemEq = this.semanticEq(implies[1], truth);
         var resultSemEq = this.semanticEq(implies[2], proof.Steps[step].Expression);
         if (!truthSemEq)
@@ -2275,10 +2250,11 @@ var NotRule = (function (_super) {
     };
     NotRule.prototype.Exec = function (proof, step, partRef, stepRefs) {
         var type = proof.Steps[step].Justification.ruleType;
+        var stepRefsZeroBase = stepRefs.map(function (r) { return r.map(function (r2) { return r2 - 1; }); });
         if (type === "intro")
-            return this.IntroVerifier(proof, step, partRef, stepRefs);
+            return this.IntroVerifier(proof, step, partRef, stepRefsZeroBase);
         if (type === "elim")
-            return this.ElimVerifier(proof, step, partRef, stepRefs);
+            return this.ElimVerifier(proof, step, partRef, stepRefsZeroBase);
         throw new Error("Unknown " + this.Name + " variation " + type + ".");
     };
     NotRule.prototype.IntroVerifier = function (proof, step, partRef, stepRefs) {
@@ -2367,7 +2343,7 @@ var OrRule = (function (_super) {
         var s = proof.Steps[step].Expression;
         if (s[0] !== 'or')
             return new InvalidResult_1.InvalidResult("Or-Intro: Current step is not an 'or'-expression.");
-        if (!this.semanticEq(s[partRef], proof.Steps[stepRefs[0][0]].Expression))
+        if (!this.semanticEq(s[partRef], proof.Steps[stepRefs[0][0] - 1].Expression))
             return new InvalidResult_1.InvalidResult("Or-Intro: Side " + partRef + " doesn't match referenced step.");
         return new ValidResult_1.ValidResult();
     };
@@ -2375,11 +2351,11 @@ var OrRule = (function (_super) {
         var currStepExpr = proof.Steps[step].Expression;
         // FIXME: What potential is there here for false valids? Can we build a custom
         // stepRefs that will break this?
-        var orStepExpr = proof.Steps[stepRefs[0][0]].Expression;
-        var a1p1Expr = proof.Steps[stepRefs[1][0]].Expression;
-        var a1p2Expr = proof.Steps[stepRefs[1][1]].Expression;
-        var a2p1Expr = proof.Steps[stepRefs[2][0]].Expression;
-        var a2p2Expr = proof.Steps[stepRefs[2][1]].Expression;
+        var orStepExpr = proof.Steps[stepRefs[0][0] - 1].Expression;
+        var a1p1Expr = proof.Steps[stepRefs[1][0] - 1].Expression;
+        var a1p2Expr = proof.Steps[stepRefs[1][1] - 1].Expression;
+        var a2p1Expr = proof.Steps[stepRefs[2][0] - 1].Expression;
+        var a2p2Expr = proof.Steps[stepRefs[2][1] - 1].Expression;
         // and through the gauntlet...
         if (orStepExpr[0] !== 'or')
             return new InvalidResult_1.InvalidResult("Or-Elim: First referenced step is not an 'or'-expression.");
@@ -2686,10 +2662,12 @@ var BaseVerifier = (function () {
             return formatResult;
         var partRef = proof.Steps[step].Justification.sideReference;
         var stepRefs = proof.Steps[step].Justification.lineReferences;
-        return validator.Exec(proof, step, partRef, stepRefs);
+        var result = validator.Exec(proof, step, partRef, stepRefs);
+        result.ErrorStep = step;
+        return result;
     };
     BaseVerifier.prototype.CheckFormat = function (format, proof, step) {
-        this.log("%j %j", proof, step);
+        //this.log("%j %j", proof, step);
         if (step < 0 || step > proof.Steps.length - 1)
             return new VerificationResult_1.VerificationResult(false, "Step " + (step + 1) + " out of range (1 - " + proof.Steps.length + ").");
         var vCheck = this.checkParams(format, proof, step);
@@ -2701,7 +2679,7 @@ var BaseVerifier = (function () {
     };
     BaseVerifier.prototype.checkParams = function (format, proof, step) {
         var justification = proof.Steps[step].Justification;
-        console.log("%j %j", justification, format);
+        //console.log("%j %j", justification, format);
         if (format.isParameterless) {
             if (justification.hasLineReferences || justification.hasSubstitution || justification.hasSideReference)
                 return "Justification '" + justification.ruleName + "' does not permit parameters.";
@@ -2726,14 +2704,14 @@ var BaseVerifier = (function () {
                     if (steps[i].length != 1)
                         return "Step reference #" + (i + 1) + " must be a single number.";
                     var n = steps[i][0];
-                    if (!(n >= 0 && n < step))
+                    if (!(n >= 1 && n < step + 1))
                         return "Step reference #" + (i + 1) + " to line " + n + " must be 1 <= step < current.";
                 }
                 else {
                     var ab = steps[i];
                     if (ab.length != 2)
                         return "Step reference #" + (i + 1) + " must be range, a-b, with a <= b.";
-                    if (ab[0] > ab[1] || Math.max(ab[0], ab[1]) >= step)
+                    if (ab[0] > ab[1] || Math.max(ab[0], ab[1]) >= step + 1)
                         return "Step reference #" + (i + 1) + " must be range, a-b, with a <= b.";
                 }
             }

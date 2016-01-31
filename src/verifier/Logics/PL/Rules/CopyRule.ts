@@ -12,10 +12,10 @@ class CopyRule extends RuleBase {
     public get Type(): string { return "derived"; }
     private format: IReasonFormat = new ReasonFormat(false, ["num"], false);
     public ReasonFormat(type: string): IReasonFormat { return this.format; }
-            
+
     public Exec(proof: IProof, step: number, partRef: any, stepRefs: number[][]): IVerificationResult {
         var curStep = proof.Steps[step].Expression;
-        var refStep = proof.Steps[stepRefs[0][0]].Expression;
+        var refStep = proof.Steps[stepRefs[0][0] - 1].Expression;
         if (! this.semanticEq(curStep, refStep))
             return new InvalidResult("Copy: Current step is not semantically equalivalent to the referenced step.");
 

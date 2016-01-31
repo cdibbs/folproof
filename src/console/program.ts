@@ -18,9 +18,12 @@ class Program {
         var ast, proof, result;
         //try {
        		ast = new FOL.Parser().parse(raw);
+					if (opts['show-ast'])
+						console.log(JSON.stringify(ast, null, 2));
 					proof = new ProofFactory().preprocess(ast);
+					if (opts['show-ir'])
+						console.log(JSON.stringify(proof, null, 2))
         	result = new PLVerifier().Verify(proof);
-		console.log(result);
         /*} catch(ex) {
         	console.log(JSON.stringify(ast, null, 2));
         	console.log("ERROR", ex.toString());
@@ -35,6 +38,14 @@ class Program {
 				flag: true,
 				position: 0,
 				help: '.fol source file'
+			})
+			.option('show-ast', {
+				flag: true,
+				help: "(DEBUG): Show the Abstract Syntax Tree returned by the parser."
+			})
+			.option('show-ir', {
+				flag: true,
+				help: "(DEBUG): Show the intermediate representation of the proof."
 			})
 		  .option('version', {
 				flag: true,

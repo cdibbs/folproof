@@ -17,15 +17,16 @@ class NotRule extends RuleBase {
         if (type === "elim") return this.elimFormat;
         throw new Error(`Unknown ${this.Name} variation ${type}.`);
     }
-            
+
     public Exec(proof: IProof, step: number, partRef: number, stepRefs: number[][]): IVerificationResult {
         var type = proof.Steps[step].Justification.ruleType;
-        if (type === "intro") return this.IntroVerifier(proof, step, partRef, stepRefs);
-        if (type === "elim") return this.ElimVerifier(proof, step, partRef, stepRefs);
-        
+        var stepRefsZeroBase = stepRefs.map(function(r) { return r.map(function(r2) { return r2 - 1; })});
+        if (type === "intro") return this.IntroVerifier(proof, step, partRef, stepRefsZeroBase);
+        if (type === "elim") return this.ElimVerifier(proof, step, partRef, stepRefsZeroBase);
+
         throw new Error(`Unknown ${this.Name} variation ${type}.`);
     }
-    
+
     public IntroVerifier(proof: IProof, step: number, partRef: number, stepRefs: number[][]): IVerificationResult {
         var assumptionExpr = proof.Steps[stepRefs[0][0]].Expression;
         var contraExpr = proof.Steps[stepRefs[0][1]].Expression;
@@ -38,10 +39,10 @@ class NotRule extends RuleBase {
 
         if (! this.semanticEq(assumptionExpr, curStep[1]))
             return new InvalidResult("Not-Intro: Negation of assumption doesn't match current step.");
-            
+
         return new ValidResult();
     }
-    
+
     public ElimVerifier(proof: IProof, step: number, partRef: number, stepRefs: number[][]): IVerificationResult {
         var s = proof.Steps[step].Expression;
         if (! this.isContradiction(s))
@@ -60,7 +61,7 @@ class NotRule extends RuleBase {
 
         if (! semEq)
             return new InvalidResult("Not-Elim: Subexpression in not-expr does not match other expr.");
-            
+
         return new ValidResult();
     }
 }

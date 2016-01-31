@@ -17,15 +17,16 @@ class ImplicationRule extends RuleBase {
         if (type === "elim") return this.elimFormat;
         throw new Error(`Unknown ${this.Name} variation ${type}.`);
     }
-            
+
     public Exec(proof: IProof, step: number, partRef: number, stepRefs: number[][]): IVerificationResult {
         var type = proof.Steps[step].Justification.ruleType;
-        if (type === "intro") return this.IntroVerifier(proof, step, partRef, stepRefs);
-        if (type === "elim") return this.ElimVerifier(proof, step, partRef, stepRefs);
-        
+        var stepRefsZeroBase = stepRefs.map(function(r) { return r.map(function(r2) { return r2 - 1; })});
+        if (type === "intro") return this.IntroVerifier(proof, step, partRef, stepRefsZeroBase);
+        if (type === "elim") return this.ElimVerifier(proof, step, partRef, stepRefsZeroBase);
+
         throw new Error(`Unknown ${this.Name} variation ${type}.`);
     }
-    
+
     public IntroVerifier(proof: IProof, step: number, partRef: number, stepRefs: number[][]): IVerificationResult {
         var truth = proof.Steps[stepRefs[0][0]].Expression;
         var result = proof.Steps[stepRefs[0][1]].Expression;
@@ -43,21 +44,21 @@ class ImplicationRule extends RuleBase {
 
         return new ValidResult();
     }
-    
+
     public ElimVerifier(proof: IProof, step: number, partRef: number, stepRefs: number[][]): IVerificationResult {
         var truthStep = stepRefs[1][0], impliesStep = stepRefs[0][0];
         var truth = proof.Steps[truthStep].Expression;
         var implies = proof.Steps[impliesStep].Expression;
         if (implies[0] != '->')
-            return new InvalidResult(`Implies-Elim: Step ${stepRefs[0][0]} is not an implication`);
-            
+            return new InvalidResult(`Implies-Elim: Step ${stepRefs[0][0] + 1} is not an implication`);
+
         var truthSemEq = this.semanticEq(implies[1], truth);
         var resultSemEq = this.semanticEq(implies[2], proof.Steps[step].Expression);
         if (! truthSemEq)
             return new InvalidResult("Implies-Elim: The implication's left side does not match the referenced step.");
         if (! resultSemEq)
             return new InvalidResult("Implies-Elim: The left side does not imply this result.");
-        
+
         return new ValidResult();
     }
 }
