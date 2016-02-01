@@ -2694,7 +2694,7 @@ var BaseVerifier = (function () {
         else if (justification.hasSideReference)
             return "Step part (e.g., 2 in 'and e2') not applicable, in this context.";
         if (format.StepRefs) {
-            if (steps.length != format.StepRefs.length) {
+            if (!steps || steps.length != format.StepRefs.length) {
                 var f = format.StepRefs
                     .map(function (e) { return e == "num" ? "n" : "n-m"; });
                 return "Step reference mismatch; required format: " + f.join(", ") + ".";
