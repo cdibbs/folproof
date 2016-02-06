@@ -1,0 +1,6 @@
+# invalid because scoping rules WRT ranges
+| a
+|| b
+||| c
+|| d
+a -> d: -> intro 1-4

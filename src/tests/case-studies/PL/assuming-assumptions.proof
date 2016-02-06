@@ -1,0 +1,6 @@
+# Valid because scoping correct.
+| a
+|| b
+||| c
+| d
+a -> d: -> intro 1-4

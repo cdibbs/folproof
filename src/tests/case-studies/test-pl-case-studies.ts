@@ -18,14 +18,14 @@ var caseStudiesPath = Path.join(__dirname, "../../../src/tests/case-studies/PL")
 var srcs = FS
     .readdirSync(caseStudiesPath)
     .filter(function (filename) { return /.proof$/.test(filename); });
-group['Test Case study files are found'] = function (test) {
+group['Case studies files are found'] = function (test) {
     test.ok(srcs.length);
     test.done();
 };
 for (var i = 0, l = srcs.length; i < l; i++) {
     var path = Path.join(caseStudiesPath, srcs[i]);
     (function (path) {
-        group[("Test File " + srcs[i] + " parses and validates.")]
+        group[("Test File " + srcs[i] + " parses and (in)validates.")]
             = function (test) {
                 // Setup
                 var src = FS.readFileSync(path, "utf8");
