@@ -35,7 +35,7 @@ for (var i = 0, l = srcs.length; i < l; i++) {
                 // Assert
                 test.ok(ast, "No AST produced.");
                 if (path.indexOf("invalid") == -1)
-                  test.ok(result.Valid, "Proof should be valid.");
+                  test.ok(result.Valid, `Proof should be valid, was: ${result.Message}.`);
                 else
                   test.ok(! result.Valid, "Proof should be invalid.");
                 test.done();

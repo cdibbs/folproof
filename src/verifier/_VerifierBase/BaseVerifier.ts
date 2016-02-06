@@ -72,7 +72,7 @@ class BaseVerifier {
         return `Justification '${justification.ruleName}' does not permit parameters.`;
     }
 
-    var steps = justification.lineRefs;
+    var steps = justification.lineReferences;
     var partNum = justification.sideReference;
     var subst = justification.substitution;
 
@@ -87,7 +87,7 @@ class BaseVerifier {
       if (!steps || steps.length != format.StepRefs.length) {
         var f = format.StepRefs
           .map(function(e) { return e == "num" ? "n" : "n-m" });
-        return "Step reference mismatch; required format: " + f.join(", ") + ".";
+        return "Step reference mismatch. Required format: " + f.join(", ") + ".";
       }
       for (var i = 0; i < steps.length; i++) {
         if (format.StepRefs[i] == "num") {
@@ -96,13 +96,44 @@ class BaseVerifier {
           var n = steps[i][0];
           if (!(n >= 1 && n < step + 1))
             return `Step reference #${i + 1} to line ${n} must be 1 <= step < current.`;
+
+          var refStep = proof.Steps[n-1];
+          var thisStep = proof.Steps[step];
+          if (refStep.Scope.length > thisStep.Scope.length)
+            return `Step reference #${i + 1} may not reach into deeper scopes.`;
         } else {
           var ab = steps[i];
           if (ab.length != 2)
-            return `Step reference #${i + 1} must be range, a-b, with a <= b.`;
+            return `Step reference #${i + 1} must be range, a-b, with a <= b < currentStep.`;
 
           if (ab[0] > ab[1] || Math.max(ab[0], ab[1]) >= step + 1)
-            return `Step reference #${i + 1} must be range, a-b, with a <= b.`;
+            return `Step reference #${i + 1} must be range, a-b, with a <= b < currentStep.`;
+
+          var refStep0 = proof.Steps[ab[0] - 1];
+          var refStep1 = proof.Steps[ab[1] - 1];
+          var thisStep = proof.Steps[step];
+          if (refStep0.Scope.length > thisStep.Scope.length
+            || refStep1.Scope.length > thisStep.Scope.length) {
+            var msg = `Step reference #${i + 1} may not reference deeper scopes (unless range encompasses entirety of scope).`;
+
+            var j = ab[0] - 1, thisScopeDepth = thisStep.Scope.length;
+            while (j > 0 && proof.Steps[j].Scope.length > thisScopeDepth) {
+              if (! proof.Steps[j].isFirstStmt)
+                return msg;
+              j = j - 1;
+            }
+
+            j = ab[1] - 1;
+            while (j < proof.Steps.length && proof.Steps[j].Scope.length > thisScopeDepth) {
+              if (! proof.Steps[j].isLastStmt)
+                return msg;
+              j = j + 1;
+            }
+          }
+
+          if (refStep0.Scope.length !== refStep1.Scope.length)
+            return `Step range #${i + 1} must begin and end in same scope.`;
+
         }
       }
     } else if (justification.hasLineReference) {
