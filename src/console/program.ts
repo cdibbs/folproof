@@ -1,11 +1,10 @@
 ///<reference path="../../typings/tsd.d.ts"/>
-///<reference path="../parsers/parsers" />
 ///<reference path="../verifier/Verifiers" />
 ///<reference path="../verifier/ProofFactory/ProofFactory" />
 
 import { PLVerifier } from "../verifier/Verifiers";
 import { ProofFactory } from "../verifier/ProofFactory/ProofFactory";
-import { FOL, PL } from "../parsers/parsers";
+import { FOL, PL } from "../parsers/Parsers";
 import fs = require('fs');
 import path = require('path');
 import nomnom = require('nomnom');

@@ -1,7 +1,7 @@
 ///<reference path="../../../../../../typings/tsd.d.ts"/>
 import { PLVerifier } from "../../../../../verifier/Verifiers";
 import { ProofFactory } from "../../../../../verifier/ProofFactory/ProofFactory";
-import { FOL, PL } from "../../../../../parsers/parsers";
+import { FOL, PL } from "../../../../../parsers/Parsers";
 
 function verifyProof(src: string) {
   var proof = fetchProof(src);

@@ -1,7 +1,7 @@
 ///<reference path="../../../typings/tsd.d.ts"/>
 import { PLVerifier } from "../../verifier/Verifiers";
 import { ProofFactory } from "../../verifier/ProofFactory/ProofFactory";
-import { PL } from "../../parsers/parsers";
+import { PL } from "../../parsers/Parsers";
 import FS = require('fs');
 import Path = require('path');
 
