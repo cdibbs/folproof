@@ -13,7 +13,6 @@ group["Or elimination succeeds when assumptions produce same result."] = (test: 
 	var src = "a or b\n~a\n~b\n| a : assumption\n| _|_ : not e 2,4\n---\n"
 					+ "| b : assumption\n| _|_ : not e 3,6\n_|_ : or e 1,4-5,6-7";
   var proof = base.fetchProof(src);
-  console.log(proof.toString());
   var result = base.verifyProof(src);
 	test.ok(result.Valid, result.Message);
 	test.done();
