@@ -28,7 +28,7 @@ parsers:
 	./node_modules/jison/lib/cli.js src/parsers/PL/pl-parser.jison src/parsers/PL/pl-parser.jisonlex -o build/parsers/PL/pl.js
 	if [ ! -d build/parsers/FOL ]; then mkdir -p build/parsers/FOL; fi
 	./node_modules/jison/lib/cli.js src/parsers/FOL/fol-parser.jison src/parsers/FOL/fol-parser.jisonlex -o build/parsers/FOL/fol.js
-	./node_modules/typescript/bin/tsc -t es5 -d --module commonjs --outDir build/parsers/ src/parsers/parsers.ts
+	./node_modules/typescript/bin/tsc -t es5 -d --module commonjs --outDir build/parsers/ src/parsers/Parsers.ts
 
 clean:
 	rm build/**/* -r
