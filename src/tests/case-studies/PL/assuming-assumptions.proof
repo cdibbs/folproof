@@ -1,6 +1,4 @@
-# Valid because scoping correct.
 | a
 || b
 ||| c
-| d
-a -> d: -> intro 1-4
+a -> c: -> intro 1-3

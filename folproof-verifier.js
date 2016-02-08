@@ -1800,8 +1800,8 @@ var AndRule = (function (_super) {
     __extends(AndRule, _super);
     function AndRule() {
         _super.apply(this, arguments);
-        this.introFormat = new ReasonFormat_1.ReasonFormat(true, ["num"], false);
-        this.elimFormat = new ReasonFormat_1.ReasonFormat(false, ["num", "num"], false);
+        this.introFormat = new ReasonFormat_1.ReasonFormat(false, ["num", "num"], false);
+        this.elimFormat = new ReasonFormat_1.ReasonFormat(true, ["num"], false);
     }
     Object.defineProperty(AndRule.prototype, "Name", {
         get: function () { return "And"; },
@@ -1832,15 +1832,15 @@ var AndRule = (function (_super) {
         var s = proof.Steps[step].Expression;
         if (s[0] !== 'and')
             return new InvalidResult_1.InvalidResult("And-Intro: Current step is not an 'and'-expression.");
-        if (this.semanticEq(s[1], proof.Steps[stepRefs[0][0]].Expression)) {
-            if (this.semanticEq(s[2], proof.Steps[stepRefs[1][0]].Expression))
+        if (this.semanticEq(s[1], proof.Steps[stepRefs[0][0] - 1].Expression)) {
+            if (this.semanticEq(s[2], proof.Steps[stepRefs[1][0] - 1].Expression))
                 return new ValidResult_1.ValidResult();
             return new InvalidResult_1.InvalidResult("And-Intro: Right side doesn't match referenced step.");
         }
         return new InvalidResult_1.InvalidResult("And-Intro: Left side doesn't match referenced step.");
     };
     AndRule.prototype.ElimVerifier = function (proof, step, partRef, stepRefs) {
-        var andExp = proof.Steps[stepRefs[0][0]].Expression;
+        var andExp = proof.Steps[stepRefs[0][0] - 1].Expression;
         if (andExp[0] != 'and')
             return new InvalidResult_1.InvalidResult("And-Elim: Referenced step is not an 'and' expression.");
         if (!this.semanticEq(andExp[partRef], proof.Steps[step].Expression))
@@ -2708,7 +2708,7 @@ var BaseVerifier = (function () {
                         return "Step reference #" + (i + 1) + " to line " + n + " must be 1 <= step < current.";
                     var refStep = proof.Steps[n - 1];
                     var thisStep = proof.Steps[step];
-                    if (refStep.Scope.length > thisStep.Scope.length)
+                    if (refStep.Scope.depth > thisStep.Scope.depth)
                         return "Step reference #" + (i + 1) + " may not reach into deeper scopes.";
                 }
                 else {
@@ -2720,24 +2720,10 @@ var BaseVerifier = (function () {
                     var refStep0 = proof.Steps[ab[0] - 1];
                     var refStep1 = proof.Steps[ab[1] - 1];
                     var thisStep = proof.Steps[step];
-                    if (refStep0.Scope.length > thisStep.Scope.length
-                        || refStep1.Scope.length > thisStep.Scope.length) {
-                        var msg = "Step reference #" + (i + 1) + " may not reference deeper scopes (unless range encompasses entirety of scope).";
-                        var j = ab[0] - 1, thisScopeDepth = thisStep.Scope.length;
-                        while (j > 0 && proof.Steps[j].Scope.length > thisScopeDepth) {
-                            if (!proof.Steps[j].isFirstStmt)
-                                return msg;
-                            j = j - 1;
-                        }
-                        j = ab[1] - 1;
-                        while (j < proof.Steps.length && proof.Steps[j].Scope.length > thisScopeDepth) {
-                            if (!proof.Steps[j].isLastStmt)
-                                return msg;
-                            j = j + 1;
-                        }
+                    if ((refStep0.Scope.depth > thisStep.Scope.depth && !refStep0.isFirstStmt)
+                        || (refStep1.Scope.depth > thisStep.Scope.depth && !refStep1.isLastStmt)) {
+                        return "Step range #" + (i + 1) + " must begin and end in same scope, unless referencing entirety of deeper scopes.";
                     }
-                    if (refStep0.Scope.length !== refStep1.Scope.length)
-                        return "Step range #" + (i + 1) + " must begin and end in same scope.";
                 }
             }
         }

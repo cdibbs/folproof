@@ -29,10 +29,21 @@ class JustificationFactory implements IJustificationFactory {
     // output:
     // ['justification', ['name', 'A.', ['/', 'x', 'y']], 'intro'/'elim', '1'/'2', [[a], [b,c], ...]]
     var name = this.parseName(why[0], why[4])
-        , jType = why[1]
+        , jType = this.parseType(why[1])
         , jSide = why[2]
         , jLineRanges = this.parseLineRanges(why[3]);
     return ['justification', name, jType, jSide, jLineRanges];
+  }
+
+  private parseType(jType: string) {
+    if (! jType)
+      return null;
+    else if ("elimination".indexOf(jType.toLowerCase()) === 0)
+      return "elim";
+    else if ("introduction".indexOf(jType.toLowerCase()) === 0)
+      return "intro";
+
+    throw new Error(`Unknown rule type ${jType}. Expected either elimination or introduction, or abbreviation.`)
   }
 
   private parseName(jName: string, sub: string): string[] {

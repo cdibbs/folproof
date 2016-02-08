@@ -5,6 +5,7 @@
 ///<reference path="../../../verifier/IUtility" />
 import { BaseVerifier } from "../../../verifier/_VerifierBase/BaseVerifier";
 import { Proof } from "../../../verifier/Data/Proof";
+import { Scope } from "../../../verifier/Data/Scope";
 import { ReasonFormat } from "../../../verifier/_VerifierBase/ReasonFormat";
 
 import { Test, ITestGroup } from 'nodeunit';
@@ -23,14 +24,14 @@ group["BaseVerifier doesn't permit single step references to reach into deeper s
     var badRef = new MockJustification();
     badRef.lineReferences = [[1]]; // but line 1 is in a deeper scope!
     var p = new Proof();
-    p.Steps.push(new MockStatement(assm, [null]));
-    p.Steps.push(new MockStatement(badRef, []));
+    p.Steps.push(new MockStatement(assm, new Scope(1)));
+    p.Steps.push(new MockStatement(badRef, new Scope(0)));
     var format = new ReasonFormat(false, ["num"], false);
 
     // Test
     var v = new BaseVerifier(new MockUtility(), new MockRulebookFactory());
     var result = v.checkParams(format, p, 1);
-    
+
     // Verify
     test.ok(result !== true, "Cannot reference deeper scope from outer!");
     test.done();
@@ -44,8 +45,8 @@ group["BaseVerifier doesn't permit step to reference self or later steps."] = (t
     var badRef = new MockJustification();
     badRef.lineReferences = [[2]]; // but line 1 is in a deeper scope!
     var p = new Proof();
-    p.Steps.push(new MockStatement(assm, [null]));
-    p.Steps.push(new MockStatement(badRef, []));
+    p.Steps.push(new MockStatement(assm, new Scope(1)));
+    p.Steps.push(new MockStatement(badRef, new Scope(0)));
     var format = new ReasonFormat(false, ["num"], false);
 
     // Test
@@ -65,8 +66,8 @@ group["BaseVerifier permits single step references to shallower scopes."] = (tes
     var badRef = new MockJustification();
     badRef.lineReferences = [[1]]; // but line 1 is in a deeper scope!
     var p = new Proof();
-    p.Steps.push(new MockStatement(assm, []));
-    p.Steps.push(new MockStatement(badRef, [null]));
+    p.Steps.push(new MockStatement(assm, new Scope(0)));
+    p.Steps.push(new MockStatement(badRef, new Scope(1)));
     var format = new ReasonFormat(false, ["num"], false);
 
     // Test
@@ -86,9 +87,9 @@ group["BaseVerifier permits step range references to shallower scopes."] = (test
     var ref = new MockJustification();
     ref.lineReferences = [[1,2]]; // but line 1 is in a deeper scope!
     var p = new Proof();
-    p.Steps.push(new MockStatement(assm, []));
-    p.Steps.push(new MockStatement(assm, []));
-    p.Steps.push(new MockStatement(ref, [null]));
+    p.Steps.push(new MockStatement(assm, new Scope(0)));
+    p.Steps.push(new MockStatement(assm, new Scope(0)));
+    p.Steps.push(new MockStatement(ref, new Scope(1)));
     var format = new ReasonFormat(false, ["range"], false);
 
     // Test
@@ -108,9 +109,9 @@ group["BaseVerifier forbids step range references to deeper scopes."] = (test: T
     var badRef = new MockJustification();
     badRef.lineReferences = [[1,2]]; // but line 1 is in a deeper scope!
     var p = new Proof();
-    p.Steps.push(new MockStatement(assm, [null]));
-    p.Steps.push(new MockStatement(assm, [null]));
-    p.Steps.push(new MockStatement(badRef, []));
+    p.Steps.push(new MockStatement(assm, new Scope(1)));
+    p.Steps.push(new MockStatement(assm, new Scope(1)));
+    p.Steps.push(new MockStatement(badRef, new Scope(0)));
     var format = new ReasonFormat(false, ["range"], false);
 
     // Test
@@ -130,9 +131,9 @@ group["BaseVerifier forbids trans-scope step range references."] = (test: Test) 
     var badRef = new MockJustification();
     badRef.lineReferences = [[1,2]]; // but line 1 is in a deeper scope!
     var p = new Proof();
-    p.Steps.push(new MockStatement(assm, []));
-    p.Steps.push(new MockStatement(assm, [null]));
-    p.Steps.push(new MockStatement(badRef, [null]));
+    p.Steps.push(new MockStatement(assm, new Scope(0)));
+    p.Steps.push(new MockStatement(assm, new Scope(1)));
+    p.Steps.push(new MockStatement(badRef, new Scope(0)));
     var format = new ReasonFormat(false, ["range"], false);
 
     // Test
@@ -152,9 +153,9 @@ group["BaseVerifier forbids step range self-references."] = (test: Test) => {
     var badRef = new MockJustification();
     badRef.lineReferences = [[1,3]]; // but line 1 is in a deeper scope!
     var p = new Proof();
-    p.Steps.push(new MockStatement(assm, []));
-    p.Steps.push(new MockStatement(assm, [null]));
-    p.Steps.push(new MockStatement(badRef, [null]));
+    p.Steps.push(new MockStatement(assm, new Scope(0)));
+    p.Steps.push(new MockStatement(assm, new Scope(1)));
+    p.Steps.push(new MockStatement(badRef, new Scope(1)));
     var format = new ReasonFormat(false, ["range"], false);
 
     // Test

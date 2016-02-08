@@ -23,7 +23,7 @@ class ProofFactory {
    */
   public preprocess(ast:any):IProof {
       var proof = new Proof();
-      this.preprocessBox(proof, ast, 0, []);
+      this.preprocessBox(proof, ast, 0, proof.baseScope);
       return proof;
   }
 
@@ -34,12 +34,11 @@ class ProofFactory {
         proof.Steps[step] = new Statement(ast[i][1], justif, scope, ast[i][3], i == 0, i == ast.length - 1);
         step = step + 1;
       } else if (ast[i][0] === 'folbox') {
-          var newScope = scope.slice(0)
-          newScope.push(ast[i][2][1]);
-          step = this.preprocessBox(proof, ast[i][1], step, newScope);
+        var newScope = scope.createChildScope();
+        //newScope.push(ast[i][2][1]);
+        step = this.preprocessBox(proof, ast[i][1], step, newScope);
       } else if (ast[i][0] === 'box') {
-          var newScope = scope.slice(0)
-          newScope.push(null);
+          var newScope = scope.createChildScope();
           step = this.preprocessBox(proof, ast[i][1], step, newScope);
       } else if (ast[i][0] === 'error') {
           proof.Steps[step] = ast[i];

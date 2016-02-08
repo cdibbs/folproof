@@ -18,10 +18,12 @@ var caseStudiesPath = Path.join(__dirname, "../../../src/tests/case-studies/PL")
 var srcs = FS
     .readdirSync(caseStudiesPath)
     .filter(function (filename) { return /.proof$/.test(filename); });
+
 group['Case studies files are found'] = function (test) {
     test.ok(srcs.length);
     test.done();
 };
+
 for (var i = 0, l = srcs.length; i < l; i++) {
     var path = Path.join(caseStudiesPath, srcs[i]);
     (function (path) {

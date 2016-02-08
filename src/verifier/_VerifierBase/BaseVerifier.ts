@@ -19,7 +19,7 @@ class BaseVerifier {
     this.rulebookFactory = rulebookFactory;
   }
 
-  public Verify(proof: Proof): VerificationResult {
+  public Verify(proof: IProof): VerificationResult {
     for (var i = 0; i < proof.Steps.length; i++) {
       var result = this.ValidateStatement(proof, i);
       if (!result.Valid)
@@ -28,7 +28,7 @@ class BaseVerifier {
     return new VerificationResult(true, "Proof is valid.");
   }
 
-  public ValidateStatement(proof: Proof, step: number): VerificationResult {
+  public ValidateStatement(proof: IProof, step: number): VerificationResult {
     var stmt = proof.Steps[step];
     if (stmt[0] === 'error')
       return new VerificationResult(false, "Proof invalid due to syntax errors.", step + 1);
@@ -99,7 +99,7 @@ class BaseVerifier {
 
           var refStep = proof.Steps[n-1];
           var thisStep = proof.Steps[step];
-          if (refStep.Scope.length > thisStep.Scope.length)
+          if (refStep.Scope.depth > thisStep.Scope.depth)
             return `Step reference #${i + 1} may not reach into deeper scopes.`;
         } else {
           var ab = steps[i];
@@ -112,28 +112,11 @@ class BaseVerifier {
           var refStep0 = proof.Steps[ab[0] - 1];
           var refStep1 = proof.Steps[ab[1] - 1];
           var thisStep = proof.Steps[step];
-          if (refStep0.Scope.length > thisStep.Scope.length
-            || refStep1.Scope.length > thisStep.Scope.length) {
-            var msg = `Step reference #${i + 1} may not reference deeper scopes (unless range encompasses entirety of scope).`;
+          if ((refStep0.Scope.depth > thisStep.Scope.depth && ! refStep0.isFirstStmt)
+            || (refStep1.Scope.depth > thisStep.Scope.depth && ! refStep1.isLastStmt)) {
 
-            var j = ab[0] - 1, thisScopeDepth = thisStep.Scope.length;
-            while (j > 0 && proof.Steps[j].Scope.length > thisScopeDepth) {
-              if (! proof.Steps[j].isFirstStmt)
-                return msg;
-              j = j - 1;
-            }
-
-            j = ab[1] - 1;
-            while (j < proof.Steps.length && proof.Steps[j].Scope.length > thisScopeDepth) {
-              if (! proof.Steps[j].isLastStmt)
-                return msg;
-              j = j + 1;
-            }
+            return `Step range #${i + 1} must begin and end in same scope, unless referencing entirety of deeper scopes.`;
           }
-
-          if (refStep0.Scope.length !== refStep1.Scope.length)
-            return `Step range #${i + 1} must begin and end in same scope.`;
-
         }
       }
     } else if (justification.hasLineReference) {

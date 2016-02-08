@@ -27,6 +27,10 @@ class Statement implements IStatement {
     get Expression():any { return this.sentenceAST; }
     get Justification():IJustification { return this.justification; }
     get Meta(): ISourceMeta { return this.loc; }
+
+    public toString(): string {
+      return JSON.stringify(this.sentenceAST) + `(1st: ${this.isFirstStmt}, last: ${this.isLastStmt}, scope: ${this.Scope})`;
+    }
 }
 
 export { Statement }
