@@ -1,0 +1,4 @@
+# invalid because scoping rules WRT ranges
+| a: assumption
+|| b: assumption
+a -> b: -> intro 1-2

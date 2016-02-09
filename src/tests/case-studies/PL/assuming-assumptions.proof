@@ -1,4 +1,7 @@
+b
 | a
-|| b
-||| c
-a -> c: -> intro 1-3
+|| ~b: assumption
+|| b: copy 1
+|| _|_: not elim 3,4
+| b: PBC 3-5
+a -> b: -> intro 2-6

@@ -10,10 +10,11 @@ class PLRulebookFactory implements IRulebookFactory {
     }
 
     FetchRule(name: string) {
-        if (this.rules[name])
-            return this.rules[name];
+      name = name.toLowerCase();
+      if (this.rules[name])
+          return this.rules[name];
 
-        return null;
+      return null;
     }
 
     BuildRulebook(): { [id: string]: IRule } {

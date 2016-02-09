@@ -1725,6 +1725,7 @@ var PLRulebookFactory = (function () {
         };
     }
     PLRulebookFactory.prototype.FetchRule = function (name) {
+        name = name.toLowerCase();
         if (this.rules[name])
             return this.rules[name];
         return null;
@@ -2384,6 +2385,7 @@ var __extends = (this && this.__extends) || function (d, b) {
 };
 var ReasonFormat_1 = require("../../../_VerifierBase/ReasonFormat");
 var InvalidResult_1 = require("../../../Data/InvalidResult");
+var ValidResult_1 = require("../../../Data/ValidResult");
 var RuleBase_1 = require("../../RuleBase");
 var PBCRule = (function (_super) {
     __extends(PBCRule, _super);
@@ -2403,8 +2405,8 @@ var PBCRule = (function (_super) {
     });
     PBCRule.prototype.ReasonFormat = function () { return this.format; };
     PBCRule.prototype.Exec = function (proof, step, partRef, stepRefs) {
-        var assumptionExpr = proof.Steps[stepRefs[0][0]].Expression;
-        var contraExpr = proof.Steps[stepRefs[0][1]].Expression;
+        var assumptionExpr = proof.Steps[stepRefs[0][0] - 1].Expression;
+        var contraExpr = proof.Steps[stepRefs[0][1] - 1].Expression;
         if (!this.isContradiction(contraExpr))
             return new InvalidResult_1.InvalidResult("PBC: Final step in range must be a contradiction.");
         if (assumptionExpr[0] !== 'not')
@@ -2412,12 +2414,13 @@ var PBCRule = (function (_super) {
         var semEq = this.semanticEq(assumptionExpr[1], proof.Steps[step].Expression);
         if (!semEq)
             return new InvalidResult_1.InvalidResult("PBC: Negation of assumption doesn't match current step.");
+        return new ValidResult_1.ValidResult();
     };
     return PBCRule;
 })(RuleBase_1.RuleBase);
 exports.PBCRule = PBCRule;
 
-},{"../../../Data/InvalidResult":3,"../../../_VerifierBase/ReasonFormat":26,"../../RuleBase":22}],21:[function(require,module,exports){
+},{"../../../Data/InvalidResult":3,"../../../Data/ValidResult":4,"../../../_VerifierBase/ReasonFormat":26,"../../RuleBase":22}],21:[function(require,module,exports){
 ///<reference path="../../../_VerifierBase/IRule.ts" />
 ///<reference path="../../../Data/IProof.ts" />
 ///<reference path="../../../Data/IVerificationResult.ts" />
@@ -2714,15 +2717,27 @@ var BaseVerifier = (function () {
                 else {
                     var ab = steps[i];
                     if (ab.length != 2)
-                        return "Step reference #" + (i + 1) + " must be range, a-b, with a <= b < currentStep.";
+                        throw new Error("Unexpected step reference format: " + JSON.stringify(ab));
                     if (ab[0] > ab[1] || Math.max(ab[0], ab[1]) >= step + 1)
                         return "Step reference #" + (i + 1) + " must be range, a-b, with a <= b < currentStep.";
                     var refStep0 = proof.Steps[ab[0] - 1];
                     var refStep1 = proof.Steps[ab[1] - 1];
                     var thisStep = proof.Steps[step];
-                    if ((refStep0.Scope.depth > thisStep.Scope.depth && !refStep0.isFirstStmt)
-                        || (refStep1.Scope.depth > thisStep.Scope.depth && !refStep1.isLastStmt)) {
-                        return "Step range #" + (i + 1) + " must begin and end in same scope, unless referencing entirety of deeper scopes.";
+                    if (refStep0.Scope.depth != refStep1.Scope.depth)
+                        return "Step range reference #" + (i + 1) + " must begin and end in same scope.";
+                    if ((refStep0.Scope.depth > thisStep.Scope.depth)
+                        || (refStep1.Scope.depth > thisStep.Scope.depth)) {
+                        // Criteria:
+                        // 1. cannot be more than one level deeper.
+                        // 2. Must begin and end in same level.
+                        // 3. Must reference entirety of deeper scope.
+                        if (refStep0.Scope.depth - thisStep.Scope.depth > 1
+                            || refStep1.Scope.depth - thisStep.Scope.depth > 1)
+                            return "Steps in step range #" + (i + 1) + " cannot be more than one scope deeper than current step.";
+                        if (refStep0.Scope.depth > thisStep.Scope.Depth && !refStep0.isFirstStmt)
+                            return "First step in range #" + (i + 1) + " is in deeper scope, but not scope's first step. Must be first step.";
+                        if (refStep1.Scope.depth > thisStep.Scope.Depth && !refStep1.isLastStmt)
+                            return "Last step in range #" + (i + 1) + " is in deeper scope, but not scope's last step. Must be last step.";
                     }
                 }
             }

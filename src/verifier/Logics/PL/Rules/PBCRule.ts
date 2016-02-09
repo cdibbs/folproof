@@ -12,10 +12,10 @@ class PBCRule extends RuleBase {
     public get Type(): string { return "derived"; }
     private format: IReasonFormat = new ReasonFormat(false, ["range"], false);
     public ReasonFormat(): IReasonFormat { return this.format; }
-            
+
     public Exec(proof: IProof, step: number, partRef: number, stepRefs: number[][]): IVerificationResult {
-        var assumptionExpr = proof.Steps[stepRefs[0][0]].Expression;
-        var contraExpr = proof.Steps[stepRefs[0][1]].Expression;
+        var assumptionExpr = proof.Steps[stepRefs[0][0] - 1].Expression;
+        var contraExpr = proof.Steps[stepRefs[0][1] - 1].Expression;
         if (! this.isContradiction(contraExpr))
             return new InvalidResult("PBC: Final step in range must be a contradiction.");
 
@@ -25,6 +25,8 @@ class PBCRule extends RuleBase {
         var semEq = this.semanticEq(assumptionExpr[1], proof.Steps[step].Expression);
         if (! semEq)
             return new InvalidResult("PBC: Negation of assumption doesn't match current step.");
+
+        return new ValidResult();
     }
 }
 

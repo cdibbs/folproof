@@ -101,7 +101,7 @@ group["BaseVerifier permits step range references to shallower scopes."] = (test
     test.done();
 };
 
-group["BaseVerifier forbids step range references to deeper scopes."] = (test: Test) => {
+group["BaseVerifier forbids step range references to scopes more than one level deeper."] = (test: Test) => {
     // e.g., [ 'justification', [ 'name', 'or' ], 'intro', '1', [ [ 0 ] ] ]
     // Setup
     var assm = new MockJustification();
@@ -109,8 +109,8 @@ group["BaseVerifier forbids step range references to deeper scopes."] = (test: T
     var badRef = new MockJustification();
     badRef.lineReferences = [[1,2]]; // but line 1 is in a deeper scope!
     var p = new Proof();
-    p.Steps.push(new MockStatement(assm, new Scope(1)));
-    p.Steps.push(new MockStatement(assm, new Scope(1)));
+    p.Steps.push(new MockStatement(assm, new Scope(2)));
+    p.Steps.push(new MockStatement(assm, new Scope(2)));
     p.Steps.push(new MockStatement(badRef, new Scope(0)));
     var format = new ReasonFormat(false, ["range"], false);
 
