@@ -12,14 +12,14 @@ class MTRule extends RuleBase {
     public get Type(): string { return "derived"; }
     private format: IReasonFormat = new ReasonFormat(false, ["num", "num"], false);
     public ReasonFormat(): IReasonFormat { return this.format; }
-            
+
     public Exec(proof: IProof, step: number, partRef: number, stepRefs: number[][]): IVerificationResult {
-        var impStep = proof.Steps[stepRefs[0][0]].Expression;
+        var impStep = proof.Steps[stepRefs[0][0] - 1].Expression;
         if (impStep[0] !== "->")
             return new InvalidResult("MT: 1st referenced step must be implication.");
-            
+
         var left = impStep[1], right = impStep[2];
-        var negStep = proof.Steps[stepRefs[1][0]].Expression;
+        var negStep = proof.Steps[stepRefs[1][0] - 1].Expression;
         if (negStep[0] !== "not" || !this.semanticEq(negStep[1], right))
             return new InvalidResult("MT: 2nd ref step must be negation of right side of 1st ref step.");
 

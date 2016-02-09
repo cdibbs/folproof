@@ -1936,7 +1936,7 @@ var ContradictionRule = (function (_super) {
         throw new Error("Unknown " + this.Name + " variation " + type + ".");
     };
     ContradictionRule.prototype.ElimVerifier = function (proof, step, partRef, stepRefs) {
-        var refStep = proof.Steps[stepRefs[0][0]].Expression;
+        var refStep = proof.Steps[stepRefs[0][0] - 1].Expression;
         if (refStep[0] != 'id' || (refStep[1] != 'contradiction' && refStep[1] != '_|_'))
             return new InvalidResult_1.InvalidResult("Contra-elim: Referenced step is not a contradiction.");
         return new ValidResult_1.ValidResult();
@@ -2003,8 +2003,7 @@ var DoubleNegationRule = (function (_super) {
     __extends(DoubleNegationRule, _super);
     function DoubleNegationRule() {
         _super.apply(this, arguments);
-        this.elimFormat = new ReasonFormat_1.ReasonFormat(false, ["num", "num"], false);
-        this.introFormat = new ReasonFormat_1.ReasonFormat(true, ["num"], false);
+        this.elimFormat = new ReasonFormat_1.ReasonFormat(false, ["num"], false);
     }
     Object.defineProperty(DoubleNegationRule.prototype, "Name", {
         get: function () { return "DoubleNegation"; },
@@ -2033,7 +2032,7 @@ var DoubleNegationRule = (function (_super) {
     };
     DoubleNegationRule.prototype.ElimVerifier = function (proof, step, partRef, stepRefs) {
         var curStep = proof.Steps[step].Expression;
-        var refStep = proof.Steps[stepRefs[0][0]].Expression;
+        var refStep = proof.Steps[stepRefs[0][0] - 1].Expression;
         if (refStep[0] !== 'not' || refStep[1][0] !== 'not')
             return new InvalidResult_1.InvalidResult("Notnot-elim: Referenced step is not a double-negation.");
         if (!this.semanticEq(refStep[1][1], curStep))
@@ -2196,11 +2195,11 @@ var MTRule = (function (_super) {
     });
     MTRule.prototype.ReasonFormat = function () { return this.format; };
     MTRule.prototype.Exec = function (proof, step, partRef, stepRefs) {
-        var impStep = proof.Steps[stepRefs[0][0]].Expression;
+        var impStep = proof.Steps[stepRefs[0][0] - 1].Expression;
         if (impStep[0] !== "->")
             return new InvalidResult_1.InvalidResult("MT: 1st referenced step must be implication.");
         var left = impStep[1], right = impStep[2];
-        var negStep = proof.Steps[stepRefs[1][0]].Expression;
+        var negStep = proof.Steps[stepRefs[1][0] - 1].Expression;
         if (negStep[0] !== "not" || !this.semanticEq(negStep[1], right))
             return new InvalidResult_1.InvalidResult("MT: 2nd ref step must be negation of right side of 1st ref step.");
         var s = proof.Steps[step].Expression;
