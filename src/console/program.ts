@@ -19,10 +19,13 @@ class Program {
        		ast = new FOL.Parser().parse(raw);
 					if (opts['show-ast'])
 						console.log(JSON.stringify(ast, null, 2));
+						
 					proof = new ProofFactory().preprocess(ast);
 					if (opts['show-ir'])
 						console.log(JSON.stringify(proof, null, 2))
+
         	result = new PLVerifier().Verify(proof);
+					console.log(result);
         /*} catch(ex) {
         	console.log(JSON.stringify(ast, null, 2));
         	console.log("ERROR", ex.toString());
