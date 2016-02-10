@@ -1885,6 +1885,8 @@ var AssumptionRule = (function (_super) {
     AssumptionRule.prototype.Exec = function (proof, step, partRef, stepRefs) {
         if (!proof.Steps[step].isFirstStmt)
             return new InvalidResult_1.InvalidResult("Assumptions can only be made at the start of an assumption box.");
+        if (proof.Steps[step].Scope.depth == 0)
+            return new InvalidResult_1.InvalidResult("Assumptions can only be made within assumption boxes.");
         return new ValidResult_1.ValidResult();
     };
     return AssumptionRule;
@@ -2429,6 +2431,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 var ReasonFormat_1 = require("../../../_VerifierBase/ReasonFormat");
+var InvalidResult_1 = require("../../../Data/InvalidResult");
 var ValidResult_1 = require("../../../Data/ValidResult");
 var RuleBase_1 = require("../../RuleBase");
 var PremiseRule = (function (_super) {
@@ -2449,13 +2452,16 @@ var PremiseRule = (function (_super) {
     });
     PremiseRule.prototype.ReasonFormat = function (type) { return this.format; };
     PremiseRule.prototype.Exec = function (proof, step, partRef, stepRefs) {
+        var s = proof.Steps[step];
+        if (s.Scope.depth > 0)
+            return new InvalidResult_1.InvalidResult("Why put a premise in an assumption scope? Did you mean to create a new assumption?");
         return new ValidResult_1.ValidResult();
     };
     return PremiseRule;
 })(RuleBase_1.RuleBase);
 exports.PremiseRule = PremiseRule;
 
-},{"../../../Data/ValidResult":4,"../../../_VerifierBase/ReasonFormat":26,"../../RuleBase":22}],22:[function(require,module,exports){
+},{"../../../Data/InvalidResult":3,"../../../Data/ValidResult":4,"../../../_VerifierBase/ReasonFormat":26,"../../RuleBase":22}],22:[function(require,module,exports){
 ///<reference path="../_VerifierBase/IRule.ts" />
 ///<reference path="../_VerifierBase/IReasonFormat.ts" />
 var RuleBase = (function () {

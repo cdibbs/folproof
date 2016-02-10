@@ -12,9 +12,13 @@ class PremiseRule extends RuleBase {
     public get Type(): string { return "simple"; }
     private format: IReasonFormat = new ReasonFormat(false, null, false);
     public ReasonFormat(type: string): IReasonFormat { return this.format; }
-            
+
     public Exec(proof: IProof, step: number, partRef: number, stepRefs: number[][]): IVerificationResult {
-        return new ValidResult();
+      var s = proof.Steps[step];
+      if (s.Scope.depth > 0)
+        return new InvalidResult("Why put a premise in an assumption scope? Did you mean to create a new assumption?");
+
+      return new ValidResult();
     }
 }
 

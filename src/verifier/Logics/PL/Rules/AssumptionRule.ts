@@ -12,11 +12,14 @@ class AssumptionRule extends RuleBase {
     public get Type(): string { return "simple"; }
     private format: IReasonFormat = new ReasonFormat(false, null, false);
     public ReasonFormat(): IReasonFormat { return this.format; }
-            
+
     public Exec(proof: IProof, step: number, partRef: number, stepRefs: number[][]): IVerificationResult {
         if (! proof.Steps[step].isFirstStmt)
-            return new InvalidResult("Assumptions can only be made at the start of an assumption box.");
-            
+          return new InvalidResult("Assumptions can only be made at the start of an assumption box.");
+
+        if (proof.Steps[step].Scope.depth == 0)
+          return new InvalidResult("Assumptions can only be made within assumption boxes.");
+
         return new ValidResult();
     }
 }
