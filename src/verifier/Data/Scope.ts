@@ -3,17 +3,20 @@
 class Scope implements IScope {
   private _id: string;
   private _children: IScope[];
+  private v: string;
 
   public constructor(
     private _depth: number,
-    private _alias: string = "")
+    private _alias: string = "",
+    v: string = null)
   {
     this._id = this.generateUUID();
     this._children = new Array<IScope>();
+    this.v = v;
   }
 
-  public createChildScope(alias: string) {
-    var child = new Scope(this.depth + 1, alias);
+  public createChildScope(alias: string, v: string) {
+    var child = new Scope(this.depth + 1, alias, v);
     this._children.push(child);
     return child;
   }
@@ -23,6 +26,8 @@ class Scope implements IScope {
   public get abbrId(): string { return this._id.substr(-12); }
   public get alias(): string { return this._alias; }
   public get children(): IScope[] { return this._children; }
+  public get variable(): string { return this.v; }
+  public get hasVariable(): boolean { return !this.v; }
 
   // quickie from http://stackoverflow.com/a/8809472
   private generateUUID(){

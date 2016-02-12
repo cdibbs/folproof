@@ -44,7 +44,7 @@ class BaseVerifier {
     var partRef = proof.Steps[step].Justification.sideReference;
     var stepRefs = proof.Steps[step].Justification.lineReferences;
 
-    var result = validator.Exec(proof, step, partRef, stepRefs);
+    var result = validator.Exec(proof, step, partRef, stepRefs, proof.Steps[step].Justification.substitution);
     result.ErrorStep = step;
     return result;
   }

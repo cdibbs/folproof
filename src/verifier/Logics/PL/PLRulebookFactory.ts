@@ -18,7 +18,7 @@ class PLRulebookFactory implements IRulebookFactory {
     }
 
     BuildRulebook(): { [id: string]: IRule } {
-        return this.rules;
+      return this.rules;
     }
 
     private rules: { [id: string]: IRule } =

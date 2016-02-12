@@ -34,7 +34,7 @@ class ProofFactory {
         proof.Steps[step] = new Statement(ast[i][1], justif, scope, ast[i][3], i == 0, i == ast.length - 1);
         step = step + 1;
       } else if (ast[i][0] === 'folbox') {
-        var newScope = scope.createChildScope();
+        var newScope = scope.createChildScope(null, ast[i][2][1]);
         //newScope.push(ast[i][2][1]);
         step = this.preprocessBox(proof, ast[i][1], step, newScope);
       } else if (ast[i][0] === 'box') {

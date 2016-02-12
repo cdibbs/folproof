@@ -5,5 +5,5 @@ interface IRule {
     Name:string;
     Type:string;
     ReasonFormat(type: string): IReasonFormat;
-    Exec(proof: IProof, step: number, partRef: number, stepRefs: number[][]): IVerificationResult;
+    Exec(proof: IProof, step: number, partRef: number, stepRefs: number[][], subst: string[]): IVerificationResult;
 }

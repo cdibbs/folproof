@@ -1,6 +1,8 @@
 /// <reference path='../../_VerifierBase/IRulebookFactory.ts' />
 /// <reference path='../../_VerifierBase/IRule.ts' />
 
+import { ForallRule, ExistsRule, SubstitutionRule } from "./Rules";
+import { PLRulebookFactory } from "../PL/PLRulebookFactory";
 import { VerificationResult } from "../../Data/VerificationResult";
 
   class FOLRulebookFactory implements IRulebookFactory {
@@ -17,7 +19,12 @@ import { VerificationResult } from "../../Data/VerificationResult";
     }
 
     BuildRulebook(): { [id: string] : IRule } {
-        return this.rules;
+      var plFactory = new PLRulebookFactory();
+      this.rules = plFactory.BuildRulebook();
+      this.rules["forall"] = new ForallRule();
+      this.rules["exists"] = new ExistsRule();
+      this.rules["substitution"] = new SubstitutionRule();
+      return this.rules;
     }
 
         private rules: { [id: string] : IRule } =
