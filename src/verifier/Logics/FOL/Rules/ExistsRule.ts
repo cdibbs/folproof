@@ -1,40 +1,41 @@
 ///<reference path="../../../_VerifierBase/IRule.ts" />
 ///<reference path="../../../Data/IProof.ts" />
+///<reference path="../../../Data/ISubstitution.ts" />
 ///<reference path="../../../Data/IVerificationResult.ts" />
 
 import { ReasonFormat } from "../../../_VerifierBase/ReasonFormat";
 import { InvalidResult } from "../../../Data/InvalidResult";
 import { ValidResult } from "../../../Data/ValidResult";
-import { RuleBase } from "../../RuleBase";
+import { FOLRuleBase } from "../FOLRuleBase";
 
-class ExistsRule extends RuleBase {
+class ExistsRule extends FOLRuleBase {
   public get Name(): string { return "Exists"; }
   public get Type(): string { return "normal"; }
   private introFormat: IReasonFormat = new ReasonFormat(false, ["num"], true);
-  private elimFormat: IReasonFormat = new ReasonFormat(true, ["num", "range"], true);
+  private elimFormat: IReasonFormat = new ReasonFormat(false, ["num", "range"], true);
   public ReasonFormat(type: string): IReasonFormat {
       if (type === "intro") return this.introFormat;
       if (type === "elim") return this.elimFormat;
       throw new Error(`Unknown ${this.Name} variation ${type}.`);
   }
 
-  public Exec(proof: IProof, step: number, partRef: number, stepRefs: number[][], subst: string[]): IVerificationResult {
+  public Exec(proof: IProof, step: number, partRef: number, stepRefs: number[][], subst: ISubstitution): IVerificationResult {
     var type = proof.Steps[step].Justification.ruleType;
     var stepRefsZeroBase = stepRefs.map(function(r) { return r.map(function(r2) { return r2 - 1; })});
-    if (type === "intro") return this.IntroVerifier(proof, step, partRef, stepRefsZeroBase);
-    if (type === "elim") return this.ElimVerifier(proof, step, partRef, stepRefsZeroBase);
+    if (type === "intro") return this.IntroVerifier(proof, step, partRef, stepRefsZeroBase, subst);
+    if (type === "elim") return this.ElimVerifier(proof, step, partRef, stepRefsZeroBase, subst);
 
     throw new Error(`Unknown ${this.Name} variation ${type}.`);
   }
 
-  public IntroVerifier(proof: IProof, step: number, partRef: number, stepRefs: number[][], subst: string[]): IVerificationResult {
+  public IntroVerifier(proof: IProof, step: number, partRef: number, stepRefs: number[][], subst: ISubstitution): IVerificationResult {
     var currStep = proof.Steps[step];
     var currExpr = currStep.Expression;
-    var refExpr = proof.Steps[steps[0]].Expression;
+    var refExpr = proof.Steps[stepRefs[0][0]].Expression;
     if (currExpr[0] !== 'exists')
         return new InvalidResult("Exists-x-Intro: Current step is not an 'exists' expression.");
 
-    var refExprSub = this.substitute(refExpr, subst[1], subst[0]);
+    var refExprSub = this.substitute(refExpr, subst.Right, subst.Left);
     if (this.semanticEq(refExprSub, currExpr[2]))
         return new ValidResult();
 
@@ -42,7 +43,7 @@ class ExistsRule extends RuleBase {
 
   }
 
-  public ElimVerifier(proof: IProof, step: number, partRef: number, stepRefs: number[][], subst: string[]): IVerificationResult {
+  public ElimVerifier(proof: IProof, step: number, partRef: number, stepRefs: number[][], subst: ISubstitution): IVerificationResult {
     var currStep = proof.Steps[step];
     var currExpr = currStep.Expression;
     var refExpr = proof.Steps[stepRefs[0][0]].Expression;
@@ -51,12 +52,12 @@ class ExistsRule extends RuleBase {
     var endExpr = proof.Steps[stepRefs[1][1]].Expression;
     if (refExpr[0] !== 'exists')
         return new InvalidResult("Exists-x-Elim: Referenced step is not an 'exists' expression.");
-    if (scope.depth == 0)
+    if (startStep.Scope.depth == 0)
         return new InvalidResult("Exists-x-Elim: Range must be within an assumption scope (e.g., an x0 box).");
 
     // check whether substition matches ref line with current line
     var scopeVars = startStep.Scope.variable;
-    var refExprSub = this.substitute(refExpr[2], subst[0], subst[1]);
+    var refExprSub = this.substitute(refExpr[2], subst.Left, subst.Right);
     if (this.semanticEq(refExprSub, startExpr)) {
         if (this.semanticEq(endExpr, currExpr))
             return new ValidResult();

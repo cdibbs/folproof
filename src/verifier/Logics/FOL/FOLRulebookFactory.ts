@@ -12,6 +12,7 @@ import { VerificationResult } from "../../Data/VerificationResult";
     }
 
     FetchRule(name: string) {
+      name = name.toLowerCase();
       if (this.rules[name])
         return this.rules[name];
 
@@ -21,9 +22,9 @@ import { VerificationResult } from "../../Data/VerificationResult";
     BuildRulebook(): { [id: string] : IRule } {
       var plFactory = new PLRulebookFactory();
       this.rules = plFactory.BuildRulebook();
-      this.rules["forall"] = new ForallRule();
-      this.rules["exists"] = new ExistsRule();
-      this.rules["substitution"] = new SubstitutionRule();
+      this.rules["a."] = new ForallRule();
+      this.rules["e."] = new ExistsRule();
+      this.rules["="] = new SubstitutionRule();
       return this.rules;
     }
 

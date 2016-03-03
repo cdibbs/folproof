@@ -16,7 +16,7 @@ class PremiseRule extends RuleBase {
     public Exec(proof: IProof, step: number, partRef: number, stepRefs: number[][]): IVerificationResult {
       var s = proof.Steps[step];
       if (s.Scope.depth > 0)
-        return new InvalidResult("Why put a premise in an assumption scope? Did you mean to create a new assumption?");
+        return new InvalidResult(`Why put a premise in an assumption scope? Did you mean to create a new assumption?`);
 
       return new ValidResult();
     }

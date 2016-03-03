@@ -5,9 +5,9 @@
 import { ReasonFormat } from "../../../_VerifierBase/ReasonFormat";
 import { InvalidResult } from "../../../Data/InvalidResult";
 import { ValidResult } from "../../../Data/ValidResult";
-import { RuleBase } from "../../RuleBase";
+import { FOLRuleBase } from "../FOLRuleBase";
 
-class SubstitutionRule extends RuleBase {
+class SubstitutionRule extends FOLRuleBase {
   public get Name(): string { return "Substitution"; }
   public get Type(): string { return "normal"; }
   private introFormat: IReasonFormat = new ReasonFormat(false, ["num"], true);
@@ -18,20 +18,20 @@ class SubstitutionRule extends RuleBase {
       throw new Error(`Unknown ${this.Name} variation ${type}.`);
   }
 
-  public Exec(proof: IProof, step: number, partRef: number, stepRefs: number[][], subst: string[]): IVerificationResult {
+  public Exec(proof: IProof, step: number, partRef: number, stepRefs: number[][], subst: ISubstitution): IVerificationResult {
     var type = proof.Steps[step].Justification.ruleType;
     var stepRefsZeroBase = stepRefs.map(function(r) { return r.map(function(r2) { return r2 - 1; })});
-    if (type === "intro") return this.IntroVerifier(proof, step, partRef, stepRefsZeroBase);
-    if (type === "elim") return this.ElimVerifier(proof, step, partRef, stepRefsZeroBase);
+    if (type === "intro") return this.IntroVerifier(proof, step, partRef, stepRefsZeroBase, subst);
+    if (type === "elim") return this.ElimVerifier(proof, step, partRef, stepRefsZeroBase, subst);
 
     throw new Error(`Unknown ${this.Name} variation ${type}.`);
   }
 
-  public IntroVerifier(proof: IProof, step: number, partRef: number, stepRefs: number[][], subst: string[]): IVerificationResult {
+  public IntroVerifier(proof: IProof, step: number, partRef: number, stepRefs: number[][], subst: ISubstitution): IVerificationResult {
     return new InvalidResult("Not implemented.");
   }
 
-  public ElimVerifier(proof: IProof, step: number, partRef: number, stepRefs: number[][], subst: string[]): IVerificationResult {
+  public ElimVerifier(proof: IProof, step: number, partRef: number, stepRefs: number[][], subst: ISubstitution): IVerificationResult {
     return new InvalidResult("Not implemented.");
   }
 }

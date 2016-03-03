@@ -20,6 +20,7 @@ class BaseVerifier {
   }
 
   public Verify(proof: IProof): VerificationResult {
+    this.rulebookFactory.BuildRulebook();
     for (var i = 0; i < proof.Steps.length; i++) {
       var result = this.ValidateStatement(proof, i);
       if (!result.Valid)
@@ -77,6 +78,7 @@ class BaseVerifier {
     var subst = justification.substitution;
 
     if (format.HasPart) {
+      console.log("part: ", justification.rawAST);
       if (!(partNum == 1 || partNum == 2))
         return "Part number must be 1 or 2";
     } else
@@ -139,10 +141,9 @@ class BaseVerifier {
     }
 
     if (format.Substitution) {
-      if (!subst)
+      if (!justification.hasSubstitution)
         return "Substitution specification required (e.g., A.x/x0 intro n-m)";
-
-      if (subst.length != 2)
+      if (!(subst.left.length > 0 && subst.right.length > 0))
         return "Substitution format must have two components (e.g., A.x/x0 intro n-m.)";
     } else if (justification.hasSubstitution) {
       return "Substitution not applicable, here.";

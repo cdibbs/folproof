@@ -28,9 +28,9 @@ group["Exists introduction fails when referenced step doesn't match after substi
 }
 
 group["Exists elimination succeeds when referenced step range is assumption & concl. matches current step."] = (test: Test) => {
-	var src = "E.a P(a)\n| with x0\n| P(x0) : assumption\n| P(x0) or Q(x0)\n : or i1 2\n| E.a(P(a) or Q(a)) : E.a/x0 i 3\nE.a(P(a) or Q(a)) : E.a/x0 elim 1,2-4";
+	var src = "E.a P(a)\n| with x0\n| P(x0) : assumption\n| P(x0) or Q(x0) : or i1 2\n| E.a(P(a) or Q(a)) : E.a/x0 i 3\nE.a(P(a) or Q(a)) : E.a/x0 elim 1,2-4";
 	var result = base.verifyProof(src);
-	test.ok(result.Valid, result.Message);
+	test.ok(result.Valid, result.ErrorStep + ": " + result.Message);
 	test.done();
 }
 
@@ -49,18 +49,18 @@ group["Exists elimination fails when referenced step range is not scoping assump
 }
 
 group["Exists elimination fails when assumption conclusion doesn't match current step."] = (test: Test) => {
-	var src = "E.a P(a)\n| with x0\n| P(x0) : assumption\n| P(x0) or Q(x0)\n : or i1 2\nE.a(P(a) or Q(a)) : E.a/x0 elim 1,2-3";
+	var src = "E.a P(a)\n| with x0\n| P(x0) : assumption\n| P(x0) or Q(x0) : or i1 2\nE.a(P(a) or Q(a)) : E.a/x0 elim 1,2-3";
 	var result = base.verifyProof(src);
 	test.ok(!result.Valid, result.Message);
-	test.ok(result.Message.indexOf("ending step") >= 0, "Must fail because ending step.");
+	test.ok(result.Message.indexOf("ending step") >= 0, "Must fail because ending step. Fails because: " + result.Message);
 	test.done();
 }
 
 group["Exists elimination fails when assumption start doesn't match first exists ref step."] = (test: Test) => {
-	var src = "E.a Q(a)\n| with x0\n| P(x0) : assumption\n| P(x0) or Q(x0)\n : or i1 2\nE.a(P(a) or Q(a)) : E.a/x0 elim 1,2-3";
+	var src = "E.a Q(a)\n| with x0\n| P(x0) : assumption\n| P(x0) or Q(x0) : or i1 2\nE.a(P(a) or Q(a)) : E.a/x0 elim 1,2-3";
 	var result = base.verifyProof(src);
 	test.ok(!result.Valid, result.Message);
-	test.ok(result.Message.indexOf("beginning step") >= 0, "Must fail because beginning step doesn't match exists step.");
+	test.ok(result.Message.indexOf("beginning step") >= 0, "Must fail because beginning step doesn't match exists step. Fails because: " + result.Message);
 	test.done();
 }
 

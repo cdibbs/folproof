@@ -1,6 +1,7 @@
 ///<reference path="ISubstitution.ts" />
 
 interface IJustification {
+  rawAST:any;
   ruleName:string;
   substitution:ISubstitution;
   hasSubstitution:boolean;

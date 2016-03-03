@@ -187,6 +187,7 @@ class MockStatement implements IStatement {
 }
 
 class MockJustification implements IJustification {
+  public rawAST:any;
   public ruleName:string;
   public substitution:ISubstitution;
   public hasSubstitution:boolean;

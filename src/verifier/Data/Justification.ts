@@ -6,6 +6,7 @@ import { Substitution } from "./Substitution";
  * Represents the justification component of a proof line.
  */
 class Justification implements IJustification {
+  private ast: any;
   private name: string; // A., as in A.x/y
   private sub1: string; // x, as in A.x/y
   private sub2: string; // y, as in A.x/y
@@ -19,6 +20,7 @@ class Justification implements IJustification {
    *                [[a], [b,c], ...]]
    */
   public constructor(ast: any) {
+    this.ast = ast;
     this.name = ast[1][1];
     this.sub1 = ast[1].length == 3 ? ast[1][2][1] : null;
     this.sub2 = ast[1].length == 3 ? ast[1][2][2] : null;
@@ -27,6 +29,7 @@ class Justification implements IJustification {
     this.lineRefs = ast[4];
   }
 
+  public get rawAST(): any { return this.ast; }
   public get ruleName():string { return this.name; }
   public get substitution(): ISubstitution { return this.sub1 != null ? new Substitution(this.sub1, this.sub2) : null; }
   public get ruleType() { return this.type; }

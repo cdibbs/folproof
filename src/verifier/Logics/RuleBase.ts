@@ -8,7 +8,7 @@ class RuleBase implements IRule {
         throw new Error(`Unimplemented for rule ${this.Name}`);
     }
 
-    Exec(proof: IProof, step: number, partRef: number, stepRefs: number[][]): IVerificationResult {
+    Exec(proof: IProof, step: number, partRef: number, stepRefs: number[][], ...args: any[]): IVerificationResult {
         throw new Error(`Unimplemented for rule ${this.Name}`);
     }
 
