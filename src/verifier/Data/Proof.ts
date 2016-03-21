@@ -9,7 +9,7 @@ class Proof implements IProof {
   public Steps: IStatement[] = new Array<IStatement>();
 
   constructor() {
-    this._baseScope = new Scope(0, "root");
+    this._baseScope = new Scope(null, 0, "root");
   }
 
   public get baseScope(): IScope { return this._baseScope; }

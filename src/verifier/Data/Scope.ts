@@ -6,6 +6,7 @@ class Scope implements IScope {
   private v: string;
 
   public constructor(
+    private _parent: IScope,
     private _depth: number,
     private _alias: string = "",
     v: string = null)
@@ -16,7 +17,7 @@ class Scope implements IScope {
   }
 
   public createChildScope(alias: string, v: string) {
-    var child = new Scope(this.depth + 1, alias, v);
+    var child = new Scope(this, this.depth + 1, alias, v);
     this._children.push(child);
     return child;
   }
@@ -26,8 +27,26 @@ class Scope implements IScope {
   public get abbrId(): string { return this._id.substr(-12); }
   public get alias(): string { return this._alias; }
   public get children(): IScope[] { return this._children; }
+  public get hasVariable(): boolean { return !!this.v; }
   public get variable(): string { return this.v; }
-  public get hasVariable(): boolean { return !this.v; }
+  public get hasParent(): boolean { return this._parent != null; }
+  public get parent(): IScope { return this._parent; }
+  public get hasAncestorVariable(): boolean {
+    var cur:IScope = this;
+    while (!cur.hasVariable && cur.hasParent) cur = cur.parent;
+    return cur.hasVariable;
+  }
+  public get ancestorVariable(): string {
+    var cur:IScope = this;
+    while (!cur.hasVariable && cur.hasParent) cur = cur.parent;
+    return cur.variable;
+  }
+
+  public ancestorVariableMatch(testVar: string): boolean {
+    var cur:IScope = this;
+    while (!cur.hasVariable && cur.variable !== testVar && cur.hasParent) cur = cur.parent;
+    return cur.variable === testVar;
+  }
 
   // quickie from http://stackoverflow.com/a/8809472
   private generateUUID(){

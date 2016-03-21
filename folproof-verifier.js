@@ -1735,7 +1735,6 @@ var FOLRulebookFactory = (function () {
     function FOLRulebookFactory(debug) {
         if (debug === void 0) { debug = function () { }; }
         this.debug = debug;
-        this.rules = {};
     }
     FOLRulebookFactory.prototype.FetchRule = function (name) {
         name = name.toLowerCase();
@@ -1875,6 +1874,7 @@ var __extends = (this && this.__extends) || function (d, b) {
 };
 var ReasonFormat_1 = require("../../../_VerifierBase/ReasonFormat");
 var InvalidResult_1 = require("../../../Data/InvalidResult");
+var ValidResult_1 = require("../../../Data/ValidResult");
 var FOLRuleBase_1 = require("../FOLRuleBase");
 var ForallRule = (function (_super) {
     __extends(ForallRule, _super);
@@ -1910,16 +1910,40 @@ var ForallRule = (function (_super) {
         throw new Error("Unknown " + this.Name + " variation " + type + ".");
     };
     ForallRule.prototype.IntroVerifier = function (proof, step, partRef, stepRefs, subst) {
-        return new InvalidResult_1.InvalidResult("Not implemented.");
+        var currStep = proof.Steps[step];
+        var currExpr = currStep.Expression;
+        var startStep = proof.Steps[stepRefs[0][0]];
+        var startExpr = startStep.Expression;
+        var scope = startStep.Scope; // ex: [['x0','x'], ['y0', 'y'], ...], LIFO
+        var endExpr = proof.Steps[stepRefs[0][1]].Expression;
+        if (currExpr[0] !== 'forall')
+            return new InvalidResult_1.InvalidResult("All-x-Intro: Current step is not a 'for-all' expression.");
+        if (!scope.hasAncestorVariable)
+            return new InvalidResult_1.InvalidResult("All-x-Intro: Not valid without a scoping assumption (e.g., an x0 box).");
+        // check if any substitutions from our scope match refExpr
+        if (!scope.ancestorVariableMatch(subst.Right))
+            return new InvalidResult_1.InvalidResult("All-x-intro: Substitution " + subst.Right + " doesn't match scope");
+        var endExprSub = this.substitute(endExpr, subst.Right, subst.Left);
+        if (!this.semanticEq(endExprSub, currExpr[2]))
+            return new InvalidResult_1.InvalidResult("All-x-Intro: Last step in range doesn't match current step after " + subst.Left + "/" + subst.Right + " + .");
+        return new ValidResult_1.ValidResult();
     };
     ForallRule.prototype.ElimVerifier = function (proof, step, partRef, stepRefs, subst) {
-        return new InvalidResult_1.InvalidResult("Not implemented.");
+        var currStep = proof.Steps[step];
+        var currExpr = currStep.Expression;
+        var refExpr = proof.Steps[stepRefs[0][0]].Expression;
+        if (refExpr[0] !== 'forall')
+            return new InvalidResult_1.InvalidResult("All-x-Elim: Referenced step is not a for-all expression.");
+        var refExprSub = this.substitute(refExpr[2], subst[0], subst[1]);
+        if (!this.semanticEq(refExprSub, currExpr))
+            return new InvalidResult_1.InvalidResult("All-x-Elim: Referenced step did not match current step after " + subst[1] + "/" + subst[0] + ".");
+        return new ValidResult_1.ValidResult();
     };
     return ForallRule;
 })(FOLRuleBase_1.FOLRuleBase);
 exports.ForallRule = ForallRule;
 
-},{"../../../Data/InvalidResult":3,"../../../_VerifierBase/ReasonFormat":33,"../FOLRuleBase":7}],13:[function(require,module,exports){
+},{"../../../Data/InvalidResult":3,"../../../Data/ValidResult":4,"../../../_VerifierBase/ReasonFormat":33,"../FOLRuleBase":7}],13:[function(require,module,exports){
 ///<reference path="../../../_VerifierBase/IRule.ts" />
 ///<reference path="../../../Data/IProof.ts" />
 ///<reference path="../../../Data/IVerificationResult.ts" />
@@ -1930,13 +1954,14 @@ var __extends = (this && this.__extends) || function (d, b) {
 };
 var ReasonFormat_1 = require("../../../_VerifierBase/ReasonFormat");
 var InvalidResult_1 = require("../../../Data/InvalidResult");
+var ValidResult_1 = require("../../../Data/ValidResult");
 var FOLRuleBase_1 = require("../FOLRuleBase");
 var SubstitutionRule = (function (_super) {
     __extends(SubstitutionRule, _super);
     function SubstitutionRule() {
         _super.apply(this, arguments);
-        this.introFormat = new ReasonFormat_1.ReasonFormat(false, ["num"], true);
-        this.elimFormat = new ReasonFormat_1.ReasonFormat(true, ["num", "range"], true);
+        this.introFormat = new ReasonFormat_1.ReasonFormat(false, null, false);
+        this.elimFormat = new ReasonFormat_1.ReasonFormat(false, ["num", "num"], false);
     }
     Object.defineProperty(SubstitutionRule.prototype, "Name", {
         get: function () { return "Substitution"; },
@@ -1965,16 +1990,28 @@ var SubstitutionRule = (function (_super) {
         throw new Error("Unknown " + this.Name + " variation " + type + ".");
     };
     SubstitutionRule.prototype.IntroVerifier = function (proof, step, partRef, stepRefs, subst) {
-        return new InvalidResult_1.InvalidResult("Not implemented.");
+        var s = proof.Steps[step].Expression;
+        if (s[0] !== '=')
+            return new InvalidResult_1.InvalidResult("Equality-Intro: Current step is not an equality.");
+        if (!this.semanticEq(s[1], s[2]))
+            return new InvalidResult_1.InvalidResult("Equality-Intro: Left and right sides do not match.");
+        return new ValidResult_1.ValidResult();
     };
     SubstitutionRule.prototype.ElimVerifier = function (proof, step, partRef, stepRefs, subst) {
-        return new InvalidResult_1.InvalidResult("Not implemented.");
+        var equalityExpr = proof.Steps[stepRefs[0][0]].Expression;
+        var elimExpr = proof.Steps[stepRefs[1][0]].Expression;
+        var proposedResult = proof.Steps[step].Expression;
+        if (equalityExpr[0] !== '=')
+            return new InvalidResult_1.InvalidResult("Equality-Elim: First referenced step is not an equality.");
+        if (!this.semanticEq(elimExpr, proposedResult, equalityExpr[1], equalityExpr[2]))
+            return new InvalidResult_1.InvalidResult("Equality-Elim: Does not result in current step.");
+        return new ValidResult_1.ValidResult();
     };
     return SubstitutionRule;
 })(FOLRuleBase_1.FOLRuleBase);
 exports.SubstitutionRule = SubstitutionRule;
 
-},{"../../../Data/InvalidResult":3,"../../../_VerifierBase/ReasonFormat":33,"../FOLRuleBase":7}],14:[function(require,module,exports){
+},{"../../../Data/InvalidResult":3,"../../../Data/ValidResult":4,"../../../_VerifierBase/ReasonFormat":33,"../FOLRuleBase":7}],14:[function(require,module,exports){
 /// <reference path='../../_VerifierBase/IRule.ts' />
 /// <reference path='../../_VerifierBase/IRulebookFactory.ts' />
 var Rules_1 = require("./Rules");

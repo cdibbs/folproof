@@ -27,7 +27,7 @@ group["Forall introduction fails when reference range is not an assumption."] = 
 	var src = "P(x) : premise\nA.x P(x) : A.x/x i 1-1";
 	var result = base.verifyProof(src);
 	test.ok(!result.Valid, result.Message);
-	test.ok(result.Message.indexOf("without a scoping assumption") >= 0, "Error must be because of missing assumption");
+	test.ok(result.Message.indexOf("without a scoping assumption") >= 0, "Error must be because of missing assumption. Was: " + result.Message);
 	test.done();
 }
 

@@ -4,4 +4,10 @@ interface IScope {
   depth: number;
   variable: string;
   hasVariable: boolean;
+  ancestorVariable: string;
+  hasAncestorVariable: boolean;
+  hasParent: boolean;
+  parent: IScope;
+
+  ancestorVariableMatch(testVar: string): boolean;
 }

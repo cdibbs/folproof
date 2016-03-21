@@ -28,41 +28,40 @@ class ForallRule extends FOLRuleBase {
   }
 
   public IntroVerifier(proof: IProof, step: number, partRef: number, stepRefs: number[][], subst: ISubstitution): IVerificationResult {
-    var currStep = proof.steps[step];
-    var currExpr = currStep.getSentence();
-    var startStep = proof.steps[steps[0][0]];
-    var startExpr = startStep.getSentence();
-    var scope = startStep.getScope(); // ex: [['x0','x'], ['y0', 'y'], ...], LIFO
-    var endExpr = proof.steps[steps[0][1]].getSentence();
+    var currStep = proof.Steps[step];
+    var currExpr = currStep.Expression;
+    var startStep = proof.Steps[stepRefs[0][0]];
+    var startExpr = startStep.Expression;
+    var scope = startStep.Scope; // ex: [['x0','x'], ['y0', 'y'], ...], LIFO
+    var endExpr = proof.Steps[stepRefs[0][1]].Expression;
     if (currExpr[0] !== 'forall')
-      return "All-x-Intro: Current step is not a 'for-all' expression.";
-    if (scope.length == 0 || scope[0] == null)
-      return "All-x-Intro: Not valid without a scoping assumption (e.g., an x0 box).";
+      return new InvalidResult("All-x-Intro: Current step is not a 'for-all' expression.");
+    if (! scope.hasAncestorVariable)
+      return new InvalidResult("All-x-Intro: Not valid without a scoping assumption (e.g., an x0 box).");
 
     // check if any substitutions from our scope match refExpr
-    var scopeVar = scope[scope.length-1];
-    var found = scope.slice().reverse().reduce(function(a,e) { return a && (e == null || e == subst[1]); }, true);
-    if (! found)
-      return "All-x-intro: Substitution " + subst[1] + " doesn't match scope: " + scope.filter(function(e) { if (e != null) return e; }).join(", ");
+    if (! scope.ancestorVariableMatch(subst.Right))
+      return new InvalidResult(`All-x-intro: Substitution ${subst.Right} doesn't match scope`);
 
-    var endExprSub = substitute(endExpr, subst[1], subst[0]);
-    if (semanticEq(endExprSub, currExpr[2]))
-      return true;
-    return "All-x-Intro: Last step in range doesn't match current step after " + subst[0] + "/" + subst[1] + ".";
+    var endExprSub = this.substitute(endExpr, subst.Right, subst.Left);
+    if (! this.semanticEq(endExprSub, currExpr[2]))
+      return new InvalidResult(`All-x-Intro: Last step in range doesn't match current step after ${subst.Left}/${subst.Right} + .`);
+
+    return new ValidResult();
   }
 
   public ElimVerifier(proof: IProof, step: number, partRef: number, stepRefs: number[][], subst: ISubstitution): IVerificationResult {
-    var currStep = proof.steps[step];
-		var currExpr = currStep.getSentence();
-		var refExpr = proof.steps[steps[0]].getSentence();
+    var currStep = proof.Steps[step];
+		var currExpr = currStep.Expression;
+		var refExpr = proof.Steps[stepRefs[0][0]].Expression;
 		if (refExpr[0] !== 'forall')
-			return "All-x-Elim: Referenced step is not a for-all expression.";
+			return new InvalidResult("All-x-Elim: Referenced step is not a for-all expression.");
 
-		var refExprSub = substitute(refExpr[2], subst[0], subst[1]);
-		if (semanticEq(refExprSub, currExpr))
-			return true;
+		var refExprSub = this.substitute(refExpr[2], subst[0], subst[1]);
+		if (! this.semanticEq(refExprSub, currExpr))
+		  return new InvalidResult("All-x-Elim: Referenced step did not match current step after " + subst[1] + "/" + subst[0] + ".");
 
-		return "All-x-Elim: Referenced step did not match current step after " + subst[1] + "/" + subst[0] + ".";
+    return new ValidResult();
   }
 }
 
