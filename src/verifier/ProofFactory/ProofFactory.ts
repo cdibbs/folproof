@@ -13,7 +13,7 @@ import { Statement } from "../Data/Statement";
  * preprocess it and return an object-oriented representation for consumption
  * by our verifier.
  */
-class ProofFactory {
+export class ProofFactory {
   private justificationFactory: IJustificationFactory = new JustificationFactory();
   /**
    * Preprocesses an AST into a Proof object. Among other things, it generates
@@ -47,5 +47,3 @@ class ProofFactory {
     return step;
   }
 }
-
-export { ProofFactory }

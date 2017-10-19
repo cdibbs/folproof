@@ -2,32 +2,34 @@
     "compilerOptions": {
         "declaration": true,
         "module": "commonjs",
-        "moduleResolution": "classic",
-        "target": "ES5",
+        "moduleResolution": "node",
+        "lib": ["es6", "dom"],
+        "noImplicitAny": false,
+        "target": "es6",
         "preserveConstEnums": true,
         "emitDecoratorMetadata": true,
         "sourceMap": true,
         "experimentalDecorators": true,
-        "outFile": "./build/src/verifier.js",
-        "verbose": true
+        "outDir": "dist",
+        "removeComments": false,
+        "typeRoots": [
+			"node_modules/@types",
+			"src/lib/types"
+		]
     },
     "filesGlob": [
         "src/**/*.ts"
     ],
-    "atom": {
-        "rewriteTsconfig": false
-    },
     "files": [
-        "src/FOLRulebookFactory.ts",
-        "src/IRulebookFactory.ts",
-        "src/Justifier.ts",
-        "src/Proof.ts",
-        "src/ReasonFormat.ts",
-        "src/Rule.ts",
-        "src/Statement.ts",
-        "src/Utilities.ts",
-        "src/VerificationResult.ts",
-        "src/Verifier.ts",
-        "src/parser/Parser.d.ts"
-    ]
+        "src/verifier/_VerifierBase/BaseVerifier.ts",
+        "src/verifier/ProofFactory/ProofFactory.ts",
+        "src/console/program.ts"
+    ],
+    "exclude": [
+		"node_modules",
+		"src/e2e/resources",
+		"src/spec-lib",
+		"*.spec.ts",
+		"*.e2e.ts"
+	]
 }

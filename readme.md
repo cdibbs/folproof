@@ -7,7 +7,7 @@ Take it for a test drive: [cdibbs.github.io/folproof](https://cdibbs.github.io/f
 1. If you don't have node and npm installed, please install it.
  * Visit [here](https://github.com/joyent/node/wiki/Installing-Node.js-via-package-manager), for more details.
 2. Run `npm install` to install the libraries FOLProof needs.
-3. Run `make`.
+3. Run `npm run build`.
 
 ## Installing (Optional)
 If you'd like to run FOLProof in a shell, then proceed, here:
